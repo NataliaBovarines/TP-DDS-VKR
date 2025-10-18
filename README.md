@@ -1,16 +1,30 @@
-# React + Vite
+# TRABAJO PRÁCTICO DE DISEÑO DE SISTEMAS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Backend (Java / Spring Boot)
 
-Currently, two official plugins are available:
+### Requisitos
+- **Java JDK 17** o superior  
+  Descargar de: [Adoptium Temurin 17](https://adoptium.net/es/temurin/releases?version=17)  
+- **Maven** incluido en el proyecto (wrapper `mvnw`)  
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Instalación de Java
+1. Descomprimir el JDK en:
+  `C:\Program Files (x86)\Java\jdk-17.0.16+8` 
 
-## React Compiler
+2. Configurar variables de entorno:
+  - Crear la variable de sistema JAVA_HOME apuntando al JDK `C:\Program Files (x86)\Java\jdk-17.0.16+8`
+  - Agregar `%JAVA_HOME%\bin` al `PATH` de las variables del sistema
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. Verificar instalación:
+- Abrir PowerShell o CMD y ejecutar:
+  `java -version` y `javac -version`
 
-## Expanding the ESLint configuration
+### Ejecución del backend
+- Abrir una terminal y moverse a la carpeta:
+  `TP-DDS-VKR\backend`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Primera ejecución (compila todo desde cero):
+  `.\mvnw clean spring-boot:run`
+
+- Ejecuciones posteriores:
+  `.\mvnw spring-boot:run`
