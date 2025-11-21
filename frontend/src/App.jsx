@@ -1,3 +1,5 @@
+
+
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
@@ -5,6 +7,12 @@ import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Sales from "./pages/Sales";
+import Reservas from "./pages/Reservas";
+import Empleados from "./pages/Empleados";
+import Productos from "./pages/Productos";
+
+
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -31,11 +39,20 @@ export default function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/sales" element={<Sales />} />
+            <Route path="/reservas" element={<Reservas />} />
+            <Route path="/empleados" element={<Empleados />} />
+            <Route path="/productos" element={<Productos />} />
           </>
         ) : (
           // Si intenta entrar sin login, lo redirige al login
           <Route path="*" element={<Navigate to="/" />} />
         )}
+      </Routes>
+    </Router>
+  );
+}
+
+
       </Routes>
     </Router>
   );
