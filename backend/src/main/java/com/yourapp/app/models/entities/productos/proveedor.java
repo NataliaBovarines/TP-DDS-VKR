@@ -1,5 +1,5 @@
 package com.yourapp.app.models.entities.productos;
 
-public class proveedor {
-    
+public class Proveedor {
+    private String nombre;
 }

@@ -1,7 +1,7 @@
 package com.yourapp.app.models.entities.notificaciones;
 
-import com.yourapp.app.models.entities.notificaciones.adapterWhatsapp;
+public class Twilio implements AdapterWhatsapp {
+    public void notificar(String mensaje, String contacto) {
 
-public class twilio implements adapterWhatsapp{
-    
+    }
 }

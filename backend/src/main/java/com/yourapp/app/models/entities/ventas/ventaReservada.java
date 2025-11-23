@@ -1,7 +1,11 @@
 package com.yourapp.app.models.entities.ventas;
 
-import com.yourapp.app.models.entities.ventas.ventaState;
+public class VentaReservada extends VentaState {
+    public VentaReservada(Venta venta) {
+        super(venta);
+    }
 
-public class ventaReservada implements ventaState {
-    
+    public void cobrarTotal() {
+        
+    }
 }

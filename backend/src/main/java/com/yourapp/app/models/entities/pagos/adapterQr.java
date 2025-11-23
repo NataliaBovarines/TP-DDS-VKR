@@ -1,5 +1,5 @@
 package com.yourapp.app.models.entities.pagos;
 
-public interface adapterQr {
-    
+public interface AdapterQr {
+    public void generarQr();
 }

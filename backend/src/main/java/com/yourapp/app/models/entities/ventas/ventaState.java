@@ -1,5 +1,9 @@
 package com.yourapp.app.models.entities.ventas;
 
-public interface ventaState {
+public abstract class VentaState {
+    private Venta venta; 
     
+    public VentaState(Venta venta) {
+        this.venta = venta;
+    }
 }

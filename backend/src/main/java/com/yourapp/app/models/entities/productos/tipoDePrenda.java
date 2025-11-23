@@ -1,5 +1,5 @@
 package com.yourapp.app.models.entities.productos;
 
-public class tipoDePrenda {
-    
+public class TipoDePrenda {
+    private String descripcion;
 }

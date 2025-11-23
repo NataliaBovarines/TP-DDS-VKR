@@ -1,7 +1,7 @@
 package com.yourapp.app.models.entities.notificaciones;
 
-import com.yourapp.app.models.entities.notificaciones.adapterEmail;
+public class JetMail implements AdapterEmail {
+    public void notificar(String mensaje, String contacto) {
 
-public class jetMail implements adapterEmail {
-    
+    }
 }

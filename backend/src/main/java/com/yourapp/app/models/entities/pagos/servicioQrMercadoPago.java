@@ -1,7 +1,9 @@
 package com.yourapp.app.models.entities.pagos;
 
-import com.yourapp.app.models.entities.pagos.adapterQr;
+import com.yourapp.app.models.entities.pagos.AdapterQr;
 
-public class servicioQrMercadoPago implements adapterQr {
-    
+public class ServicioQrMercadoPago implements AdapterQr {
+    public void generarQr() {
+        
+    }
 }

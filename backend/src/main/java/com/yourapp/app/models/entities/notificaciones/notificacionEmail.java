@@ -1,7 +1,10 @@
 package com.yourapp.app.models.entities.notificaciones;
 
-import com.yourapp.app.models.entities.notificaciones.medioDeNotificacion;
+public class NotificacionEmail implements MedioDeNotificacion {
+    private String contacto;
+    private AdapterEmail adapterEmail;
 
-public class notificacionEmail implements medioDeNotificacion {
-    
+    public void notificar(String mensaje) {
+
+    }
 }

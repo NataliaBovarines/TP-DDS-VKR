@@ -1,5 +1,5 @@
 package com.yourapp.app.models.entities.productos;
 
-public class talle {
-    
+public class Talle {
+    private String descripcion;
 }
