@@ -1,7 +1,8 @@
 package com.yourapp.app.models.entities;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,8 @@ public class Rol {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
-    @ManyToMany
+    @ElementCollection(targetClass = Permiso.class)
+    @Enumerated(EnumType.STRING)
     private List<Permiso> permisos = new ArrayList<>();
 
     public boolean tenesPermiso(Permiso permiso) {

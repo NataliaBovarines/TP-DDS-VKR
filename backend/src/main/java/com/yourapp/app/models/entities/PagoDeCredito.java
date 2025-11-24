@@ -1,6 +1,7 @@
 package com.yourapp.app.models.entities;
 
 import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

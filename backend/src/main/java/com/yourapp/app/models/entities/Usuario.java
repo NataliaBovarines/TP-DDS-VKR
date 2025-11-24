@@ -12,6 +12,6 @@ public class Usuario {
     private Long id;
     private String nombreDeUsuario;
     private String contrasenia; // La guardamos plana ¿¿¿???
-    @OneToOne
+    @ManyToOne
     private Rol rol;
 }
