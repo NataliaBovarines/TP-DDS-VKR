@@ -1,5 +1,8 @@
 package com.yourapp.app.repositories;
 
-public class usuarioRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.yourapp.app.models.entities.Usuario;
+
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
 }

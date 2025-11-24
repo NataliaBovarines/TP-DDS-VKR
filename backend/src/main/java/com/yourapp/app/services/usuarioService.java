@@ -1,5 +1,13 @@
 package com.yourapp.app.services;
 
-public class usuarioService {
-    
+import org.springframework.stereotype.Service;
+import com.yourapp.app.repositories.UsuarioRepository;
+
+@Service
+public class UsuarioService {
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
 }

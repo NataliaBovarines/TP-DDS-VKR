@@ -1,5 +1,8 @@
 package com.yourapp.app.repositories;
 
-public class empleadoRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.yourapp.app.models.entities.Empleado;
+
+public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
     
 }
