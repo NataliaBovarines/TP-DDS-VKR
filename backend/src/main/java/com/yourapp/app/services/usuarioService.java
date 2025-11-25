@@ -2,6 +2,7 @@ package com.yourapp.app.services;
 
 import org.springframework.stereotype.Service;
 
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.mappers.UsuarioMapper;
 import com.yourapp.app.models.dto.UsuarioDto;
 import com.yourapp.app.models.dto.UsuarioResponseDto;
@@ -20,6 +21,10 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDto crear(UsuarioDto usuarioDto) {
+        if (usuarioRepository.existsByNombreDeUsuario(usuarioDto.getNombreDeUsuario())) {
+            throw new ConflictException("El nombre de usuario ya está en uso");
+        }
+
         Rol rol = rolService.obtener(usuarioDto.getRolId());
         Usuario usuario = UsuarioMapper.toEntity(usuarioDto, rol);
         Usuario usuarioGuardado = usuarioRepository.save(usuario);

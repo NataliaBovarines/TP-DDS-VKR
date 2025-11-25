@@ -2,6 +2,7 @@ package com.yourapp.app.services;
 
 import org.springframework.stereotype.Service;
 
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.RolMapper;
 import com.yourapp.app.models.dto.RolDto;
@@ -17,6 +18,10 @@ public class RolService {
     }
 
     public Rol crear(RolDto rolDto) {
+        if (rolRepository.existsByNombre(rolDto.getNombre())) {
+            throw new ConflictException("El nombre del rol ya está en uso");
+        }
+
         Rol rol = RolMapper.toEntity(rolDto);
         return rolRepository.save(rol);
     }
