@@ -2,6 +2,7 @@ package com.yourapp.app.services;
 
 import org.springframework.stereotype.Service;
 
+import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.RolMapper;
 import com.yourapp.app.models.dto.RolDto;
 import com.yourapp.app.models.entities.Rol;
@@ -23,6 +24,6 @@ public class RolService {
     public Rol obtener(Long rolId) {
         return rolRepository
             .findById(rolId)
-            .orElseThrow(() -> new RuntimeException("Rol no encontrado")); // TODO: CAMBIAR A ERRORES DE NUESTRA APP
+            .orElseThrow(() -> new NotFoundException("Rol no encontrado"));
     }
 }
