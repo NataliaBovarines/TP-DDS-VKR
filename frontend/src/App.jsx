@@ -51,10 +51,3 @@ export default function App() {
     </Router>
   );
 }
-
-
-      </Routes>
-    </Router>
-  );
-}
-
