@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.ConflictException;
@@ -25,5 +27,9 @@ public class CategoriaService {
 
     public Categoria obtenerCategoria(Long categoriaId) {
         return categoriaRepository.findById(categoriaId).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
+    }
+
+    public List<Categoria> obtenerTodasLasCategorias() {
+        return categoriaRepository.findAll();
     }
 }

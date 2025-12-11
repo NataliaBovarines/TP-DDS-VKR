@@ -2,6 +2,7 @@ package com.yourapp.app.controllers;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -59,7 +60,7 @@ public class ProductoController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Producto> obtenerProductosFiltrados(@Valid @ModelAttribute ProductoFiltroDto filtros) {
+    public Page<Producto> obtenerProductosFiltrados(@Valid @ModelAttribute ProductoFiltroDto filtros) {
         return productoService.obtenerProductosFiltrados(filtros);
     } 
 }

@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.ConflictException;
@@ -25,5 +27,9 @@ public class ColorService {
 
     public Color obtenerColor(Long colorId) {
         return colorRepository.findById(colorId).orElseThrow(() -> new NotFoundException("Color no encontrado"));
+    }
+
+    public List<Color> obtenerTodosLosColores() {
+        return colorRepository.findAll();
     }
 }

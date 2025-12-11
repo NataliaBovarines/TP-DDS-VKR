@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.ConflictException;
@@ -25,5 +27,9 @@ public class TipoDePrendaService {
 
     public TipoDePrenda obtenerTipoDePrenda(Long tipoDePrendaId) {
         return tipoDePrendaRepository.findById(tipoDePrendaId).orElseThrow(() -> new NotFoundException("Tipo de prenda no encontrado"));
+    }
+
+    public List<TipoDePrenda> obtenerTodosLosTipos() {
+        return tipoDePrendaRepository.findAll();
     }
 }

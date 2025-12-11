@@ -2,6 +2,9 @@ package com.yourapp.app.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -86,7 +89,7 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
-    public List<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
+    public Page<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
 
@@ -164,7 +167,12 @@ public class ProductoService {
             });
         }
 
-        // --------- CONSULTA CON ESPECIFICACION Y ORDENAMIENTO ----------
-        return productoRepository.findAll(spec, sort);
+        // --------- PAGINACION ----------
+        int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
+        int tamanio = 10;
+        Pageable pageable = PageRequest.of(pagina, tamanio, sort);
+
+        // --------- CONSULTA CON ESPECIFICACION, ORDENAMIENTO Y PAGINACION ----------
+        return productoRepository.findAll(spec, pageable);
     }
 }

@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.ConflictException;
@@ -25,5 +27,9 @@ public class ProveedorService {
 
     public Proveedor obtenerProveedor(Long proveedorId) {
         return proveedorRepository.findById(proveedorId).orElseThrow(() -> new NotFoundException("Proveedor no encontrado"));
+    }
+
+    public List<Proveedor> obtenerTodosLosProveedores() {
+        return proveedorRepository.findAll();
     }
 }

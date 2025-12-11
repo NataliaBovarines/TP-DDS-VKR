@@ -8,14 +8,11 @@ import lombok.Setter;
 @Getter @Setter
 public class DetalleProductoDto {
     private Long talleId;
-
     private Long colorId;
-
     @NotNull
     @Min(value = 0)
     private Integer stockActual;
-    
     @NotNull
     @Min(value = 0)
-    private Integer stockMinimo;   
+    private Integer stockMinimo; 
 }

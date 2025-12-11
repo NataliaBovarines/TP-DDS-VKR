@@ -1,6 +1,9 @@
 package com.yourapp.app.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +29,11 @@ public class TalleController {
     @ResponseStatus(HttpStatus.CREATED)
     public Talle crearTalle(@RequestBody @Valid TalleDto talleDto) {
         return talleService.crearTalle(talleDto);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK) 
+    public List<Talle> obtenerTodosLosTalles() {
+        return talleService.obtenerTodosLosTalles();
     }
 }

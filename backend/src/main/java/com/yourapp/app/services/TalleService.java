@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.ConflictException;
@@ -25,5 +27,9 @@ public class TalleService {
 
     public Talle obtenerTalle(Long talleId) {
         return talleRepository.findById(talleId).orElseThrow(() -> new NotFoundException("Talle no encontrado"));
+    }
+
+    public List<Talle> obtenerTodosLosTalles() {
+        return talleRepository.findAll();
     }
 }

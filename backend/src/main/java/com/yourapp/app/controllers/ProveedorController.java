@@ -1,6 +1,9 @@
 package com.yourapp.app.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,4 +30,10 @@ public class ProveedorController {
     public Proveedor crearProveedor(@RequestBody @Valid ProveedorDto proveedorDto) {
         return proveedorService.crearProveedor(proveedorDto);
     }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<Proveedor> obtenerTodosLosProveedores() {
+        return proveedorService.obtenerTodosLosProveedores();
+    } 
 }

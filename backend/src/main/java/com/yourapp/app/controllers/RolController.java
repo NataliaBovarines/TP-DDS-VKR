@@ -1,5 +1,7 @@
 package com.yourapp.app.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,8 +32,9 @@ public class RolController {
         return rolService.crearRol(rolDto);
     }
 
-    // @GetMapping("/{id}")
-    // public Rol obtener(@PathVariable Long id) {
-    //     return rolService.obtener(id);
-    // }
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK) 
+    public List<Rol> obtenerTodosLosRoles() {
+        return rolService.obtenerTodosLosRoles();
+    }
 }

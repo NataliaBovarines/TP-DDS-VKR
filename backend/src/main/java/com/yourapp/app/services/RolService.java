@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.ConflictException;
@@ -25,5 +27,9 @@ public class RolService {
 
     public Rol obtenerRol(Long rolId) {
         return rolRepository.findById(rolId).orElseThrow(() -> new NotFoundException("Rol no encontrado"));
+    }
+
+    public List<Rol> obtenerTodosLosRoles() {
+        return rolRepository.findAll();
     }
 }
