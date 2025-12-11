@@ -1,13 +1,15 @@
 package com.yourapp.app.models.entities.state;
 
 import com.yourapp.app.models.entities.Venta;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
+@Entity
+@DiscriminatorValue("RECHAZADA")
 public class VentaRechazada extends VentaState {
-    public VentaRechazada(Venta venta) {
-        super(venta);
-    }
 
-    // public ReporteVenta registrar() {
-    //     return new ReporteVenta()
-    // }
+    @Override
+    public boolean puedeCambiarA(Class<? extends VentaState> nuevoEstado) {
+        return false;
+    }
 }
