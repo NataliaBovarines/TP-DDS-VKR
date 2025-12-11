@@ -9,17 +9,13 @@ import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.models.entities.TipoDePrenda;
 
 public class ProductoMapper {
-    public static Producto toEntity(ProductoDto productoDto, Categoria categoria, TipoDePrenda tipoDePrenda, Talle talle, Color color, Proveedor proveedor) {
+    public static Producto toEntity(ProductoDto productoDto, Categoria categoria, TipoDePrenda tipoDePrenda, Proveedor proveedor) {
         Producto producto = new Producto();
         producto.setNombre(productoDto.getNombre());
         producto.setDescripcion(productoDto.getDescripcion());
         producto.setCategoria(categoria);
         producto.setTipoDePrenda(tipoDePrenda);
-        producto.setTalle(talle);
-        producto.setColor(color);
         producto.setProveedor(proveedor);
-        producto.setStockActual(productoDto.getStockActual());
-        producto.setStockMinimo(productoDto.getStockMinimo());
         producto.setPrecio(productoDto.getPrecio());
         return producto;
     }

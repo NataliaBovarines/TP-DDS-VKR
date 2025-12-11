@@ -13,14 +13,7 @@ public class ProductoPatchDto {
     private String descripcion;
     private Long categoriaId;
     private Long tipoDePrendaId;
-    private Long talleId;
-    private Long colorId;
     private Long proveedorId;
     @Min(value = 0)
-    private Integer stockActual;
-    @Min(value = 0)
-    private Integer stockMinimo;
-    @Min(value = 0)
     private Integer precio;
-    private Boolean estaActivo;
 }

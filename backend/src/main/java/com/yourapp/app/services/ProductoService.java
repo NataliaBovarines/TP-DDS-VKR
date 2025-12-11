@@ -1,31 +1,46 @@
 package com.yourapp.app.services;
 
+import java.util.List;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
+import com.yourapp.app.mappers.DetalleProductoMapper;
 import com.yourapp.app.mappers.ProductoMapper;
+import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
+import com.yourapp.app.models.dto.ProductoFiltroDto;
 import com.yourapp.app.models.dto.ProductoPatchDto;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.models.entities.Color;
+import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
 import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.models.entities.TipoDePrenda;
+import com.yourapp.app.repositories.DetalleProductoRepository;
 import com.yourapp.app.repositories.ProductoRepository;
+
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 @Service
 public class ProductoService {
     private final ProductoRepository productoRepository;
+    private final DetalleProductoRepository detalleProductoRepository;
     private final CategoriaService categoriaService;
     private final TipoDePrendaService tipoDePrendaService;
     private final TalleService talleService;
     private final ColorService colorService;
     private final ProveedorService proveedorService;
 
-    public ProductoService(ProductoRepository productoRepository, CategoriaService categoriaService, ColorService colorService, ProveedorService proveedorService, TalleService talleService, TipoDePrendaService tipoDePrendaService) {
+    public ProductoService(ProductoRepository productoRepository, DetalleProductoRepository detalleProductoRepository, CategoriaService categoriaService, ColorService colorService, ProveedorService proveedorService, TalleService talleService, TipoDePrendaService tipoDePrendaService) {
         this.productoRepository = productoRepository;
+        this.detalleProductoRepository = detalleProductoRepository;
         this.categoriaService = categoriaService;
         this.tipoDePrendaService = tipoDePrendaService;
         this.talleService = talleService;
@@ -37,11 +52,21 @@ public class ProductoService {
         Categoria categoria = categoriaService.obtenerCategoria(productoDto.getCategoriaId());
         if(!categoria.getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
         TipoDePrenda tipoDePrenda = tipoDePrendaService.obtenerTipoDePrenda(productoDto.getTipoDePrendaId());
-        Talle talle = talleService.obtenerTalle(productoDto.getTalleId());
-        Color color = colorService.obtenerColor(productoDto.getColorId());
         Proveedor proveedor = proveedorService.obtenerProveedor(productoDto.getProveedorId());
-        Producto producto = ProductoMapper.toEntity(productoDto, categoria, tipoDePrenda, talle, color, proveedor);
+        Producto producto = ProductoMapper.toEntity(productoDto, categoria, tipoDePrenda, proveedor);
         return productoRepository.save(producto);
+    }
+
+    public DetalleProducto crearDetalleProducto(Long productoId, DetalleProductoDto detalleDto) {
+        Producto producto = this.obtenerProducto(productoId);
+        Talle talle = talleService.obtenerTalle(detalleDto.getTalleId());
+        Color color = colorService.obtenerColor(detalleDto.getColorId());
+        DetalleProducto detalle = DetalleProductoMapper.toEntity(detalleDto, producto, talle, color);
+        return detalleProductoRepository.save(detalle);
+    }
+
+    public Producto obtenerProducto(Long productoId) {
+        return productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }
 
     public Producto actualizarProducto(Long id, ProductoPatchDto productoDto) {
@@ -51,18 +76,95 @@ public class ProductoService {
         if (productoDto.getDescripcion() != null) producto.setDescripcion(productoDto.getDescripcion());
         if (productoDto.getCategoriaId() != null) {
             Categoria categoria = categoriaService.obtenerCategoria(productoDto.getCategoriaId());
-            if (!categoria.getEstaActiva()) throw new ConflictException("No se puede asignar una categoría inactiva");
+            if (!categoria.getEstaActiva()) throw new ConflictException("No se puede asignar una categoria inactiva");
             producto.setCategoria(categoria);
         }
         if (productoDto.getTipoDePrendaId() != null) producto.setTipoDePrenda(tipoDePrendaService.obtenerTipoDePrenda(productoDto.getTipoDePrendaId()));
-        if (productoDto.getTalleId() != null) producto.setTalle(talleService.obtenerTalle(productoDto.getTalleId()));
-        if (productoDto.getColorId() != null) producto.setColor(colorService.obtenerColor(productoDto.getColorId()));
         if (productoDto.getProveedorId() != null) producto.setProveedor(proveedorService.obtenerProveedor(productoDto.getProveedorId()));
-        if (productoDto.getStockActual() != null) producto.setStockActual(productoDto.getStockActual());
-        if (productoDto.getStockMinimo() != null) producto.setStockMinimo(productoDto.getStockMinimo());
         if (productoDto.getPrecio() != null) producto.setPrecio(productoDto.getPrecio());
-        if (productoDto.getEstaActivo() != null) producto.setEstaActivo(productoDto.getEstaActivo());
 
         return productoRepository.save(producto);
+    }
+
+    public List<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
+        // --------- ORDENAMIENTO ----------
+        Sort sort = Sort.unsorted();
+
+        if (filtros.getOrden() != null) {
+            List<String> camposPermitidos = List.of("nombre", "precio");
+
+            String campo = filtros.getOrden().toLowerCase();
+
+            if (camposPermitidos.contains(campo)) {
+                Sort.Direction direccion = Sort.Direction.ASC;
+                if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
+                    direccion = Sort.Direction.DESC;
+                }
+                sort = Sort.by(direccion, campo);
+            } else {
+                throw new BadRequestException("No se puede ordenar por el campo: " + campo);
+            }
+        }
+
+        // --------- ESPECIFICACION ----------
+        Specification<Producto> spec = (root, query, cb) -> cb.conjunction();
+
+        // Filtrar por nombre
+        if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("nombre")), "%" + filtros.getNombre().toLowerCase() + "%")
+            );
+        }
+
+        // Filtrar por categoría
+        if (filtros.getCategoriaId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("categoria").get("id"), filtros.getCategoriaId())
+            );
+        }
+
+        // Filtrar por tipo
+        if (filtros.getTipoId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("tipoDePrenda").get("id"), filtros.getTipoId())
+            );
+        }
+
+        // Filtrar por proveedor
+        if (filtros.getProveedorId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("proveedor").get("id"), filtros.getProveedorId())
+            );
+        }
+
+        // Filtrar por stock bajo de los detalles
+        if (Boolean.TRUE.equals(filtros.getStockBajo())) {
+            spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
+                Join<Producto, DetalleProducto> join = root.join("detallesProductos", JoinType.LEFT);
+                return cb.lessThan(join.get("stockActual"), join.get("stockMinimo"));
+            });
+        }
+
+        // Filtrar por color de los detalles
+        if (filtros.getColorId() != null) {
+            spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
+                Join<Producto, DetalleProducto> join = root.join("detallesProductos", JoinType.LEFT);
+                return cb.equal(join.get("color").get("id"), filtros.getColorId());
+            });
+        }
+
+        // Filtrar por talle de los detalles
+        if (filtros.getTalleId() != null) {
+            spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
+                Join<Producto, DetalleProducto> join = root.join("detallesProductos", JoinType.LEFT);
+                return cb.equal(join.get("talle").get("id"), filtros.getTalleId());
+            });
+        }
+
+        // --------- CONSULTA CON ESPECIFICACION Y ORDENAMIENTO ----------
+        return productoRepository.findAll(spec, sort);
     }
 }

@@ -1,5 +1,8 @@
 package com.yourapp.app.models.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,13 +20,8 @@ public class Producto {
     @ManyToOne
     private TipoDePrenda tipoDePrenda;
     @ManyToOne
-    private Talle talle;
-    @ManyToOne
-    private Color color;
-    @ManyToOne
     private Proveedor proveedor;
-    private Integer stockActual;
-    private Integer stockMinimo;
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
+    private List<DetalleProducto> detallesProductos = new ArrayList<>();
     private Integer precio;
-    private Boolean estaActivo = true;
 }

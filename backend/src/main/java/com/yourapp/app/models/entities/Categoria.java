@@ -12,15 +12,4 @@ public class Categoria {
     private Long id;
     private String descripcion;
     private Boolean estaActiva = true;
-
-    // // Constructor vacío
-    // public Categoria() {}
-
-    // // Constructor con parámetros
-    // public Categoria(int id, String descripcion, boolean estaActiva) {
-    //     this.id = id;
-    //     this.descripcion = descripcion;
-    //     this.estaActiva = estaActiva;
-    // }
-
 }

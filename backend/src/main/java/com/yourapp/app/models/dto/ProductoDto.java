@@ -19,17 +19,7 @@ public class ProductoDto {
     @NotNull
     private Long tipoDePrendaId;
     @NotNull
-    private Long talleId;
-    @NotNull
-    private Long colorId;
-    @NotNull
     private Long proveedorId;
-    @NotNull
-    @Min(value = 0)
-    private Integer stockActual;
-    @NotNull
-    @Min(value = 0)
-    private Integer stockMinimo;
     @NotNull
     @Min(value = 0)
     private Integer precio;
