@@ -1,10 +1,13 @@
 package com.yourapp.app.models.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Entity @Data
+@NoArgsConstructor
 public class DetalleVenta {
 
     @Id
@@ -27,7 +30,6 @@ public class DetalleVenta {
         this.cantidad = cantidad;
         this.precioTotalUnitario = precioTotalUnitario;
     }
-
 
 
     public Venta getVenta() {
@@ -54,5 +56,7 @@ public class DetalleVenta {
         return precioTotalUnitario;
     }
 
-
+  public void calcularPrecioTotal() {
+      this.precioTotalUnitario = precioUnitarioActual * cantidad;
+  }
 }

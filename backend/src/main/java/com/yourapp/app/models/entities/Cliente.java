@@ -1,75 +1,74 @@
 package com.yourapp.app.models.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-public class Cliente {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(name = "clientes")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Cliente extends Persistible {
+
+    @Column(nullable = false)
     private String nombre;
+
     private String apellido;
+
     private String telefono;
+
+    @Column(unique = true)
     private String dni;
-    private Double creditoLimite;
-    private Double deuda;
 
-    public Cliente(String nombre, String apellido, String telefono, String dni, Double creditoLimite, Double deuda) {
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.telefono = telefono;
-        this.dni = dni;
-        this.creditoLimite = creditoLimite;
-        this.deuda = deuda;
-    }
-    // private CategoriaCliente categoriaCliente
+    @Column(name = "credito_limite")
+    private Double creditoLimite = 0.0;
 
-    public String getNombre() {
-        return nombre;
+    private Double deuda = 0.0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categoria_cliente")
+    private CategoriaCliente categoriaCliente = CategoriaCliente.REGISTRADO;
+
+    public enum CategoriaCliente {
+        REGISTRADO, CONFIABLE, NO_CONFIABLE
     }
 
-    public String getApellido() {
-        return apellido;
+    public boolean puedeReservar(Double monto) {
+        if (categoriaCliente != CategoriaCliente.CONFIABLE) {
+            return false;
+        }
+        return monto <= getCreditoDisponible();
     }
 
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public String getDni() {
-        return dni;
-    }
-
-    public Double getCreditoLimite() {
-        return creditoLimite;
-    }
-
-    public Double getDeuda() {
-        return deuda;
-    }
-
-    public void setCreditoLimite(Double creditoLimite) {
-        this.creditoLimite = creditoLimite;
-    }
-
-    public void setDeuda(Double deuda) {
-        this.deuda = deuda;
+    public Double getCreditoDisponible() {
+        return creditoLimite - deuda;
     }
 
     public void aumentarDeuda(Double monto) {
-        if(this.deuda + monto > this.creditoLimite) {
-            // Lanzar error
+        if (monto <= 0) {
+            throw new IllegalArgumentException("Monto debe ser positivo");
+        }
+        if (deuda + monto > creditoLimite) {
+            throw new IllegalStateException("Supera límite de crédito");
         }
         this.deuda += monto;
     }
 
-    public Double disminuirDeuda(Double monto) {
-        if (this.deuda < 0) {
-            this.deuda = 0.0;
+    public void disminuirDeuda(Double monto) {
+        if (monto <= 0) {
+            throw new IllegalArgumentException("Monto debe ser positivo");
         }
         this.deuda -= monto;
-        return monto;
+    }
+
+    public boolean esConfiable() {
+        return categoriaCliente == CategoriaCliente.CONFIABLE;
+    }
+
+    public void ajustarSaldo(Double monto) {
+        this.deuda += monto;
+        if (deuda > creditoLimite) {
+            throw new IllegalStateException("Supera límite de crédito");
+        }
     }
 }

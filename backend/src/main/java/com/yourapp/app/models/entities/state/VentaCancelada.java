@@ -1,23 +1,16 @@
 package com.yourapp.app.models.entities.state;
 
-import com.yourapp.app.models.entities.DetalleVenta;
-import com.yourapp.app.models.entities.Venta;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
-
+@Entity
+@DiscriminatorValue("CANCELADA")
+@NoArgsConstructor
 public class VentaCancelada extends VentaState {
 
-    private List<DetalleVenta> ventas;
-
-    public VentaCancelada (List<DetalleVenta> ventas) {
-        super(ventas);
-    }
-
-    public void aumentarStock() {
-
-    }
-
-    public Venta generarNuevaVenta() {
-        return new Venta();
+    @Override
+    public boolean puedeCambiarA(Class<? extends VentaState> nuevoEstado) {
+        return false;
     }
 }

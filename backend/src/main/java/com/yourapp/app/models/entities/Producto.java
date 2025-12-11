@@ -3,92 +3,129 @@ package com.yourapp.app.models.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
-public class Producto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(name = "productos")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Producto extends Persistible {
+
+    @Column(nullable = false)
     private String nombre;
+
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
     private Categoria categoria;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_prenda_id")
     private TipoDePrenda tipoDePrenda;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "talle_id")
     private Talle talle;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "color_id")
     private Color color;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;
-    private int stockActual;
-    private int stockMinimo;
-    private int precio;
 
-    public Producto(String nombre, String descripcion, Categoria categoria, TipoDePrenda tipoDePrenda, Talle talle, Color color, Proveedor proveedor, int stockActual, int stockMinimo, int precio) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.categoria = categoria;
-        this.tipoDePrenda = tipoDePrenda;
-        this.talle = talle;
-        this.color = color;
-        this.proveedor = proveedor;
-        this.stockActual = stockActual;
-        this.stockMinimo = stockMinimo;
-        this.precio = precio;
+    @Column(name = "stock_actual")
+    private Integer stockActual = 0;
+
+    @Column(name = "stock_reservado")
+    private Integer stockReservado = 0;
+
+    @Column(name = "stock_minimo")
+    private Integer stockMinimo = 5;
+
+    @Column(nullable = false)
+    private Integer precio;
+
+    // Métodos de negocio para manejo de stock
+    public Integer getStockDisponible() {
+        return Math.max(0, stockActual - stockReservado);
     }
 
-    public String getNombre() {
-        return nombre;
+    public void reservarStock(Integer cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("Cantidad debe ser positiva");
+        }
+
+        if (cantidad > getStockDisponible()) {
+            throw new IllegalStateException(
+                String.format("Stock disponible insuficiente. Disponible: %d, Solicitado: %d",
+                    getStockDisponible(), cantidad)
+            );
+        }
+
+        this.stockReservado += cantidad;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public void liberarStockReservado(Integer cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("Cantidad debe ser positiva");
+        }
+
+        if (cantidad > stockReservado) {
+            throw new IllegalStateException(
+                String.format("No hay suficiente stock reservado. Reservado: %d, A liberar: %d",
+                    stockReservado, cantidad)
+            );
+        }
+
+        this.stockReservado -= cantidad;
     }
 
-    public Categoria getCategoria() {
-        return categoria;
+    public void confirmarVenta(Integer cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("Cantidad debe ser positiva");
+        }
+
+        if (cantidad > stockReservado) {
+            throw new IllegalStateException("Cantidad no reservada previamente");
+        }
+
+        if (cantidad > stockActual) {
+            throw new IllegalStateException("Stock actual insuficiente");
+        }
+
+        // Liberar de reservado y disminuir actual
+        this.stockReservado -= cantidad;
+        this.stockActual -= cantidad;
     }
 
-    public TipoDePrenda getTipoDePrenda() {
-        return tipoDePrenda;
+    public void cancelarVenta(Integer cantidad) {
+        liberarStockReservado(cantidad);
     }
 
-    public Talle getTalle() {
-        return talle;
+    public void aumentarStock(Integer cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("Cantidad debe ser positiva");
+        }
+
+        this.stockActual += cantidad;
     }
 
-    public Color getColor() {
-        return color;
+    public boolean necesitaReposicion() {
+        return stockActual <= stockMinimo;
     }
 
-    public Proveedor getProveedor() {
-        return proveedor;
+    public boolean necesitaReposicionPorUnidad() {
+        return stockActual == 0;
     }
 
-    public int getStockActual() {
-        return stockActual;
+    public boolean necesitaReposicionPorCurva() {
+        return stockActual < 2;
     }
-
-    public int getStockMinimo() {
-        return stockMinimo;
-    }
-
-    public int getPrecio() {
-        return precio;
-    }
-
-    //Metodos para setear stock
-    public void setStockActual(int stockActual) {
-        this.stockActual = stockActual;
-    }
-
-    public void setStockMinimo(int stockMinimo) {
-        this.stockMinimo = stockMinimo;
-    }
-
-    public void setPrecio(int precio) {
-        this.precio = precio;
-    }
-
 }
