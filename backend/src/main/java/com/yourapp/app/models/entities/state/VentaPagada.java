@@ -1,5 +1,6 @@
 package com.yourapp.app.models.entities.state;
 
+import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -47,10 +48,12 @@ public class VentaPagada extends VentaState {
             return false;
         }
 
-        LocalDateTime ahora = LocalDateTime.now();
-        LocalDateTime fechaVenta = venta.getFecha();
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+        Integer mesesPermitidos = config.getTiempoMaximoCancelacionMeses();
 
-        return fechaVenta.getYear() == ahora.getYear() &&
-            fechaVenta.getMonth() == ahora.getMonth();
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime fechaLimite = venta.getFecha().plusMonths(mesesPermitidos);
+
+        return ahora.isBefore(fechaLimite);
     }
 }

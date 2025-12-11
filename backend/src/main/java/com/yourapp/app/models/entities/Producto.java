@@ -52,6 +52,12 @@ public class Producto extends Persistible {
     @Column(nullable = false)
     private Integer precio;
 
+    public Producto() {
+        // Establecer stock mínimo por defecto según configuración
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+        this.stockMinimo = (config != null) ? config.getStockMinimoGlobal() : 5;
+    }
+
     // Métodos de negocio para manejo de stock
     public Integer getStockDisponible() {
         return Math.max(0, stockActual - stockReservado);
@@ -118,7 +124,9 @@ public class Producto extends Persistible {
     }
 
     public boolean necesitaReposicion() {
-        return stockActual <= stockMinimo;
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+        Integer minimo = (config != null) ? config.getStockMinimoGlobal() : this.stockMinimo;
+        return stockActual <= minimo;
     }
 
     public boolean necesitaReposicionPorUnidad() {

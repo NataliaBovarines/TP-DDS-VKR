@@ -66,9 +66,30 @@ public class Cliente extends Persistible {
     }
 
     public void ajustarSaldo(Double monto) {
-        this.deuda += monto;
-        if (deuda > creditoLimite) {
-            throw new IllegalStateException("Supera límite de crédito");
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+        Double nuevaDeuda = deuda + monto;
+
+        if (nuevaDeuda < 0 && config != null) {
+            if (config.excedeLimiteSaldoFavor(nuevaDeuda)) {
+                throw new IllegalStateException(
+                    String.format("Saldo a favor excede el límite permitido. Límite: $%.2f",
+                        config.getLimiteSaldoFavor())
+                );
+            }
+        }
+
+        if (nuevaDeuda > creditoLimite) {
+            throw new IllegalStateException(
+                String.format("Supera límite de crédito. Límite: $%.2f, Nueva deuda: $%.2f",
+                    creditoLimite, nuevaDeuda)
+            );
+        }
+
+        this.deuda = nuevaDeuda;
+
+        if (deuda < 0) {
+            System.out.println(String.format("Cliente %s tiene saldo a favor: $%.2f",
+                nombre, Math.abs(deuda)));
         }
     }
 }

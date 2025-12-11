@@ -65,6 +65,11 @@ public class Venta extends Persistible {
         for (DetalleVenta detalle : detalles) {
             detalle.getProducto().reservarStock(detalle.getCantidad());
         }
+
+        // Establecer fecha de vencimiento usando configuración
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+        Integer diasValidez = config.getDiasValidezReserva();
+        this.fechaVencimientoReserva = LocalDateTime.now().plusDays(diasValidez);
     }
 
     public void liberarStockProductos() {

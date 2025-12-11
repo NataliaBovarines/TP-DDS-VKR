@@ -1,5 +1,6 @@
 package com.yourapp.app.models.entities.state;
 
+import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.models.entities.Venta;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.models.entities.PagoDeCredito;
@@ -35,6 +36,32 @@ public class VentaIniciada extends VentaState {
     public void reservarConCredito(Double montoInicial) {
         Venta venta = getVenta();
         Cliente cliente = venta.getCliente();
+
+        if (cliente == null) {
+            throw new IllegalStateException("Se requiere cliente para reserva");
+        }
+
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+
+        // Validar si la tienda permite reservas
+        if (config != null && !config.permiteReserva()) {
+            throw new IllegalStateException("La tienda no permite reservas en este momento");
+        }
+
+        // Calcular mínimo usando configuración
+        Double minimoInicial = venta.getTotal();
+        if (config != null) {
+            minimoInicial = config.calcularMontoMinimoSena(venta.getTotal());
+        }
+
+        if (montoInicial < minimoInicial) {
+            throw new IllegalArgumentException(
+                String.format("Monto inicial mínimo: $%.2f (%.0f%% del total $%.2f)",
+                    minimoInicial,
+                    (config != null ? config.getPorcentajeMinimoSena() * 100 : 10),
+                    venta.getTotal())
+            );
+        }
 
         if (cliente == null) {
             throw new IllegalStateException("Se requiere cliente para reserva");
