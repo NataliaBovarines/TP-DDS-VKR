@@ -26,8 +26,8 @@ public class RolController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Rol crear(@RequestBody @Valid RolDto rolDto) {
-        return rolService.crear(rolDto);
+    public Rol crearRol(@RequestBody @Valid RolDto rolDto) {
+        return rolService.crearRol(rolDto);
     }
 
     // @GetMapping("/{id}")

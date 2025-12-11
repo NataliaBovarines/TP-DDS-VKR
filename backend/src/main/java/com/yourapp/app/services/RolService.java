@@ -17,7 +17,7 @@ public class RolService {
         this.rolRepository = rolRepository;
     }
 
-    public Rol crear(RolDto rolDto) {
+    public Rol crearRol(RolDto rolDto) {
         if (rolRepository.existsByNombre(rolDto.getNombre())) {
             throw new ConflictException("El nombre del rol ya está en uso");
         }
@@ -26,7 +26,7 @@ public class RolService {
         return rolRepository.save(rol);
     }
 
-    public Rol obtener(Long rolId) {
+    public Rol obtenerRol(Long rolId) {
         return rolRepository
             .findById(rolId)
             .orElseThrow(() -> new NotFoundException("Rol no encontrado"));
