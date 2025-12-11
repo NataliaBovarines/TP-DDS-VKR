@@ -21,10 +21,7 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDto crearUsuario(UsuarioDto usuarioDto) {
-        if (usuarioRepository.existsByNombreDeUsuario(usuarioDto.getNombreDeUsuario())) {
-            throw new ConflictException("El nombre de usuario ya está en uso");
-        }
-
+        if (usuarioRepository.existsByNombreDeUsuario(usuarioDto.getNombreDeUsuario())) throw new ConflictException("El nombre de usuario ya está en uso");
         Rol rol = rolService.obtenerRol(usuarioDto.getRolId());
         Usuario usuario = UsuarioMapper.toEntity(usuarioDto, rol);
         Usuario usuarioGuardado = usuarioRepository.save(usuario);

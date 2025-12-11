@@ -7,7 +7,6 @@ public class CategoriaMapper {
     public static Categoria toEntity(CategoriaDto categoriaDto) {
         Categoria categoria = new Categoria();
         categoria.setDescripcion(categoriaDto.getDescripcion());
-        categoria.setEstaActiva(true);
         return categoria;
     }
 }

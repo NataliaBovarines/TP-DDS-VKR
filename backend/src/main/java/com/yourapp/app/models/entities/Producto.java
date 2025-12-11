@@ -25,4 +25,5 @@ public class Producto {
     private Integer stockActual;
     private Integer stockMinimo;
     private Integer precio;
+    private Boolean estaActivo = true;
 }

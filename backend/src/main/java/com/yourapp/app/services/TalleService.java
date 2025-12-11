@@ -18,17 +18,12 @@ public class TalleService {
     }
     
     public Talle crearTalle(TalleDto talleDto) {
-        if (talleRepository.existsByDescripcion(talleDto.getDescripcion())) {
-            throw new ConflictException("La descripción del talle ya está en uso");
-        }
-
+        if (talleRepository.existsByDescripcion(talleDto.getDescripcion())) throw new ConflictException("La descripción del talle ya está en uso");
         Talle talle = TalleMapper.toEntity(talleDto);
         return talleRepository.save(talle);
     }
 
     public Talle obtenerTalle(Long talleId) {
-        return talleRepository
-            .findById(talleId)
-            .orElseThrow(() -> new NotFoundException("Talle no encontrado"));
+        return talleRepository.findById(talleId).orElseThrow(() -> new NotFoundException("Talle no encontrado"));
     }
 }

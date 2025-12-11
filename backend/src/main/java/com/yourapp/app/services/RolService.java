@@ -18,17 +18,12 @@ public class RolService {
     }
 
     public Rol crearRol(RolDto rolDto) {
-        if (rolRepository.existsByNombre(rolDto.getNombre())) {
-            throw new ConflictException("El nombre del rol ya está en uso");
-        }
-
+        if (rolRepository.existsByNombre(rolDto.getNombre())) throw new ConflictException("El nombre del rol ya está en uso");
         Rol rol = RolMapper.toEntity(rolDto);
         return rolRepository.save(rol);
     }
 
     public Rol obtenerRol(Long rolId) {
-        return rolRepository
-            .findById(rolId)
-            .orElseThrow(() -> new NotFoundException("Rol no encontrado"));
+        return rolRepository.findById(rolId).orElseThrow(() -> new NotFoundException("Rol no encontrado"));
     }
 }

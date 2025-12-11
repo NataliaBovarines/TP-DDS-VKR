@@ -18,17 +18,12 @@ public class ProveedorService {
     }
     
     public Proveedor crearProveedor(ProveedorDto proveedorDto) {
-        if (proveedorRepository.existsByNombre(proveedorDto.getNombre())) {
-            throw new ConflictException("El nombre del proveedor ya está en uso");
-        }
-
+        if (proveedorRepository.existsByNombre(proveedorDto.getNombre())) throw new ConflictException("El nombre del proveedor ya está en uso");
         Proveedor proveedor = ProveedorMapper.toEntity(proveedorDto);
         return proveedorRepository.save(proveedor);
     }
 
     public Proveedor obtenerProveedor(Long proveedorId) {
-        return proveedorRepository
-            .findById(proveedorId)
-            .orElseThrow(() -> new NotFoundException("Proveedor no encontrado"));
+        return proveedorRepository.findById(proveedorId).orElseThrow(() -> new NotFoundException("Proveedor no encontrado"));
     }
 }

@@ -18,17 +18,12 @@ public class ColorService {
     }
 
     public Color crearColor(ColorDto colorDto) {
-        if (colorRepository.existsByDescripcion(colorDto.getDescripcion())) {
-            throw new ConflictException("La descripción del color ya está en uso");
-        }
-
+        if (colorRepository.existsByDescripcion(colorDto.getDescripcion())) throw new ConflictException("La descripción del color ya está en uso");
         Color color = ColorMapper.toEntity(colorDto);
         return colorRepository.save(color);
     }
 
     public Color obtenerColor(Long colorId) {
-        return colorRepository
-            .findById(colorId)
-            .orElseThrow(() -> new NotFoundException("Color no encontrado"));
+        return colorRepository.findById(colorId).orElseThrow(() -> new NotFoundException("Color no encontrado"));
     }
 }

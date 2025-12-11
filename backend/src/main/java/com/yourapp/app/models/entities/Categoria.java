@@ -11,7 +11,7 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String descripcion;
-    private Boolean estaActiva;
+    private Boolean estaActiva = true;
 
     // // Constructor vacío
     // public Categoria() {}

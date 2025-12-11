@@ -18,17 +18,12 @@ public class TipoDePrendaService {
     }
 
         public TipoDePrenda crearTipoDePrenda(TipoDePrendaDto tipoDePrendaDto) {
-        if (tipoDePrendaRepository.existsByDescripcion(tipoDePrendaDto.getDescripcion())) {
-            throw new ConflictException("La descripción del tipo de prenda ya está en uso");
-        }
-
+        if (tipoDePrendaRepository.existsByDescripcion(tipoDePrendaDto.getDescripcion())) throw new ConflictException("La descripción del tipo de prenda ya está en uso");
         TipoDePrenda tipoDePrenda = TipoDePrendaMapper.toEntity(tipoDePrendaDto);
         return tipoDePrendaRepository.save(tipoDePrenda);
     }
 
     public TipoDePrenda obtenerTipoDePrenda(Long tipoDePrendaId) {
-        return tipoDePrendaRepository
-            .findById(tipoDePrendaId)
-            .orElseThrow(() -> new NotFoundException("Tipo de prenda no encontrado"));
+        return tipoDePrendaRepository.findById(tipoDePrendaId).orElseThrow(() -> new NotFoundException("Tipo de prenda no encontrado"));
     }
 }

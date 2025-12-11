@@ -18,17 +18,12 @@ public class CategoriaService {
     }
 
     public Categoria crearCategoria(CategoriaDto categoriaDto) {
-        if (categoriaRepository.existsByDescripcion(categoriaDto.getDescripcion())) {
-            throw new ConflictException("La descripción de la categoria ya está en uso");
-        }
-
+        if (categoriaRepository.existsByDescripcion(categoriaDto.getDescripcion())) throw new ConflictException("La descripción de la categoria ya está en uso");
         Categoria categoria = CategoriaMapper.toEntity(categoriaDto);
         return categoriaRepository.save(categoria);
     }
 
     public Categoria obtenerCategoria(Long categoriaId) {
-        return categoriaRepository
-            .findById(categoriaId)
-            .orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
+        return categoriaRepository.findById(categoriaId).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
     }
 }
