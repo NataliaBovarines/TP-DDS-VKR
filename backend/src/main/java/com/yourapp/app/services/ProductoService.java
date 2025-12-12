@@ -14,6 +14,7 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleProductoMapper;
 import com.yourapp.app.mappers.ProductoMapper;
+import com.yourapp.app.models.dto.DetalleProductoCambioDto;
 import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.dto.ProductoFiltroDto;
@@ -53,7 +54,7 @@ public class ProductoService {
     }
 
     public DetalleProducto crearDetalleProducto(Long productoId, DetalleProductoDto detalleDto) {
-        Producto producto = this.obtenerProducto(productoId);
+        Producto producto = obtenerProducto(productoId);
         Talle talle = talleService.obtenerTalle(detalleDto.getTalleId());
         Color color = colorService.obtenerColor(detalleDto.getColorId());
         DetalleProducto detalle = DetalleProductoMapper.toEntity(detalleDto, producto, talle, color);
@@ -61,15 +62,23 @@ public class ProductoService {
     }
 
     public Producto obtenerProducto(Long productoId) {
-        return productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+        Producto producto = productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+
+        if (producto.getFueEliminado()) throw new NotFoundException("Producto eliminado");
+    
+        return producto;
     }
 
     public DetalleProducto obtenerDetalleProducto(Long detalleId) {
-        return detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
+        DetalleProducto detalle = detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
+        
+        if (Boolean.TRUE.equals(detalle.getFueEliminado())) throw new NotFoundException("Producto eliminado");
+
+        return detalle;
     }
 
     public Producto actualizarProducto(Long id, ProductoPatchDto productoDto) {
-        Producto producto = productoRepository.findById(id).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+        Producto producto = obtenerProducto(id);
 
         if (productoDto.getNombre() != null) producto.setNombre(productoDto.getNombre());
         if (productoDto.getDescripcion() != null) producto.setDescripcion(productoDto.getDescripcion());
@@ -83,6 +92,40 @@ public class ProductoService {
         if (productoDto.getPrecio() != null) producto.setPrecio(productoDto.getPrecio());
 
         return productoRepository.save(producto);
+    }
+
+    public DetalleProducto actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoCambioDto detalleDto) {
+        DetalleProducto detalle = obtenerDetalleProducto(detalleId);
+
+        if (!detalle.getProducto().getId().equals(id)) {
+            throw new BadRequestException("El detalle no pertenece al producto especificado");
+        }
+
+        if (detalleDto.getStockAumento() != null) detalle.setStockActual(detalle.getStockActual() + detalleDto.getStockAumento());
+
+        if (detalleDto.getStockMinimo() != null) detalle.setStockMinimo(detalleDto.getStockMinimo());
+
+        return detalleProductoRepository.save(detalle);
+    }
+
+    public void eliminarProducto(Long id) {
+        Producto producto = obtenerProducto(id);
+
+        producto.softDelete();
+
+        productoRepository.save(producto);
+    }
+
+    public void eliminarDetalleProducto(Long id, Long detalleId) {
+        Producto producto = obtenerProducto(id);
+
+        DetalleProducto detalle = obtenerDetalleProducto(detalleId);
+
+        if (!detalle.getProducto().getId().equals(producto.getId())) throw new BadRequestException("El detalle no pertenece a este producto");
+
+        detalle.softDelete();
+
+        detalleProductoRepository.save(detalle);
     }
 
     public Page<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
@@ -107,6 +150,8 @@ public class ProductoService {
 
         // --------- ESPECIFICACION ----------
         Specification<Producto> spec = (root, query, cb) -> cb.conjunction();
+
+        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
 
         // Filtrar por nombre
         if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yourapp.app.models.dto.DetalleProductoCambioDto;
 import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.dto.ProductoFiltroDto;
@@ -53,9 +54,27 @@ public class ProductoController {
         return productoService.actualizarProducto(id, productoDto);
     }
 
+    @PatchMapping("/{id}/detalles/{detalleId}")
+    @ResponseStatus(HttpStatus.OK)
+    public DetalleProducto actualizarDetalleProducto(@PathVariable Long id, @PathVariable Long detalleId, @RequestBody @Valid DetalleProductoCambioDto detalleDto) {
+        return productoService.actualizarDetalleProducto(id, detalleId, detalleDto);
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<Producto> obtenerProductosFiltrados(@Valid @ModelAttribute ProductoFiltroDto filtros) {
         return productoService.obtenerProductosFiltrados(filtros);
     } 
-}
+
+    @PatchMapping("/{id}/eliminacion")
+    @ResponseStatus(HttpStatus.OK) 
+    public void eliminarProducto(@PathVariable Long id) {
+        productoService.eliminarProducto(id);
+    }
+
+    @PatchMapping("/{id}/detalles/{detalleId}/eliminacion")
+    @ResponseStatus(HttpStatus.OK)
+    public void eliminarDetalleProducto(@PathVariable Long id, @PathVariable Long detalleId) {
+        productoService.eliminarDetalleProducto(id, detalleId);
+    }
+}   

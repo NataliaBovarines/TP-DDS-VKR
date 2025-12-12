@@ -8,10 +8,7 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class DetalleProducto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class DetalleProducto extends Persistible {
     @ManyToOne
     @JsonIgnore
     private Producto producto;

@@ -22,7 +22,6 @@ public class VentaService {
     private final ProductoService productoService;
     private final ClienteRepository clienteRepository;
     private final EmpleadoRepository empleadoRepository;
-    private final PagoDeCreditoRepository pagoDeCreditoRepository;
 
     @Transactional
     public Venta crearVenta(Long empleadoId, Long clienteId) {
