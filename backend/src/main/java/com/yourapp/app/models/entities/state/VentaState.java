@@ -1,5 +1,6 @@
 package com.yourapp.app.models.entities.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yourapp.app.models.entities.Persistible;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.*;
@@ -10,11 +11,12 @@ import lombok.NoArgsConstructor;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_estado", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "estados_venta")
-@MappedSuperclass @NoArgsConstructor
+@NoArgsConstructor
 public abstract class VentaState extends Persistible {
 
-    @OneToOne
-    @JoinColumn(name = "venta_id", unique = true)
+    @ManyToOne
+    @JoinColumn(name = "venta_id")
+    @JsonIgnore
     private Venta venta;
 
 

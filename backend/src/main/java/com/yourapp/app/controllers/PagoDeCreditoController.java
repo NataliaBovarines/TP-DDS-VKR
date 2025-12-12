@@ -5,12 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.services.PagoDeCreditoService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/pagos-de-credito")
+@RequiredArgsConstructor
 public class PagoDeCreditoController {
     private final PagoDeCreditoService pagoDeCreditoService;
-
-    public PagoDeCreditoController(PagoDeCreditoService pagoDeCreditoService) {
-        this.pagoDeCreditoService = pagoDeCreditoService;
-    }
 }

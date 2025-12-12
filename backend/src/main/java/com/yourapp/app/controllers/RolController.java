@@ -1,8 +1,9 @@
 package com.yourapp.app.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,24 +15,23 @@ import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.services.RolService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/roles")
+@RequiredArgsConstructor
 public class RolController {
     private final RolService rolService;
 
-    public RolController(RolService rolService) {
-        this.rolService = rolService;
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Rol crear(@RequestBody @Valid RolDto rolDto) {
-        return rolService.crear(rolDto);
+    public Rol crearRol(@RequestBody @Valid RolDto rolDto) {
+        return rolService.crearRol(rolDto);
     }
 
-    // @GetMapping("/{id}")
-    // public Rol obtener(@PathVariable Long id) {
-    //     return rolService.obtener(id);
-    // }
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK) 
+    public List<Rol> obtenerTodosLosRoles() {
+        return rolService.obtenerTodosLosRoles();
+    }
 }

@@ -14,11 +14,11 @@ import java.util.List;
 @Setter
 public class Venta extends Persistible {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "empleado_id", nullable = false)
     private Empleado empleado;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
@@ -39,6 +39,9 @@ public class Venta extends Persistible {
     @JoinColumn(name = "estado_id")
     private VentaState estado;
 
+    @Column(name = "estado_nombre")
+    private String estadoNombre;
+
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles = new ArrayList<>();
 
@@ -47,6 +50,24 @@ public class Venta extends Persistible {
 
     public enum MetodoPago {
         EFECTIVO, DEBITO, MERCADO_PAGO, CREDITO
+    }
+
+    @Override
+    public void softDelete() {
+        this.setFueEliminado(true);
+
+        for (DetalleVenta detalle : detalles) {
+            detalle.softDelete();
+        }
+
+        for (PagoDeCredito pago : pagosCredito) {
+            pago.softDelete();
+        }
+    }
+
+    public void setEstado(VentaState estado) {
+        this.estado = estado;
+        this.estadoNombre = estado != null ? estado.getClass().getSimpleName() : null;
     }
 
     public void agregarDetalle(DetalleVenta detalle) {
@@ -63,7 +84,7 @@ public class Venta extends Persistible {
 
     public void reservarStockProductos() {
         for (DetalleVenta detalle : detalles) {
-            detalle.getProducto().reservarStock(detalle.getCantidad());
+            detalle.reservarStock();
         }
 
         // Establecer fecha de vencimiento usando configuración
@@ -74,20 +95,19 @@ public class Venta extends Persistible {
 
     public void liberarStockProductos() {
         for (DetalleVenta detalle : detalles) {
-            detalle.getProducto().liberarStockReservado(detalle.getCantidad());
+            detalle.liberarStockReservado();
         }
     }
 
     public void confirmarStockProductos() {
         for (DetalleVenta detalle : detalles) {
-            detalle.getProducto().confirmarVenta(detalle.getCantidad());
+            detalle.confirmarVenta();
         }
     }
 
     public void verificarStockDisponible() {
         for (DetalleVenta detalle : detalles) {
-            Producto producto = detalle.getProducto();
-            if (producto.getStockDisponible() < detalle.getCantidad()) {
+            if (!detalle.hayStockDisponible()) {
                 throw new IllegalStateException("Stock insuficiente");
             }
         }

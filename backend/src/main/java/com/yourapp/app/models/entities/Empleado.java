@@ -26,6 +26,6 @@ public class Empleado {
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 
     public void recibirNotificacion(String mensaje) {
-        this.mediosDeNotificacion.forEach(m -> m.notificar(mensaje));
+        this.mediosDeNotificacion.forEach(m -> m.notificar(mensaje, this));
     }
 }
