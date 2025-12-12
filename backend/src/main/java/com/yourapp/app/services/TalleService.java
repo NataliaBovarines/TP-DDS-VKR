@@ -11,14 +11,13 @@ import com.yourapp.app.models.dto.TalleDto;
 import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.repositories.TalleRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class TalleService {
     private final TalleRepository talleRepository;
 
-    public TalleService(TalleRepository talleRepository) {
-        this.talleRepository = talleRepository;
-    }
-    
     public Talle crearTalle(TalleDto talleDto) {
         if (talleRepository.existsByDescripcion(talleDto.getDescripcion())) throw new ConflictException("La descripción del talle ya está en uso");
         Talle talle = TalleMapper.toEntity(talleDto);

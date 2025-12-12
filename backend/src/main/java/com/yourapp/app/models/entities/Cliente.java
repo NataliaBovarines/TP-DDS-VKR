@@ -1,34 +1,95 @@
 package com.yourapp.app.models.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Getter @Setter
-public class Cliente {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(name = "clientes")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Cliente extends Persistible {
+
+    @Column(nullable = false)
     private String nombre;
+
     private String apellido;
+
     private String telefono;
+
+    @Column(unique = true)
     private String dni;
-    private Double creditoLimite;
-    private Double deuda;
-    // private CategoriaCliente categoriaCliente
-    
+
+    @Column(name = "credito_limite")
+    private Double creditoLimite = 0.0;
+
+    private Double deuda = 0.0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "categoria_cliente")
+    private CategoriaCliente categoriaCliente = CategoriaCliente.REGISTRADO;
+
+    public enum CategoriaCliente {
+        REGISTRADO, CONFIABLE, NO_CONFIABLE
+    }
+
+    public boolean puedeReservar(Double monto) {
+        if (categoriaCliente != CategoriaCliente.CONFIABLE) {
+            return false;
+        }
+        return monto <= getCreditoDisponible();
+    }
+
+    public Double getCreditoDisponible() {
+        return creditoLimite - deuda;
+    }
+
     public void aumentarDeuda(Double monto) {
-        if(this.deuda + monto > this.creditoLimite) { 
-            // Lanzar error
+        if (monto <= 0) {
+            throw new IllegalArgumentException("Monto debe ser positivo");
+        }
+        if (deuda + monto > creditoLimite) {
+            throw new IllegalStateException("Supera límite de crédito");
         }
         this.deuda += monto;
     }
 
     public void disminuirDeuda(Double monto) {
-        if (this.deuda < 0) {
-            this.deuda = 0.0;
+        if (monto <= 0) {
+            throw new IllegalArgumentException("Monto debe ser positivo");
         }
         this.deuda -= monto;
+    }
+
+    public boolean esConfiable() {
+        return categoriaCliente == CategoriaCliente.CONFIABLE;
+    }
+
+    public void ajustarSaldo(Double monto) {
+        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
+        Double nuevaDeuda = deuda + monto;
+
+        if (nuevaDeuda < 0 && config != null) {
+            if (config.excedeLimiteSaldoFavor(nuevaDeuda)) {
+                throw new IllegalStateException(
+                    String.format("Saldo a favor excede el límite permitido. Límite: $%.2f",
+                        config.getLimiteSaldoFavor())
+                );
+            }
+        }
+
+        if (nuevaDeuda > creditoLimite) {
+            throw new IllegalStateException(
+                String.format("Supera límite de crédito. Límite: $%.2f, Nueva deuda: $%.2f",
+                    creditoLimite, nuevaDeuda)
+            );
+        }
+
+        this.deuda = nuevaDeuda;
+
+        if (deuda < 0) {
+            System.out.println(String.format("Cliente %s tiene saldo a favor: $%.2f",
+                nombre, Math.abs(deuda)));
+        }
     }
 }

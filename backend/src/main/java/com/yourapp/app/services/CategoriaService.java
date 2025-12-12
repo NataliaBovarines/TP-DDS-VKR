@@ -11,13 +11,12 @@ import com.yourapp.app.models.dto.CategoriaDto;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.repositories.CategoriaRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
-
-    public CategoriaService(CategoriaRepository categoriaRepository) {
-        this.categoriaRepository = categoriaRepository;
-    }
 
     public Categoria crearCategoria(CategoriaDto categoriaDto) {
         if (categoriaRepository.existsByDescripcion(categoriaDto.getDescripcion())) throw new ConflictException("La descripción de la categoria ya está en uso");

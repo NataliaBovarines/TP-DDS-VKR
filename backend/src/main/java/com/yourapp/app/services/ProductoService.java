@@ -30,8 +30,10 @@ import com.yourapp.app.repositories.ProductoRepository;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ProductoService {
     private final ProductoRepository productoRepository;
     private final DetalleProductoRepository detalleProductoRepository;
@@ -40,16 +42,6 @@ public class ProductoService {
     private final TalleService talleService;
     private final ColorService colorService;
     private final ProveedorService proveedorService;
-
-    public ProductoService(ProductoRepository productoRepository, DetalleProductoRepository detalleProductoRepository, CategoriaService categoriaService, ColorService colorService, ProveedorService proveedorService, TalleService talleService, TipoDePrendaService tipoDePrendaService) {
-        this.productoRepository = productoRepository;
-        this.detalleProductoRepository = detalleProductoRepository;
-        this.categoriaService = categoriaService;
-        this.tipoDePrendaService = tipoDePrendaService;
-        this.talleService = talleService;
-        this.colorService = colorService;
-        this.proveedorService = proveedorService;
-    }
 
     public Producto crearProducto(ProductoDto productoDto) {
         Categoria categoria = categoriaService.obtenerCategoria(productoDto.getCategoriaId());
@@ -70,6 +62,10 @@ public class ProductoService {
 
     public Producto obtenerProducto(Long productoId) {
         return productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+    }
+
+    public DetalleProducto obtenerDetalleProducto(Long detalleId) {
+        return detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
     }
 
     public Producto actualizarProducto(Long id, ProductoPatchDto productoDto) {

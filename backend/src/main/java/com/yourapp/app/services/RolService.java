@@ -11,13 +11,12 @@ import com.yourapp.app.models.dto.RolDto;
 import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.repositories.RolRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class RolService {
     private final RolRepository rolRepository;
-
-    public RolService(RolRepository rolRepository) {
-        this.rolRepository = rolRepository;
-    }
 
     public Rol crearRol(RolDto rolDto) {
         if (rolRepository.existsByNombre(rolDto.getNombre())) throw new ConflictException("El nombre del rol ya está en uso");

@@ -10,15 +10,13 @@ import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.models.entities.Usuario;
 import com.yourapp.app.repositories.UsuarioRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolService rolService;
-
-    public UsuarioService(UsuarioRepository usuarioRepository, RolService rolService) {
-        this.usuarioRepository = usuarioRepository;
-        this.rolService = rolService;
-    }
 
     public UsuarioResponseDto crearUsuario(UsuarioDto usuarioDto) {
         if (usuarioRepository.existsByNombreDeUsuario(usuarioDto.getNombreDeUsuario())) throw new ConflictException("El nombre de usuario ya está en uso");

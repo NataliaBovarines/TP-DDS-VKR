@@ -11,13 +11,12 @@ import com.yourapp.app.models.dto.ColorDto;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.repositories.ColorRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ColorService {
     private final ColorRepository colorRepository;
-
-    public ColorService(ColorRepository colorRepository) {
-        this.colorRepository = colorRepository;
-    }
 
     public Color crearColor(ColorDto colorDto) {
         if (colorRepository.existsByDescripcion(colorDto.getDescripcion())) throw new ConflictException("La descripción del color ya está en uso");

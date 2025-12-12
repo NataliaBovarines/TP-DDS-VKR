@@ -11,13 +11,12 @@ import com.yourapp.app.models.dto.ProveedorDto;
 import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.repositories.ProveedorRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ProveedorService {
     private final ProveedorRepository proveedorRepository;
-
-    public ProveedorService(ProveedorRepository proveedorRepository) {
-        this.proveedorRepository = proveedorRepository;
-    }
     
     public Proveedor crearProveedor(ProveedorDto proveedorDto) {
         if (proveedorRepository.existsByNombre(proveedorDto.getNombre())) throw new ConflictException("El nombre del proveedor ya está en uso");
