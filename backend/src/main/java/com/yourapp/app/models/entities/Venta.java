@@ -39,6 +39,9 @@ public class Venta extends Persistible {
     @JoinColumn(name = "estado_id")
     private VentaState estado;
 
+    @Column(name = "estado_nombre")
+    private String estadoNombre;
+
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles = new ArrayList<>();
 
@@ -47,6 +50,11 @@ public class Venta extends Persistible {
 
     public enum MetodoPago {
         EFECTIVO, DEBITO, MERCADO_PAGO, CREDITO
+    }
+
+    public void setEstado(VentaState estado) {
+        this.estado = estado;
+        this.estadoNombre = estado != null ? estado.getClass().getSimpleName() : null;
     }
 
     public void agregarDetalle(DetalleVenta detalle) {

@@ -1,18 +1,28 @@
 package com.yourapp.app.services;
 
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleVentaMapper;
 import com.yourapp.app.mappers.VentaMapper;
 import com.yourapp.app.models.dto.DetalleVentaDto;
+import com.yourapp.app.models.dto.VentaFiltroDto;
 import com.yourapp.app.models.entities.*;
 import com.yourapp.app.models.entities.Venta.MetodoPago;
 import com.yourapp.app.models.entities.state.*;
 import com.yourapp.app.repositories.*;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +50,9 @@ public class VentaService {
     }
 
     public Venta obtenerVenta(Long ventaId) {
-        return ventaRepository.findById(ventaId).orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
+        if(venta.getFueEliminado()) throw new NotFoundException("Venta eliminada");
+        return venta;
     } 
 
     @Transactional
@@ -68,7 +80,7 @@ public class VentaService {
 
         return ventaRepository.save(venta);
     }
-    
+
     @Transactional
     public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
         Venta venta = obtenerVenta(ventaId);
@@ -179,5 +191,64 @@ public class VentaService {
                 ((VentaReservada) venta.getEstado()).procesar();
             }
         }
+    }
+
+    public Page<Venta> obtenerVentasFiltradas(VentaFiltroDto filtros) {
+        // --------- ORDENAMIENTO ----------
+        Sort sort = Sort.unsorted();
+        if (filtros.getOrden() != null) {
+            List<String> camposPermitidos = List.of("fecha", "total", "montoPagado", "fechaVencimientoReserva");
+
+            String campo = filtros.getOrden().toLowerCase();
+            if (camposPermitidos.contains(campo)) {
+                Sort.Direction direccion = Sort.Direction.ASC;
+                if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
+                    direccion = Sort.Direction.DESC;
+                }
+                sort = Sort.by(direccion, campo);
+            } else {
+                throw new BadRequestException("No se puede ordenar por el campo: " + campo);
+            }
+        }
+
+        // --------- ESPECIFICACION ----------
+        Specification<Venta> spec = (root, query, cb) -> cb.conjunction();
+
+        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
+
+        // Filtrar por empleado
+        if (filtros.getEmpleadoId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("empleado").get("id"), filtros.getEmpleadoId())
+            );
+        }
+
+        // Filtrar por cliente
+        if (filtros.getClienteId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("cliente").get("id"), filtros.getClienteId())
+            );
+        }
+
+        // Filtrar por método de pago
+        if (filtros.getMetodoPago() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("metodoPago"), filtros.getMetodoPago())
+            );
+        }
+
+        // Filtrar por estado (nombre de la clase de VentaState)
+        if (filtros.getEstado() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("estadoNombre"), filtros.getEstado())
+            );
+        }
+
+        // --------- PAGINACION ----------
+        int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
+        int tamanio = 10;
+        Pageable pageable = PageRequest.of(pagina, tamanio, sort);
+
+        return ventaRepository.findAll(spec, pageable);
     }
 }

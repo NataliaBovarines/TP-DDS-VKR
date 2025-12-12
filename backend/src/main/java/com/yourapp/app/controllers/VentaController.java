@@ -1,7 +1,11 @@
 package com.yourapp.app.controllers;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +15,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.DetalleVentaDto;
+import com.yourapp.app.models.dto.ProductoFiltroDto;
 import com.yourapp.app.models.dto.VentaCambioDto;
 import com.yourapp.app.models.dto.VentaDto;
+import com.yourapp.app.models.dto.VentaFiltroDto;
 import com.yourapp.app.models.dto.VentaPagoDto;
 import com.yourapp.app.models.entities.PagoDeCredito;
 import com.yourapp.app.models.entities.Venta;
@@ -79,5 +85,11 @@ public class VentaController {
     @ResponseStatus(HttpStatus.OK) 
     public void procesarReservasVencidas(@PathVariable Long id) {
         ventaService.procesarReservasVencidas(); // Cancela las ventas reservadas vencidas
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Page<Venta> obtenerVentasFiltradas(@Valid @ModelAttribute VentaFiltroDto filtros) {
+        return ventaService.obtenerVentasFiltradas(filtros);
     }
 }
