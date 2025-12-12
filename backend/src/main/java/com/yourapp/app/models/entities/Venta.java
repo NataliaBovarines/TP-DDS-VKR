@@ -52,6 +52,19 @@ public class Venta extends Persistible {
         EFECTIVO, DEBITO, MERCADO_PAGO, CREDITO
     }
 
+    @Override
+    public void softDelete() {
+        this.setFueEliminado(true);
+
+        for (DetalleVenta detalle : detalles) {
+            detalle.softDelete();
+        }
+
+        for (PagoDeCredito pago : pagosCredito) {
+            pago.softDelete();
+        }
+    }
+
     public void setEstado(VentaState estado) {
         this.estado = estado;
         this.estadoNombre = estado != null ? estado.getClass().getSimpleName() : null;

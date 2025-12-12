@@ -46,4 +46,13 @@ public class Producto extends Persistible {
             .mapToInt(DetalleProducto::getStockActual)
             .sum();
     }
+
+    @Override
+    public void softDelete() {
+        this.setFueEliminado(true);
+
+        for (DetalleProducto detalle : detallesProductos) {
+            detalle.softDelete();
+        }
+    }
 }

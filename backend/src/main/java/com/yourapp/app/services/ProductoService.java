@@ -112,7 +112,7 @@ public class ProductoService {
         Producto producto = obtenerProducto(id);
 
         producto.softDelete();
-
+        
         productoRepository.save(producto);
     }
 

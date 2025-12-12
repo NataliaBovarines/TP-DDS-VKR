@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +78,14 @@ public class VentaService {
         venta.calcularTotal();
 
         return ventaRepository.save(venta);
+    }
+
+    public void eliminarVenta(Long id) {
+        Venta venta = obtenerVenta(id);
+
+        venta.softDelete();
+        
+        ventaRepository.save(venta);
     }
 
     @Transactional
