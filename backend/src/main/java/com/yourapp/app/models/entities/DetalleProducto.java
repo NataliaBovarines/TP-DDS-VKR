@@ -15,9 +15,9 @@ public class DetalleProducto {
     @ManyToOne
     @JsonIgnore
     private Producto producto;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Talle talle;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Color color;
     @Column(nullable = false)
     private Integer stockActual = 0;

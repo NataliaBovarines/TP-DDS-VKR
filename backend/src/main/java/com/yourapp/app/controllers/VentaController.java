@@ -57,7 +57,7 @@ public class VentaController {
         return ventaService.reservarConCredito(id, ventaPagoDto.getMonto());
     }
 
-    @PostMapping("/{id}/pagos")
+    @PostMapping("/{id}/reserva-pagos")
     @ResponseStatus(HttpStatus.OK) 
     public PagoDeCredito agregarPagoParcialCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
         return ventaService.agregarPagoParcialCredito(id, ventaPagoDto.getMonto());

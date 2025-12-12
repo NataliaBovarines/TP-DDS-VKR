@@ -1,5 +1,7 @@
 package com.yourapp.app.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -14,6 +16,7 @@ public class DetalleVenta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @ManyToOne
+    @JsonIgnore
     private Venta venta;
     @ManyToOne
     private DetalleProducto detalleProducto;

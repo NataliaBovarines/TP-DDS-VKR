@@ -1,6 +1,10 @@
 package com.yourapp.app.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,5 +28,17 @@ public class UsuarioController {
     @ResponseStatus(HttpStatus.CREATED)
     public UsuarioResponseDto crearUsuario(@RequestBody @Valid UsuarioDto usuarioDto) {
         return usuarioService.crearUsuario(usuarioDto);
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UsuarioResponseDto obtenerUsuario(@PathVariable Long id) {
+        return usuarioService.obtenerUsuario(id);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<UsuarioResponseDto> obtenerTodosLosUsuarios() {
+        return usuarioService.obtenerTodosLosUsuarios();
     }
 }

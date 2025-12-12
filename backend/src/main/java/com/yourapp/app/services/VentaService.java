@@ -3,7 +3,6 @@ package com.yourapp.app.services;
 import com.yourapp.app.mappers.DetalleVentaMapper;
 import com.yourapp.app.mappers.VentaMapper;
 import com.yourapp.app.models.dto.DetalleVentaDto;
-import com.yourapp.app.models.dto.VentaDto;
 import com.yourapp.app.models.entities.*;
 import com.yourapp.app.models.entities.Venta.MetodoPago;
 import com.yourapp.app.models.entities.state.*;
@@ -70,7 +69,7 @@ public class VentaService {
 
         return ventaRepository.save(venta);
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     @Transactional
     public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
         Venta venta = obtenerVenta(ventaId);
@@ -109,7 +108,7 @@ public class VentaService {
         venta.setEstado(nuevoEstado);
         venta.setMetodoPago(MetodoPago.CREDITO);
 
-        return venta.getPagosCredito().get(0);
+        return venta.getPagosCredito().isEmpty() ? null : venta.getPagosCredito().get(0);
     }
 
     @Transactional
@@ -160,7 +159,7 @@ public class VentaService {
 
             nuevaVenta.getDetalles().add(detalleVenta);
         }
-        
+
         nuevaVenta.calcularTotal();
 
         if (ventaOriginal.getCliente() != null) {

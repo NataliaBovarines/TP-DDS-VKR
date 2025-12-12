@@ -14,11 +14,11 @@ import java.util.List;
 @Setter
 public class Venta extends Persistible {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "empleado_id", nullable = false)
     private Empleado empleado;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
