@@ -5,12 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.services.DetalleVentaService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/detalle-ventas")
+@RequiredArgsConstructor
 public class DetalleVentaController {
     private final DetalleVentaService detalleVentaService;
-
-    public DetalleVentaController(DetalleVentaService detalleVentaService) {
-        this.detalleVentaService = detalleVentaService;
-    }
 }

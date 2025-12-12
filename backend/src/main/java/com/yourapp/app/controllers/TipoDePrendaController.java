@@ -15,15 +15,13 @@ import com.yourapp.app.models.entities.TipoDePrenda;
 import com.yourapp.app.services.TipoDePrendaService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/tipos-de-prenda")
+@RequiredArgsConstructor
 public class TipoDePrendaController {
     private final TipoDePrendaService tipoDePrendaService;
-
-    public TipoDePrendaController(TipoDePrendaService tipoDePrendaService) {
-        this.tipoDePrendaService = tipoDePrendaService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

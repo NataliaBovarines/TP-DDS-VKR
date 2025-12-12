@@ -15,15 +15,13 @@ import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.services.ColorService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/colores")
+@RequiredArgsConstructor
 public class ColorController {
     private final ColorService colorService;
-
-    public ColorController(ColorService colorService) {
-        this.colorService = colorService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

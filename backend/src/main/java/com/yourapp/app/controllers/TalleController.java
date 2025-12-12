@@ -15,15 +15,13 @@ import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.services.TalleService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/talles")
+@RequiredArgsConstructor
 public class TalleController {
     private final TalleService talleService;
-
-    public TalleController(TalleService talleService) {
-        this.talleService = talleService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

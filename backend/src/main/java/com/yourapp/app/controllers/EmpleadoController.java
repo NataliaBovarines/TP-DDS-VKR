@@ -5,12 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.services.EmpleadoService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/empleados")
+@RequiredArgsConstructor
 public class EmpleadoController {
     private final EmpleadoService empleadoService;
-
-    public EmpleadoController(EmpleadoService empleadoService) {
-        this.empleadoService = empleadoService;
-    }
 }

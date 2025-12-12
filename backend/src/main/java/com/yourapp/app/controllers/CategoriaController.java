@@ -15,15 +15,13 @@ import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.services.CategoriaService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/categorias")
+@RequiredArgsConstructor
 public class CategoriaController {
     private final CategoriaService categoriaService;
-
-    public CategoriaController(CategoriaService categoriaService) {
-        this.categoriaService = categoriaService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

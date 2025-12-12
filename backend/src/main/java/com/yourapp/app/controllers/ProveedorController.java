@@ -15,15 +15,13 @@ import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.services.ProveedorService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/proveedores")
+@RequiredArgsConstructor
 public class ProveedorController {
     private final ProveedorService proveedorService;
-
-    public ProveedorController(ProveedorService proveedorService) {
-        this.proveedorService = proveedorService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

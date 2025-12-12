@@ -1,5 +1,9 @@
 package com.yourapp.app.services;
 
+import com.yourapp.app.mappers.DetalleVentaMapper;
+import com.yourapp.app.mappers.VentaMapper;
+import com.yourapp.app.models.dto.DetalleVentaDto;
+import com.yourapp.app.models.dto.VentaDto;
 import com.yourapp.app.models.entities.*;
 import com.yourapp.app.models.entities.Venta.MetodoPago;
 import com.yourapp.app.models.entities.state.*;
@@ -32,43 +36,36 @@ public class VentaService {
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         }
 
-        Venta venta = new Venta();
-        venta.setEmpleado(empleado);
-        venta.setCliente(cliente);
-        venta.setFecha(LocalDateTime.now());
-        venta.setEstado(new VentaIniciada());
-        venta.getEstado().setVenta(venta);
+        Venta venta = VentaMapper.toEntity(empleado, cliente);
 
         return ventaRepository.save(venta);
     }
 
+    public Venta obtenerVenta(Long ventaId) {
+        return ventaRepository.findById(ventaId).orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+    } 
+
     @Transactional
-    public Venta agregarProductoAVenta(Long ventaId, Long detalleProductoId, Integer cantidad) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+    public Venta agregarProductoAVenta(Long ventaId, DetalleVentaDto detalleVentaDto) {
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) {
             throw new IllegalStateException("Solo se pueden agregar productos a ventas INICIADAS");
         }
 
-        DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleProductoId);
+        DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleVentaDto.getDetalleProductoId());
 
-        if (cantidad <= 0) {
+        if (detalleVentaDto.getCantidad() <= 0) {
             throw new IllegalArgumentException("Cantidad debe ser positiva");
         }
 
-        if (detalleProducto.getStockDisponible() < cantidad) {
+        if (detalleProducto.getStockDisponible() < detalleVentaDto.getCantidad()) {
             throw new IllegalStateException("Stock insuficiente");
         }
 
-        DetalleVenta detalle = new DetalleVenta();
-        detalle.setDetalleProducto(detalleProducto);
-        detalle.setCantidad(cantidad);
-        detalle.setPrecioUnitarioActual(detalleProducto.getProducto().getPrecio().doubleValue());
-        detalle.calcularPrecioTotal();
-        detalle.setVenta(venta);
+        DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleVentaDto, detalleProducto, venta);
 
-        venta.getDetalles().add(detalle);
+        venta.getDetalles().add(detalleVenta);
         venta.calcularTotal();
 
         return ventaRepository.save(venta);
@@ -76,8 +73,7 @@ public class VentaService {
 
     @Transactional
     public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) {
             throw new IllegalStateException("Solo se pueden pagar ventas INICIADAS");
@@ -100,8 +96,7 @@ public class VentaService {
 
     @Transactional
     public PagoDeCredito reservarConCredito(Long ventaId, Double montoInicial) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) {
             throw new IllegalStateException("Solo se pueden reservar ventas INICIADAS");
@@ -119,8 +114,7 @@ public class VentaService {
 
     @Transactional
     public PagoDeCredito agregarPagoParcialCredito(Long ventaId, Double monto) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaReservada)) {
             throw new IllegalStateException("Solo se pueden agregar pagos a ventas RESERVADAS");
@@ -140,8 +134,7 @@ public class VentaService {
 
     @Transactional
     public Venta cancelarVenta(Long ventaId, String motivo) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         venta.getEstado().cancelar(motivo);
 
