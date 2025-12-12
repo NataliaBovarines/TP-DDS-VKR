@@ -70,7 +70,7 @@ public class VentaService {
 
         return ventaRepository.save(venta);
     }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////
     @Transactional
     public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
         Venta venta = obtenerVenta(ventaId);
@@ -146,17 +146,21 @@ public class VentaService {
     }
 
     @Transactional
-    public Venta procesarCambioProducto(Long ventaOriginalId, List<DetalleVenta> nuevosProductos, String motivo) {
+    public Venta procesarCambioProducto(Long ventaOriginalId, List<DetalleVentaDto> nuevosProductosDtos, String motivo) {
         Venta ventaOriginal = cancelarVenta(ventaOriginalId, motivo);
 
         Double valorOriginal = ventaOriginal.getTotal();
 
         Venta nuevaVenta = crearVenta(ventaOriginal.getEmpleado().getId(), ventaOriginal.getCliente().getId());
 
-        for (DetalleVenta detalle : nuevosProductos) {
-            detalle.setVenta(nuevaVenta);
-            nuevaVenta.getDetalles().add(detalle);
+        for (DetalleVentaDto detalleVentaDto : nuevosProductosDtos) {
+            DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleVentaDto.getDetalleProductoId());
+
+            DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleVentaDto, detalleProducto, nuevaVenta);
+
+            nuevaVenta.getDetalles().add(detalleVenta);
         }
+        
         nuevaVenta.calcularTotal();
 
         if (ventaOriginal.getCliente() != null) {

@@ -35,7 +35,7 @@ public class ProductoController {
         return productoService.crearProducto(productoDto);
     }
 
-    @PostMapping("/{id}/detalle-productos")
+    @PostMapping("/{id}/detalles")
     @ResponseStatus(HttpStatus.OK)
     public DetalleProducto crearDetalleProducto(@PathVariable Long id, @RequestBody @Valid DetalleProductoDto detalleDto) {
         return productoService.crearDetalleProducto(id, detalleDto);
