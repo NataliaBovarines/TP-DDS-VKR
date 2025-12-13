@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,11 +31,23 @@ public class ClienteController {
         return clienteService.crearCliente(clienteDto);
     }
 
-    @GetMapping("/{}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK) 
     public Cliente obtenerCliente(@PathVariable Long id) {
         return clienteService.obtenerCliente(id);
     }
+
+    // @PatchMapping("/{id}")
+    // @ResponseStatus(HttpStatus.OK)
+    // public Cliente actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteCambioDto clienteDto) {
+    //     return clienteService.actualizarCliente(id, clienteDto);
+    // }
+
+    // @PatchMapping("/{id}/eliminacion")
+    // @ResponseStatus(HttpStatus.OK)
+    // public void eliminarCliente(@PathVariable Long id) {
+    //     clienteService.eliminarCliente(id);
+    // }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

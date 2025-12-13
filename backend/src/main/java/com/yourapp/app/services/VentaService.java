@@ -80,11 +80,12 @@ public class VentaService {
         return ventaRepository.save(venta);
     }
 
+    @Transactional
     public void eliminarVenta(Long id) {
         Venta venta = obtenerVenta(id);
 
         venta.softDelete();
-        
+
         ventaRepository.save(venta);
     }
 

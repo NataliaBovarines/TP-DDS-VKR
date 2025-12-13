@@ -11,6 +11,7 @@ import com.yourapp.app.models.dto.ClienteDto;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.repositories.ClienteRepository;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class ClienteService {
     private final ClienteRepository clienteRepository;
     
+    @Transactional
     public Cliente crearCliente(ClienteDto clienteDto) {
         Cliente cliente = ClienteMapper.toEntity(clienteDto);
         if (clienteRepository.existsByDni(clienteDto.getDni())) throw new ConflictException("El DNI ya esta asignado a otro cliente");

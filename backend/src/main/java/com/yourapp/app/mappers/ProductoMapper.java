@@ -2,10 +2,8 @@ package com.yourapp.app.mappers;
 
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.entities.Categoria;
-import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.Producto;
 import com.yourapp.app.models.entities.Proveedor;
-import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.models.entities.TipoDePrenda;
 
 public class ProductoMapper {

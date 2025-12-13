@@ -3,6 +3,7 @@ package com.yourapp.app.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class ColorService {
     private final ColorRepository colorRepository;
 
+    @Transactional
     public Color crearColor(ColorDto colorDto) {
         if (colorRepository.existsByDescripcion(colorDto.getDescripcion())) throw new ConflictException("La descripción del color ya está en uso");
         Color color = ColorMapper.toEntity(colorDto);

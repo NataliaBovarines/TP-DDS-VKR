@@ -3,6 +3,7 @@ package com.yourapp.app.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class TipoDePrendaService {
     private final TipoDePrendaRepository tipoDePrendaRepository;
     
+    @Transactional
     public TipoDePrenda crearTipoDePrenda(TipoDePrendaDto tipoDePrendaDto) {
         if (tipoDePrendaRepository.existsByDescripcion(tipoDePrendaDto.getDescripcion())) throw new ConflictException("La descripción del tipo de prenda ya está en uso");
         TipoDePrenda tipoDePrenda = TipoDePrendaMapper.toEntity(tipoDePrendaDto);

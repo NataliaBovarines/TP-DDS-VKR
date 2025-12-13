@@ -10,8 +10,11 @@ public class ClienteMapper {
         cliente.setApellido(clienteDto.getApellido());
         cliente.setTelefono(clienteDto.getTelefono());
         cliente.setDni(clienteDto.getDni());
-        cliente.setCreditoLimite(clienteDto.getCreditoLimite());
-        cliente.setCategoriaCliente(clienteDto.getCategoria());
+        cliente.setCreditoLimite(clienteDto.getCreditoLimite() != null ? clienteDto.getCreditoLimite() : 0.0);
+        
+        if (clienteDto.getCategoria() != null) cliente.setCategoriaCliente(clienteDto.getCategoria());
+        else cliente.setCategoriaCliente(Cliente.CategoriaCliente.NO_CONFIABLE);
+        
         return cliente;
     }
 }

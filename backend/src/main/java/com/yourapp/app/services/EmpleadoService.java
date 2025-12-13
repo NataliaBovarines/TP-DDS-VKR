@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -22,6 +23,7 @@ public class EmpleadoService {
     private final EmpleadoRepository empleadoRepository;
     private final UsuarioService usuarioService;
 
+    @Transactional
     public EmpleadoResponseDto crearEmpleado(EmpleadoDto empleadoDto) {
         Usuario usuario = usuarioService.obtenerUsuarioCompleto(empleadoDto.getUsuarioId());
         if (empleadoRepository.existsByUsuario(usuario)) throw new ConflictException("El usuario ya esta asignado a otro empleado");

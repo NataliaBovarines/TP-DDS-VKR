@@ -3,6 +3,7 @@ package com.yourapp.app.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -17,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProveedorService {
     private final ProveedorRepository proveedorRepository;
-    
+
+    @Transactional
     public Proveedor crearProveedor(ProveedorDto proveedorDto) {
         if (proveedorRepository.existsByNombre(proveedorDto.getNombre())) throw new ConflictException("El nombre del proveedor ya está en uso");
         Proveedor proveedor = ProveedorMapper.toEntity(proveedorDto);

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
@@ -44,6 +45,7 @@ public class ProductoService {
     private final ColorService colorService;
     private final ProveedorService proveedorService;
 
+    @Transactional
     public Producto crearProducto(ProductoDto productoDto) {
         Categoria categoria = categoriaService.obtenerCategoria(productoDto.getCategoriaId());
         if(!categoria.getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
@@ -53,6 +55,7 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
+    @Transactional
     public DetalleProducto crearDetalleProducto(Long productoId, DetalleProductoDto detalleDto) {
         Producto producto = obtenerProducto(productoId);
         Talle talle = talleService.obtenerTalle(detalleDto.getTalleId());
@@ -77,6 +80,7 @@ public class ProductoService {
         return detalle;
     }
 
+    @Transactional
     public Producto actualizarProducto(Long id, ProductoPatchDto productoDto) {
         Producto producto = obtenerProducto(id);
 
@@ -94,6 +98,7 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
+    @Transactional
     public DetalleProducto actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoCambioDto detalleDto) {
         DetalleProducto detalle = obtenerDetalleProducto(detalleId);
 
@@ -108,14 +113,16 @@ public class ProductoService {
         return detalleProductoRepository.save(detalle);
     }
 
+    @Transactional
     public void eliminarProducto(Long id) {
         Producto producto = obtenerProducto(id);
 
         producto.softDelete();
-        
+
         productoRepository.save(producto);
     }
 
+    @Transactional
     public void eliminarDetalleProducto(Long id, Long detalleId) {
         Producto producto = obtenerProducto(id);
 

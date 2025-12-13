@@ -3,6 +3,7 @@ package com.yourapp.app.services;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class RolService {
     private final RolRepository rolRepository;
 
+    @Transactional
     public Rol crearRol(RolDto rolDto) {
         if (rolRepository.existsByNombre(rolDto.getNombre())) throw new ConflictException("El nombre del rol ya está en uso");
         Rol rol = RolMapper.toEntity(rolDto);
