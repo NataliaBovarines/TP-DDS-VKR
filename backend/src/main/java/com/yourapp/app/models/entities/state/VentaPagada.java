@@ -1,6 +1,7 @@
 package com.yourapp.app.models.entities.state;
 
 import com.yourapp.app.models.entities.ConfiguracionTienda;
+import com.yourapp.app.models.entities.DetalleVenta;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -30,9 +31,7 @@ public class VentaPagada extends VentaState {
             }
         }
 
-        venta.getDetalles().forEach(detalle -> {
-            detalle.getProducto().aumentarStock(detalle.getCantidad());
-        });
+        venta.getDetalles().forEach(DetalleVenta::aumentarStock);
 
         System.out.println("Venta pagada cancelada. Motivo: " + motivo);
     }

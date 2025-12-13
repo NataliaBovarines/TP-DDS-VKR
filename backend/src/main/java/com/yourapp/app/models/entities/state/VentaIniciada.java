@@ -24,10 +24,6 @@ public class VentaIniciada extends VentaState {
 
         venta.verificarStockDisponible();
 
-        if (metodoPago == Venta.MetodoPago.CREDITO) {
-            procesarPagoCredito(monto, venta.getCliente());
-        }
-
         venta.confirmarStockProductos();
         venta.setFecha(LocalDateTime.now());
     }
@@ -41,6 +37,10 @@ public class VentaIniciada extends VentaState {
             throw new IllegalStateException("Se requiere cliente para reserva");
         }
 
+        if (!cliente.esConfiable()) {
+            throw new IllegalStateException("Cliente no es confiable");
+        }
+
         ConfiguracionTienda config = ConfiguracionTienda.getInstance();
 
         // Validar si la tienda permite reservas
@@ -48,45 +48,44 @@ public class VentaIniciada extends VentaState {
             throw new IllegalStateException("La tienda no permite reservas en este momento");
         }
 
-        // Calcular mínimo usando configuración
-        Double minimoInicial = venta.getTotal();
-        if (config != null) {
-            minimoInicial = config.calcularMontoMinimoSena(venta.getTotal());
+        if(montoInicial > 0) {
+            // Calcular mínimo usando configuración
+            Double minimoInicial = venta.getTotal();
+            if (config != null) {
+                minimoInicial = config.calcularMontoMinimoSena(venta.getTotal());
+            }
+
+            if (montoInicial < minimoInicial) {
+                throw new IllegalArgumentException(
+                    String.format("Monto inicial mínimo: $%.2f (%.0f%% del total $%.2f)",
+                        minimoInicial,
+                        (config != null ? config.getPorcentajeMinimoSena() * 100 : 10),
+                        venta.getTotal())
+                );
+            }
+
+            if (montoInicial < venta.getTotal() * 0.10) {
+                throw new IllegalArgumentException("Monto inicial mínimo: 10% del total");
+            }
+
+            if (!cliente.puedeReservar(montoInicial)) {
+                throw new IllegalStateException("Crédito insuficiente");
+            }
+
+            PagoDeCredito pagoInicial = new PagoDeCredito();
+            pagoInicial.setVenta(venta);
+            pagoInicial.setCliente(cliente);
+            pagoInicial.setMonto(montoInicial);
+            pagoInicial.setNumeroPago(1);
+            pagoInicial.setFecha(LocalDateTime.now());
+            pagoInicial.setEsPagoInicial(true);
+            pagoInicial.procesarPagoInicial();
+            venta.agregarPagoCredito(pagoInicial);
+        } else {
+            cliente.aumentarDeuda(venta.getTotal());
+ 
         }
 
-        if (montoInicial < minimoInicial) {
-            throw new IllegalArgumentException(
-                String.format("Monto inicial mínimo: $%.2f (%.0f%% del total $%.2f)",
-                    minimoInicial,
-                    (config != null ? config.getPorcentajeMinimoSena() * 100 : 10),
-                    venta.getTotal())
-            );
-        }
-
-        if (cliente == null) {
-            throw new IllegalStateException("Se requiere cliente para reserva");
-        }
-
-        if (!cliente.esConfiable()) {
-            throw new IllegalStateException("Cliente no es confiable");
-        }
-
-        if (montoInicial < venta.getTotal() * 0.10) {
-            throw new IllegalArgumentException("Monto inicial mínimo: 10% del total");
-        }
-
-        if (!cliente.puedeReservar(montoInicial)) {
-            throw new IllegalStateException("Crédito insuficiente");
-        }
-
-        PagoDeCredito pagoInicial = new PagoDeCredito();
-        pagoInicial.setVenta(venta);
-        pagoInicial.setCliente(cliente);
-        pagoInicial.setMonto(montoInicial);
-        pagoInicial.setNumeroPago(1);
-        pagoInicial.procesarPago();
-
-        venta.agregarPagoCredito(pagoInicial);
         venta.reservarStockProductos();
         venta.setFechaVencimientoReserva(LocalDateTime.now().plusMonths(3));
     }
@@ -110,24 +109,5 @@ public class VentaIniciada extends VentaState {
     @Override
     public Double getSaldoPendiente() {
         return getVenta().getTotal();
-    }
-
-    private void procesarPagoCredito(Double monto, Cliente cliente) {
-        if (cliente == null) {
-            throw new IllegalStateException("Cliente requerido para pago a crédito");
-        }
-
-        if (!cliente.puedeReservar(monto)) {
-            throw new IllegalStateException("Cliente no puede fiar este monto");
-        }
-
-        PagoDeCredito pagoCredito = new PagoDeCredito();
-        pagoCredito.setVenta(getVenta());
-        pagoCredito.setCliente(cliente);
-        pagoCredito.setMonto(monto);
-        pagoCredito.setNumeroPago(1);
-        pagoCredito.procesarPago();
-        getVenta().agregarPagoCredito(pagoCredito);
-        cliente.aumentarDeuda(monto);
     }
 }

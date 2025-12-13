@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "pagos_credito")
 @Getter
@@ -15,6 +17,7 @@ public class PagoDeCredito extends Persistible {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id", nullable = false)
+    @JsonIgnore
     private Venta venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,17 +37,40 @@ public class PagoDeCredito extends Persistible {
     private Boolean esPagoInicial = false;
 
     // Lógica de negocio
-    public void procesarPago() {
+    public void procesarPagoInicial() {
         if (cliente == null || venta == null) {
-            throw new IllegalStateException("Pago incompleto: falta cliente o venta");
+            throw new IllegalStateException("No se puede procesar pago: falta cliente o venta");
         }
-
-        cliente.aumentarDeuda(monto);
 
         venta.setMontoPagado(venta.getMontoPagado() + monto);
 
+        cliente.aumentarDeuda(venta.getTotal() - venta.getMontoPagado());
+        
         System.out.println(String.format(
-            "Pago #%d registrado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
+            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
+            numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
+        ));
+    }
+
+    public void procesarPago() {
+        if (cliente == null || venta == null) {
+            throw new IllegalStateException("No se puede procesar pago: falta cliente o venta");
+        }
+
+        double saldoPendiente = venta.getTotal() - venta.getMontoPagado();
+
+        if (monto > saldoPendiente) {
+            throw new IllegalArgumentException(
+            String.format("El pago $%.2f excede el saldo pendiente $%.2f", monto, saldoPendiente)
+        );
+        }
+        
+        venta.setMontoPagado(venta.getMontoPagado() + monto);
+
+        cliente.disminuirDeuda(monto);
+        
+        System.out.println(String.format(
+            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
             numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
         ));
     }

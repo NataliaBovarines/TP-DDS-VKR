@@ -1,10 +1,22 @@
 package com.yourapp.app.services;
 
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.NotFoundException;
+import com.yourapp.app.mappers.DetalleVentaMapper;
+import com.yourapp.app.mappers.VentaMapper;
+import com.yourapp.app.models.dto.DetalleVentaDto;
+import com.yourapp.app.models.dto.VentaFiltroDto;
 import com.yourapp.app.models.entities.*;
 import com.yourapp.app.models.entities.Venta.MetodoPago;
 import com.yourapp.app.models.entities.state.*;
 import com.yourapp.app.repositories.*;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +28,9 @@ import java.util.List;
 public class VentaService {
 
     private final VentaRepository ventaRepository;
-    private final ProductoRepository productoRepository;
+    private final ProductoService productoService;
     private final ClienteRepository clienteRepository;
     private final EmpleadoRepository empleadoRepository;
-    private final PagoDeCreditoRepository pagoDeCreditoRepository;
 
     @Transactional
     public Venta crearVenta(Long empleadoId, Long clienteId) {
@@ -32,53 +43,54 @@ public class VentaService {
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         }
 
-        Venta venta = new Venta();
-        venta.setEmpleado(empleado);
-        venta.setCliente(cliente);
-        venta.setFecha(LocalDateTime.now());
-        venta.setEstado(new VentaIniciada());
-        venta.getEstado().setVenta(venta);
+        Venta venta = VentaMapper.toEntity(empleado, cliente);
 
         return ventaRepository.save(venta);
     }
 
+    public Venta obtenerVenta(Long ventaId) {
+        Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
+        if(venta.getFueEliminado()) throw new NotFoundException("Venta eliminada");
+        return venta;
+    } 
+
     @Transactional
-    public Venta agregarProductoAVenta(Long ventaId, Long productoId, Integer cantidad) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+    public Venta agregarProductoAVenta(Long ventaId, DetalleVentaDto detalleVentaDto) {
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) {
             throw new IllegalStateException("Solo se pueden agregar productos a ventas INICIADAS");
         }
 
-        Producto producto = productoRepository.findById(productoId)
-            .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleVentaDto.getDetalleProductoId());
 
-        if (cantidad <= 0) {
+        if (detalleVentaDto.getCantidad() <= 0) {
             throw new IllegalArgumentException("Cantidad debe ser positiva");
         }
 
-        if (producto.getStockDisponible() < cantidad) {
+        if (detalleProducto.getStockDisponible() < detalleVentaDto.getCantidad()) {
             throw new IllegalStateException("Stock insuficiente");
         }
 
-        DetalleVenta detalle = new DetalleVenta();
-        detalle.setProducto(producto);
-        detalle.setCantidad(cantidad);
-        detalle.setPrecioUnitarioActual(producto.getPrecio().doubleValue());
-        detalle.calcularPrecioTotal();
-        detalle.setVenta(venta);
+        DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleVentaDto, detalleProducto, venta);
 
-        venta.getDetalles().add(detalle);
+        venta.getDetalles().add(detalleVenta);
         venta.calcularTotal();
 
         return ventaRepository.save(venta);
     }
 
+    public void eliminarVenta(Long id) {
+        Venta venta = obtenerVenta(id);
+
+        venta.softDelete();
+        
+        ventaRepository.save(venta);
+    }
+
     @Transactional
     public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) {
             throw new IllegalStateException("Solo se pueden pagar ventas INICIADAS");
@@ -101,8 +113,7 @@ public class VentaService {
 
     @Transactional
     public PagoDeCredito reservarConCredito(Long ventaId, Double montoInicial) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) {
             throw new IllegalStateException("Solo se pueden reservar ventas INICIADAS");
@@ -115,13 +126,12 @@ public class VentaService {
         venta.setEstado(nuevoEstado);
         venta.setMetodoPago(MetodoPago.CREDITO);
 
-        return venta.getPagosCredito().get(0);
+        return venta.getPagosCredito().isEmpty() ? null : venta.getPagosCredito().get(0);
     }
 
     @Transactional
     public PagoDeCredito agregarPagoParcialCredito(Long ventaId, Double monto) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaReservada)) {
             throw new IllegalStateException("Solo se pueden agregar pagos a ventas RESERVADAS");
@@ -141,8 +151,7 @@ public class VentaService {
 
     @Transactional
     public Venta cancelarVenta(Long ventaId, String motivo) {
-        Venta venta = ventaRepository.findById(ventaId)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+        Venta venta = obtenerVenta(ventaId);
 
         venta.getEstado().cancelar(motivo);
 
@@ -154,17 +163,21 @@ public class VentaService {
     }
 
     @Transactional
-    public Venta procesarCambioProducto(Long ventaOriginalId, List<DetalleVenta> nuevosProductos, String motivo) {
+    public Venta procesarCambioProducto(Long ventaOriginalId, List<DetalleVentaDto> nuevosProductosDtos, String motivo) {
         Venta ventaOriginal = cancelarVenta(ventaOriginalId, motivo);
 
         Double valorOriginal = ventaOriginal.getTotal();
 
         Venta nuevaVenta = crearVenta(ventaOriginal.getEmpleado().getId(), ventaOriginal.getCliente().getId());
 
-        for (DetalleVenta detalle : nuevosProductos) {
-            detalle.setVenta(nuevaVenta);
-            nuevaVenta.getDetalles().add(detalle);
+        for (DetalleVentaDto detalleVentaDto : nuevosProductosDtos) {
+            DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleVentaDto.getDetalleProductoId());
+
+            DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleVentaDto, detalleProducto, nuevaVenta);
+
+            nuevaVenta.getDetalles().add(detalleVenta);
         }
+
         nuevaVenta.calcularTotal();
 
         if (ventaOriginal.getCliente() != null) {
@@ -179,11 +192,70 @@ public class VentaService {
 
     @Transactional
     public void procesarReservasVencidas() {
-        List<Venta> ventasReservadas = ventaRepository.findByEstadoTipo("RESERVADA");
+        List<Venta> ventasReservadas = ventaRepository.findByEstado(VentaReservada.class);
         for (Venta venta : ventasReservadas) {
             if (venta.getEstado() instanceof VentaReservada) {
                 ((VentaReservada) venta.getEstado()).procesar();
             }
         }
+    }
+
+    public Page<Venta> obtenerVentasFiltradas(VentaFiltroDto filtros) {
+        // --------- ORDENAMIENTO ----------
+        Sort sort = Sort.unsorted();
+        if (filtros.getOrden() != null) {
+            List<String> camposPermitidos = List.of("fecha", "total", "montoPagado", "fechaVencimientoReserva");
+
+            String campo = filtros.getOrden().toLowerCase();
+            if (camposPermitidos.contains(campo)) {
+                Sort.Direction direccion = Sort.Direction.ASC;
+                if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
+                    direccion = Sort.Direction.DESC;
+                }
+                sort = Sort.by(direccion, campo);
+            } else {
+                throw new BadRequestException("No se puede ordenar por el campo: " + campo);
+            }
+        }
+
+        // --------- ESPECIFICACION ----------
+        Specification<Venta> spec = (root, query, cb) -> cb.conjunction();
+
+        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
+
+        // Filtrar por empleado
+        if (filtros.getEmpleadoId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("empleado").get("id"), filtros.getEmpleadoId())
+            );
+        }
+
+        // Filtrar por cliente
+        if (filtros.getClienteId() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("cliente").get("id"), filtros.getClienteId())
+            );
+        }
+
+        // Filtrar por método de pago
+        if (filtros.getMetodoPago() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("metodoPago"), filtros.getMetodoPago())
+            );
+        }
+
+        // Filtrar por estado (nombre de la clase de VentaState)
+        if (filtros.getEstado() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("estadoNombre"), filtros.getEstado())
+            );
+        }
+
+        // --------- PAGINACION ----------
+        int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
+        int tamanio = 10;
+        Pageable pageable = PageRequest.of(pagina, tamanio, sort);
+
+        return ventaRepository.findAll(spec, pageable);
     }
 }

@@ -42,6 +42,7 @@ public class VentaReservada extends VentaState {
         pago.setCliente(cliente);
         pago.setMonto(monto);
         pago.setNumeroPago(venta.getPagosCredito().size() + 1);
+        pago.setFecha(LocalDateTime.now());
         pago.procesarPago();
         venta.agregarPagoCredito(pago);
 
