@@ -2,12 +2,20 @@ package com.yourapp.app.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ClienteMapper;
+import com.yourapp.app.models.dto.ClienteCambioDto;
 import com.yourapp.app.models.dto.ClienteDto;
+import com.yourapp.app.models.dto.ClienteFiltroDto;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.repositories.ClienteRepository;
 
@@ -30,7 +38,87 @@ public class ClienteService {
         return clienteRepository.findById(id).orElseThrow(() -> new NotFoundException("Cliente no encontrado"));
     }
 
-    public List<Cliente> obtenerTodosLosClientes() {
-        return clienteRepository.findAll();
+    @Transactional
+    public Cliente actualizarCliente(Long id, ClienteCambioDto clienteDto) {
+        Cliente cliente = obtenerCliente(id);
+
+        if (clienteDto.getNombre() != null && !clienteDto.getNombre().isBlank()) cliente.setNombre(clienteDto.getNombre());
+        if (clienteDto.getApellido() != null && !clienteDto.getApellido().isBlank()) cliente.setApellido(clienteDto.getApellido());
+        if (clienteDto.getTelefono() != null) cliente.setTelefono(clienteDto.getTelefono());
+        if (clienteDto.getCreditoLimite() != null) cliente.setCreditoLimite(clienteDto.getCreditoLimite());
+        if (clienteDto.getCategoria() != null) cliente.setCategoriaCliente(clienteDto.getCategoria());
+
+        return clienteRepository.save(cliente);  
+    }
+
+    @Transactional
+    public void eliminarCliente(Long id) {
+        Cliente cliente = obtenerCliente(id);
+
+        cliente.softDelete();
+
+        clienteRepository.save(cliente);
+    }
+
+    public Page<Cliente> obtenerClientesFiltrados(ClienteFiltroDto filtros) {
+        // --------- ORDENAMIENTO ----------
+        Sort sort = Sort.unsorted();
+
+        if (filtros.getOrden() != null) {
+            List<String> camposPermitidos = List.of("nombre", "apellido", "dni", "creditoLimite", "deuda");
+
+            String campo = filtros.getOrden().toLowerCase();
+
+            if (camposPermitidos.contains(campo)) {
+                Sort.Direction direccion = Sort.Direction.ASC;
+                if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
+                    direccion = Sort.Direction.DESC;
+                }
+                sort = Sort.by(direccion, campo);
+            } else {
+                throw new BadRequestException("No se puede ordenar por el campo: " + campo);
+            }
+        }
+
+        // --------- ESPECIFICACION ----------
+        Specification<Cliente> spec = (root, query, cb) -> cb.conjunction();
+
+        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
+
+        // Filtrar por nombre
+        if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("nombre")), "%" + filtros.getNombre().toLowerCase() + "%")
+            );
+        }
+
+        // Filtrar por apellido
+        if (filtros.getApellido() != null && !filtros.getApellido().isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("apellido")), "%" + filtros.getApellido().toLowerCase() + "%")
+            );
+        }
+
+        // Filtrar por DNI exacto
+        if (filtros.getDni() != null && !filtros.getDni().isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("dni"), filtros.getDni())
+            );
+        }
+
+        // Filtrar por categoría
+        if (filtros.getCategoria() != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("categoriaCliente"), filtros.getCategoria())
+            );
+        }
+
+        // --------- PAGINACION ----------
+        int pagina = 0; // podrías recibirlo como parámetro en el DTO
+        int tamanio = 10;
+        Pageable pageable = PageRequest.of(pagina, tamanio, sort);
+
+        // --------- CONSULTA CON ESPECIFICACION, ORDENAMIENTO Y PAGINACION ----------
+        return clienteRepository.findAll(spec, pageable);
     }
 }

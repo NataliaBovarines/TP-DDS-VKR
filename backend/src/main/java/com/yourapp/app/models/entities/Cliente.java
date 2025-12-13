@@ -27,7 +27,7 @@ public class Cliente extends Persistible {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria_cliente")
-    private CategoriaCliente categoriaCliente = CategoriaCliente.REGISTRADO;
+    private CategoriaCliente categoriaCliente;
 
     public enum CategoriaCliente {
         REGISTRADO, CONFIABLE, NO_CONFIABLE
