@@ -14,6 +14,7 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.UsuarioMapper;
+import com.yourapp.app.models.dto.UsuarioCambioDto;
 import com.yourapp.app.models.dto.UsuarioDto;
 import com.yourapp.app.models.dto.UsuarioFiltroDto;
 import com.yourapp.app.models.dto.UsuarioResponseDto;
@@ -46,6 +47,19 @@ public class UsuarioService {
 
     public Usuario obtenerUsuarioCompleto(Long id) {
         return usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+    }
+
+    @Transactional
+    public UsuarioResponseDto actualizarRolUsuario(Long id, UsuarioCambioDto usuarioDto) {
+        Usuario usuario = obtenerUsuarioCompleto(id);
+
+        Rol rol = rolService.obtenerRol(usuarioDto.getRolId());
+
+        if (usuarioDto.getRolId() != null) usuario.setRol(rol);
+
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+
+        return UsuarioMapper.fromEntity(usuarioGuardado);
     }
     
     public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(UsuarioFiltroDto filtros) {

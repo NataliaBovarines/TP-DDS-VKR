@@ -9,10 +9,7 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Rol {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Rol extends Persistible {
     private String nombre;
     @ElementCollection(targetClass = Permiso.class)
     @Enumerated(EnumType.STRING)

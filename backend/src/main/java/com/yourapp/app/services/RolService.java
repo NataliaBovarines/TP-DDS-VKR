@@ -30,6 +30,14 @@ public class RolService {
         return rolRepository.findById(rolId).orElseThrow(() -> new NotFoundException("Rol no encontrado"));
     }
 
+    public void eliminarRol(Long id) {
+        Rol rol = obtenerRol(id);
+
+        rol.softDelete();
+
+        rolRepository.save(rol);
+    }
+
     public List<Rol> obtenerTodosLosRoles() {
         return rolRepository.findAll();
     }
