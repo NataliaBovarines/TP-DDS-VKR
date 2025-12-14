@@ -42,9 +42,9 @@ public class PagoDeCredito extends Persistible {
             throw new IllegalStateException("No se puede procesar pago: falta cliente o venta");
         }
 
-        venta.setMontoPagado(venta.getMontoPagado() + monto);
+        venta.setMontoPagado(monto);
 
-        cliente.aumentarDeuda(venta.getTotal() - venta.getMontoPagado());
+        cliente.aumentarDeuda(venta.getTotal() - monto);
         
         System.out.println(String.format(
             "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
@@ -60,9 +60,7 @@ public class PagoDeCredito extends Persistible {
         double saldoPendiente = venta.getTotal() - venta.getMontoPagado();
 
         if (monto > saldoPendiente) {
-            throw new IllegalArgumentException(
-            String.format("El pago $%.2f excede el saldo pendiente $%.2f", monto, saldoPendiente)
-        );
+            throw new IllegalArgumentException(String.format("El pago $%.2f excede el saldo pendiente $%.2f", monto, saldoPendiente));
         }
         
         venta.setMontoPagado(venta.getMontoPagado() + monto);

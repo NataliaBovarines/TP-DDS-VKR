@@ -116,7 +116,6 @@ public class Venta extends Persistible {
     public void agregarPagoCredito(PagoDeCredito pago) {
         pago.setVenta(this);
         this.pagosCredito.add(pago);
-        this.montoPagado += pago.getMonto();
     }
 
     public Double getSaldoPendiente() {

@@ -68,6 +68,10 @@ public class VentaIniciada extends VentaState {
                 throw new IllegalArgumentException("Monto inicial mínimo: 10% del total");
             }
 
+            if(montoInicial > venta.getTotal()) {
+                throw new IllegalArgumentException("Monto inicial excede el saldo total");
+            }
+
             if (!cliente.puedeReservar(montoInicial)) {
                 throw new IllegalStateException("Crédito insuficiente");
             }
