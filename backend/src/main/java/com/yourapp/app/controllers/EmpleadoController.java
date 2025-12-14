@@ -44,7 +44,7 @@ public class EmpleadoController {
         return empleadoService.actualizarEmpleado(id, empleadoDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
     public void eliminarEmpleado(@PathVariable Long id) {
         empleadoService.eliminarEmpleado(id);
