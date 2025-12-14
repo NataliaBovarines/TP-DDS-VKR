@@ -2,6 +2,7 @@ package com.yourapp.app.controllers;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.UsuarioDto;
+import com.yourapp.app.models.dto.UsuarioFiltroDto;
 import com.yourapp.app.models.dto.UsuarioResponseDto;
 import com.yourapp.app.services.UsuarioService;
 
@@ -38,7 +40,7 @@ public class UsuarioController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UsuarioResponseDto> obtenerTodosLosUsuarios() {
-        return usuarioService.obtenerTodosLosUsuarios();
+    public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(@PathVariable UsuarioFiltroDto filtros) {
+        return usuarioService.obtenerUsuariosFiltrados(filtros);
     }
 }
