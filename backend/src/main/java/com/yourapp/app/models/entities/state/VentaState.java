@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yourapp.app.models.entities.Persistible;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity @Data
+@Entity 
+@Getter @Setter
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_estado", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "estados_venta")

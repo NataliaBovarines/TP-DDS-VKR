@@ -1,9 +1,11 @@
 package com.yourapp.app.models.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity @Data
+@Entity
+@Getter @Setter
 @Table(name = "configuracion_tienda")
 public class ConfiguracionTienda extends Persistible {
 
