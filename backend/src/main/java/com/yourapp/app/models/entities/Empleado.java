@@ -11,11 +11,10 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Empleado {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Empleado extends Persistible {
     private String nombre;
+    private String apellido;
+    @Column(unique = true)
     private String dni;
     private String direccion;
     private String mail;

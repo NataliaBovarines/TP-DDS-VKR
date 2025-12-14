@@ -13,4 +13,5 @@ public class ClienteFiltroDto {
     private CategoriaCliente categoria;
     private String orden;
     private String direccion;
+    private Integer pagina;
 }

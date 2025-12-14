@@ -9,6 +9,7 @@ public class EmpleadoMapper {
     public static Empleado toEntity(EmpleadoDto empleadoDto, Usuario usuario) {
         Empleado empleado = new Empleado();
         empleado.setNombre(empleadoDto.getNombre());
+        empleado.setApellido(empleadoDto.getApellido());
         empleado.setDni(empleadoDto.getDni());
         empleado.setDireccion(empleadoDto.getDireccion());
         empleado.setMail(empleadoDto.getMail());
@@ -20,6 +21,7 @@ public class EmpleadoMapper {
     public static EmpleadoResponseDto fromEntity(Empleado empleado) {
         EmpleadoResponseDto empleadoDto = new EmpleadoResponseDto();
         empleadoDto.setNombre(empleado.getNombre());
+        empleadoDto.setApellido(empleadoDto.getApellido());
         empleadoDto.setDni(empleado.getDni());
         empleadoDto.setDireccion(empleado.getDireccion());
         empleadoDto.setMail(empleado.getMail());

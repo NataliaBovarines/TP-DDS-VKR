@@ -114,7 +114,7 @@ public class ClienteService {
         }
 
         // --------- PAGINACION ----------
-        int pagina = 0; // podrías recibirlo como parámetro en el DTO
+        int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
         int tamanio = 10;
         Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 

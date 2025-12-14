@@ -92,7 +92,6 @@ public class VentaIniciada extends VentaState {
 
     @Override
     public void rechazar(String motivo) {
-        Venta venta = getVenta();
         if (motivo == null || motivo.trim().isEmpty()) {
             throw new IllegalArgumentException("Motivo de rechazo requerido");
         }

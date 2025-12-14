@@ -12,9 +12,9 @@ public class ClienteDto {
     private String nombre;
     @NotBlank
     private String apellido;
-
+    @NotBlank
     private String telefono;
-
+    @NotBlank
     private String dni;
 
     private Double creditoLimite;

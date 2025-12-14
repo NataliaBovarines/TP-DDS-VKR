@@ -9,6 +9,8 @@ public class EmpleadoDto {
     @NotBlank
     private String nombre;
     @NotBlank
+    private String apellido;
+    @NotBlank
     private String dni;
     @NotBlank
     private String direccion;
