@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 @Table(name = "productos")
 @Getter
 @Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 @AllArgsConstructor
 public class Producto extends Persistible {
 
