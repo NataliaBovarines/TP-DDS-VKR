@@ -3,6 +3,7 @@ package com.yourapp.app.controllers;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,7 +53,7 @@ public class EmpleadoController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<EmpleadoResponseDto> obtenerTodosLosEmpleados(@PathVariable EmpleadoFiltroDto filtros) {
+    public Page<EmpleadoResponseDto> obtenerTodosLosEmpleados(@Valid @ModelAttribute EmpleadoFiltroDto filtros) {
         return empleadoService.obtenerEmpleadosFiltrados(filtros);
     }
 }

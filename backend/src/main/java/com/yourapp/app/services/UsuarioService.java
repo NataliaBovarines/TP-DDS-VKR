@@ -10,11 +10,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.yourapp.app.exceptions.BadRequestException;
-import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.UsuarioMapper;
-import com.yourapp.app.models.dto.UsuarioCambioDto;
-import com.yourapp.app.models.dto.UsuarioDto;
+import com.yourapp.app.models.dto.UsuarioRolDto;
 import com.yourapp.app.models.dto.UsuarioFiltroDto;
 import com.yourapp.app.models.dto.UsuarioResponseDto;
 import com.yourapp.app.models.entities.Usuario;
@@ -30,15 +28,6 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolService rolService;
 
-    @Transactional
-    public UsuarioResponseDto crearUsuario(UsuarioDto usuarioDto) {
-        if (usuarioRepository.existsByNombreDeUsuario(usuarioDto.getNombreDeUsuario())) throw new ConflictException("El nombre de usuario ya está en uso");
-        Rol rol = rolService.obtenerRol(usuarioDto.getRolId());
-        Usuario usuario = UsuarioMapper.toEntity(usuarioDto, rol);
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
-        return UsuarioMapper.fromEntity(usuarioGuardado);
-    }
-
     public UsuarioResponseDto obtenerUsuario(Long id) {
         Usuario usuarioGuardado = obtenerUsuarioCompleto(id);
         return UsuarioMapper.fromEntity(usuarioGuardado);
@@ -48,13 +37,22 @@ public class UsuarioService {
         return usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
     }
 
+    public Usuario obtenerUsuarioByNombre(String nombreDeUsuario) {
+        return usuarioRepository.findByNombreDeUsuario(nombreDeUsuario);
+    }
+
     @Transactional
-    public UsuarioResponseDto actualizarRolUsuario(Long id, UsuarioCambioDto usuarioDto) {
+    public void guardarUsuario(Usuario usuario) {
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public UsuarioResponseDto actualizarRolUsuario(Long id, UsuarioRolDto usuarioDto) {
         Usuario usuario = obtenerUsuarioCompleto(id);
 
         Rol rol = rolService.obtenerRol(usuarioDto.getRolId());
 
-        if (usuarioDto.getRolId() != null) usuario.setRol(rol);
+        usuario.setRol(rol);
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 

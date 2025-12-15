@@ -6,13 +6,12 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Usuario extends Persistible {
     @Column(unique = true)
     private String nombreDeUsuario;
-    private String contrasenia; // La guardamos plana ¿¿¿???
+
+    private String contrasenia;
+
     @ManyToOne
     private Rol rol;
 }
