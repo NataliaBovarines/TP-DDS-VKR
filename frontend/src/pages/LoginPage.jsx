@@ -48,21 +48,32 @@ export default function LoginPage() {
   );
 }
 */
-import React from "react";
+import React, { useState } from "react";
 import LoginBox from "../components/LoginBox";
+import RegisterBox from "../components/RegisterBox";
 import fondo from "../assets/fondo.jpg";
 
 export default function LoginPage({ onLogin }) {
+  const [showRegister, setShowRegister] = useState(false);
+
   return (
-    <div className="flex h-screen font-sans">
+    <div className="flex h-screen font-sans relative">
+      
       {/* Lado izquierdo: login */}
-      <div className="w-1/2 flex justify-center items-center bg-gray-50">
-        <LoginBox onLogin={onLogin} /> {/* 👈 acá pasás la función */}
+      <div className="w-1/2 flex justify-center items-center bg-gray-50 relative">
+        <div className={showRegister ? "blur-sm pointer-events-none" : ""}>
+          <LoginBox
+            onLogin={onLogin}
+            onRegister={() => setShowRegister(true)}
+          />
+        </div>
       </div>
 
       {/* Lado derecho: fondo con texto */}
       <div
-        className="w-1/2 relative flex flex-col justify-center items-center text-center text-white p-12"
+        className={`w-1/2 relative flex flex-col justify-center items-center text-center text-white p-12 ${
+          showRegister ? "blur-sm" : ""
+        }`}
         style={{
           backgroundImage: `url(${fondo})`,
           backgroundSize: "cover",
@@ -95,6 +106,17 @@ export default function LoginPage({ onLogin }) {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {showRegister && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <RegisterBox
+            onRegister={() => console.log("Registrar")}
+            onBack={() => setShowRegister(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
+
