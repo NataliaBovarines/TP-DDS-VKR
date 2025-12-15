@@ -1,5 +1,6 @@
 package com.yourapp.app.models.entities;
 
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.models.entities.state.VentaState;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -105,10 +106,16 @@ public class Venta extends Persistible {
         }
     }
 
+    public void confirmarStockReservado() {
+        for (DetalleVenta detalle : detalles) {
+            detalle.confirmarReserva();
+        }
+    }
+
     public void verificarStockDisponible() {
         for (DetalleVenta detalle : detalles) {
             if (!detalle.hayStockDisponible()) {
-                throw new IllegalStateException("Stock insuficiente");
+                throw new ConflictException("Stock insuficiente");
             }
         }
     }

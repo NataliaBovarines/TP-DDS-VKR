@@ -63,6 +63,10 @@ public class DetalleVenta extends Persistible {
         detalleProducto.confirmarVenta(cantidad);
     }
 
+    public void confirmarReserva() {
+        detalleProducto.confirmarReserva(cantidad);
+    }
+
     public boolean hayStockDisponible() {
         return detalleProducto.getStockDisponible() >= cantidad;
     }

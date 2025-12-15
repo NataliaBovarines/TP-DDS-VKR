@@ -1,6 +1,7 @@
 package com.yourapp.app.services;
 
 import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleVentaMapper;
 import com.yourapp.app.mappers.VentaMapper;
@@ -29,20 +30,16 @@ public class VentaService {
 
     private final VentaRepository ventaRepository;
     private final ProductoService productoService;
-    private final ClienteRepository clienteRepository;
-    private final EmpleadoRepository empleadoRepository;
+    private final ClienteService clienteService;
+    private final EmpleadoService empleadoService;
 
     @Transactional
     public Venta crearVenta(Long empleadoId, Long clienteId) {
-        Empleado empleado = empleadoRepository.findById(empleadoId)
-            .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+        Empleado empleado = empleadoService.obtenerEmpleadoCompleto(empleadoId);
 
         Cliente cliente = null;
-        if (clienteId != null) {
-            cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-        }
-
+        if (clienteId != null) cliente = clienteService.obtenerCliente(clienteId);
+        
         Venta venta = VentaMapper.toEntity(empleado, cliente);
 
         return ventaRepository.save(venta);
@@ -50,7 +47,9 @@ public class VentaService {
 
     public Venta obtenerVenta(Long ventaId) {
         Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
+        
         if(venta.getFueEliminado()) throw new NotFoundException("Venta eliminada");
+        
         return venta;
     } 
 
@@ -58,19 +57,13 @@ public class VentaService {
     public Venta agregarProductoAVenta(Long ventaId, DetalleVentaDto detalleVentaDto) {
         Venta venta = obtenerVenta(ventaId);
 
-        if (!(venta.getEstado() instanceof VentaIniciada)) {
-            throw new IllegalStateException("Solo se pueden agregar productos a ventas INICIADAS");
-        }
+        if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden agregar productos a ventas INICIADAS");
 
         DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleVentaDto.getDetalleProductoId());
 
-        if (detalleVentaDto.getCantidad() <= 0) {
-            throw new IllegalArgumentException("Cantidad debe ser positiva");
-        }
-
-        if (detalleProducto.getStockDisponible() < detalleVentaDto.getCantidad()) {
-            throw new IllegalStateException("Stock insuficiente");
-        }
+        if (detalleVentaDto.getCantidad() <= 0) throw new BadRequestException("Cantidad debe ser positiva");
+        
+        if (detalleProducto.getStockDisponible() < detalleVentaDto.getCantidad()) throw new ConflictException("Stock insuficiente");
 
         DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleVentaDto, detalleProducto, venta);
 
@@ -93,14 +86,10 @@ public class VentaService {
     public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
         Venta venta = obtenerVenta(ventaId);
 
-        if (!(venta.getEstado() instanceof VentaIniciada)) {
-            throw new IllegalStateException("Solo se pueden pagar ventas INICIADAS");
-        }
-
-        if (metodoPago == MetodoPago.CREDITO) {
-            throw new IllegalArgumentException("Crédito solo para reservas");
-        }
-
+        if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden pagar ventas INICIADAS");
+        
+        if (metodoPago == MetodoPago.CREDITO) throw new ConflictException("Crédito solo para reservas");
+        
         venta.getEstado().cobrarTotal(venta.getTotal(), metodoPago);
 
         VentaPagada nuevoEstado = new VentaPagada();
@@ -116,10 +105,8 @@ public class VentaService {
     public PagoDeCredito reservarConCredito(Long ventaId, Double montoInicial) {
         Venta venta = obtenerVenta(ventaId);
 
-        if (!(venta.getEstado() instanceof VentaIniciada)) {
-            throw new IllegalStateException("Solo se pueden reservar ventas INICIADAS");
-        }
-
+        if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden reservar ventas INICIADAS");
+        
         venta.getEstado().reservarConCredito(montoInicial);
 
         VentaReservada nuevoEstado = new VentaReservada();
@@ -134,10 +121,8 @@ public class VentaService {
     public PagoDeCredito agregarPagoParcialCredito(Long ventaId, Double monto) {
         Venta venta = obtenerVenta(ventaId);
 
-        if (!(venta.getEstado() instanceof VentaReservada)) {
-            throw new IllegalStateException("Solo se pueden agregar pagos a ventas RESERVADAS");
-        }
-
+        if (!(venta.getEstado() instanceof VentaReservada)) throw new ConflictException("Solo se pueden agregar pagos a ventas RESERVADAS");
+        
         venta.getEstado().agregarPagoCredito(monto);
 
         if (venta.estaCompletamentePagada()) {

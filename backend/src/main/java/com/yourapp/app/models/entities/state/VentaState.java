@@ -1,6 +1,7 @@
 package com.yourapp.app.models.entities.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.models.entities.Persistible;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.*;
@@ -59,6 +60,6 @@ public abstract class VentaState extends Persistible {
     }
 
     private void throwUnsupportedError() {
-        throw new UnsupportedOperationException("Operación no soportada en estado: " + this.getClass().getSimpleName());
+        throw new ConflictException("Operación no permitida en estado: " + this.getClass().getSimpleName());
     }
 }

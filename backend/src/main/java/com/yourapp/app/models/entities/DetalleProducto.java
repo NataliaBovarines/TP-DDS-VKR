@@ -1,6 +1,8 @@
 package com.yourapp.app.models.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -35,50 +37,42 @@ public class DetalleProducto extends Persistible {
     }
 
     public void reservarStock(Integer cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("Cantidad debe ser positiva");
-        }
+        if (cantidad <= 0) throw new BadRequestException("Cantidad debe ser positiva");
 
         if (cantidad > getStockDisponible()) {
-            throw new IllegalStateException(
-                String.format("Stock disponible insuficiente. Disponible: %d, Solicitado: %d",
-                    getStockDisponible(), cantidad)
+            throw new ConflictException(
+                String.format("Stock disponible insuficiente. Disponible: %d, Solicitado: %d", getStockDisponible(), cantidad)
             );
         }
-
+        
         this.stockReservado += cantidad;
     }
 
     public void liberarStockReservado(Integer cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("Cantidad debe ser positiva");
-        }
-
-        if (cantidad > stockReservado) {
-            throw new IllegalStateException(
-                String.format("No hay suficiente stock reservado. Reservado: %d, A liberar: %d",
-                    stockReservado, cantidad)
-            );
-        }
-
+        if (cantidad <= 0) throw new BadRequestException("Cantidad debe ser positiva");
+        
+        if (cantidad > stockReservado) throw new ConflictException(String.format("No hay suficiente stock reservado. Reservado: %d, A liberar: %d", stockReservado, cantidad));
+        
         this.stockReservado -= cantidad;
     }
 
-    public void confirmarVenta(Integer cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("Cantidad debe ser positiva");
-        }
-
-        if (cantidad > stockReservado) {
-            throw new IllegalStateException("Cantidad no reservada previamente");
-        }
-
-        if (cantidad > stockActual) {
-            throw new IllegalStateException("Stock actual insuficiente");
-        }
-
+    public void confirmarReserva(Integer cantidad) {
+        if (cantidad <= 0) throw new BadRequestException("Cantidad debe ser positiva");
+        
+        if (cantidad > stockReservado) throw new ConflictException("Cantidad no reservada previamente");
+        
+        if (cantidad > stockActual) throw new ConflictException("Stock actual insuficiente");
+        
         // Liberar de reservado y disminuir actual
         this.stockReservado -= cantidad;
+        this.stockActual -= cantidad;
+    }
+
+    public void confirmarVenta(Integer cantidad) {
+        if (cantidad <= 0) throw new BadRequestException("Cantidad debe ser positiva");
+
+        if (cantidad > stockActual) throw new ConflictException("Stock actual insuficiente");
+
         this.stockActual -= cantidad;
     }
 
@@ -87,9 +81,7 @@ public class DetalleProducto extends Persistible {
     }
 
     public void aumentarStock(Integer cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException("Cantidad debe ser positiva");
-        }
+        if (cantidad <= 0) throw new BadRequestException("Cantidad debe ser positiva");
 
         this.stockActual += cantidad;
     }

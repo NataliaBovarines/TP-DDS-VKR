@@ -1,5 +1,8 @@
 package com.yourapp.app.models.entities;
 
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,19 +48,16 @@ public class Cliente extends Persistible {
     }
 
     public void aumentarDeuda(Double monto) {
-        if (monto <= 0) {
-            throw new IllegalArgumentException("Monto debe ser positivo");
-        }
-        if (deuda + monto > creditoLimite) {
-            throw new IllegalStateException("Supera límite de crédito");
-        }
+        if (monto <= 0) throw new BadRequestException("Monto debe ser positivo");
+        
+        if (deuda + monto > creditoLimite) throw new ConflictException("Supera límite de crédito");
+        
         this.deuda += monto;
     }
 
     public void disminuirDeuda(Double monto) {
-        if (monto <= 0) {
-            throw new IllegalArgumentException("Monto debe ser positivo");
-        }
+        if (monto <= 0) throw new BadRequestException("Monto debe ser positivo");
+        
         this.deuda -= monto;
     }
 
@@ -71,7 +71,7 @@ public class Cliente extends Persistible {
 
         if (nuevaDeuda < 0 && config != null) {
             if (config.excedeLimiteSaldoFavor(nuevaDeuda)) {
-                throw new IllegalStateException(
+                throw new ConflictException(
                     String.format("Saldo a favor excede el límite permitido. Límite: $%.2f",
                         config.getLimiteSaldoFavor())
                 );
@@ -79,7 +79,7 @@ public class Cliente extends Persistible {
         }
 
         if (nuevaDeuda > creditoLimite) {
-            throw new IllegalStateException(
+            throw new ConflictException(
                 String.format("Supera límite de crédito. Límite: $%.2f, Nueva deuda: $%.2f",
                     creditoLimite, nuevaDeuda)
             );

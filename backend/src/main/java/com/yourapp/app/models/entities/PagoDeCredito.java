@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
 
 @Entity
 @Table(name = "pagos_credito")
@@ -38,46 +40,36 @@ public class PagoDeCredito extends Persistible {
 
     // Lógica de negocio
     public void procesarPagoInicial() {
-        if (cliente == null || venta == null) {
-            throw new IllegalStateException("No se puede procesar pago: falta cliente o venta");
-        }
-
+        if (cliente == null || venta == null) throw new BadRequestException("No se puede procesar pago: falta cliente o venta");
+        
         venta.setMontoPagado(monto);
 
         cliente.aumentarDeuda(venta.getTotal() - monto);
         
         System.out.println(String.format(
-            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
-            numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
+            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f", numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
         ));
     }
 
     public void procesarPago() {
-        if (cliente == null || venta == null) {
-            throw new IllegalStateException("No se puede procesar pago: falta cliente o venta");
-        }
-
+        if (cliente == null || venta == null) throw new BadRequestException("No se puede procesar pago: falta cliente o venta");
+        
         double saldoPendiente = venta.getTotal() - venta.getMontoPagado();
 
-        if (monto > saldoPendiente) {
-            throw new IllegalArgumentException(String.format("El pago $%.2f excede el saldo pendiente $%.2f", monto, saldoPendiente));
-        }
+        if (monto > saldoPendiente) throw new BadRequestException(String.format("El pago $%.2f excede el saldo pendiente $%.2f", monto, saldoPendiente));
         
         venta.setMontoPagado(venta.getMontoPagado() + monto);
 
         cliente.disminuirDeuda(monto);
         
         System.out.println(String.format(
-            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
-            numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
+            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f", numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
         ));
     }
 
     public void revertirPago() {
-        if (cliente == null || venta == null) {
-            throw new IllegalStateException("No se puede revertir pago incompleto");
-        }
-
+        if (cliente == null || venta == null) throw new ConflictException("No se puede revertir pago incompleto");
+    
         // Disminuir deuda del cliente
         cliente.disminuirDeuda(monto);
 
