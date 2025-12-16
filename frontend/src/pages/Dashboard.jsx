@@ -1,86 +1,76 @@
 import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar"; // ajustá la ruta si tu estructura es distinta
+import Navbar from "../components/Navbar";
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-[#EEEEEE] font-sans text-[#1D1D1D]">
       {/* Navbar */}
       <Navbar />
 
       {/* Contenido principal */}
-      <main className="p-6">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Bienvenido al Gestor de Ventas VKR
+      <main className="px-8 py-6">
+        {/* Título */}
+        <h2 className="text-2xl font-semibold mb-1">
+          Bienvenido a VKR
         </h2>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-[#6B5D58] mb-8">
           Resumen general de tu negocio
         </p>
 
-        {/* Tarjetas superiores */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {/* Tarjetas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card
             title="Total Productos"
-            value="120"
+            value="$3372.85 ARS"
             subtitle="En inventario"
-            color="bg-blue-100 text-blue-700"
+            icon="📦"
           />
+
           <Card
             title="Reservas Activas"
-            value="15"
+            value="0"
             subtitle="Pendientes de completar"
-            color="bg-green-100 text-green-700"
+            icon="🧾"
           />
+
           <Card
             title="Stock Bajo"
             value="5"
             subtitle="Productos con stock menor a 5"
-            color="bg-red-100 text-red-700"
+            icon="⚠️"
             warning
           />
+
           <Card
             title="Empleados"
-            value="8"
+            value="3"
             subtitle="Personal activo"
-            color="bg-yellow-100 text-yellow-700"
-          />
-        </div>
-
-        {/* Secciones inferiores */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <SectionCard
-            icon="⚙️"
-            title="Gestión de Productos"
-            text="Controlá tu inventario, agregá nuevos productos y actualizá el stock."
-          />
-          <SectionCard
-            icon="📦"
-            title="Reservas de Clientes"
-            text="Administrá las reservas y ventas no completadas."
-          />
-          <SectionCard
             icon="👥"
-            title="Equipo de Trabajo"
-            text="Gestioná los empleados y sus roles en la tienda."
           />
         </div>
 
-        {/* Botón principal de venta */}
-        <div className="flex justify-center mt-10">
+        {/* Acciones */}
+        <div className="flex flex-col items-center mt-16 gap-4">
           <Link
             to="/sales"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition"
+            className="
+              btn btn-primary w-56
+              inline-flex items-center justify-center
+              no-underline
+            "
           >
-            🛒 Realizar Venta
+            Realizar venta
           </Link>
-        </div>
 
-        {/* Botón secundario de reporte */}
-        <div className="flex justify-center">
           <Link
-            to="/report"
-            className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-5 py-2 rounded-lg shadow-sm transition"
+            to="/metrics"
+            className="
+              btn btn-outline w-40
+              inline-flex items-center justify-center
+              no-underline
+            "
           >
-            🧾 Generar Reporte
+            Ir a Métricas
           </Link>
         </div>
       </main>
@@ -88,30 +78,33 @@ export default function Dashboard() {
   );
 }
 
-// ----- Componentes internos -----
-function Card({ title, value, subtitle, color, warning }) {
+/* ---------- Card ---------- */
+function Card({ title, value, subtitle, icon, warning }) {
   return (
-    <div
-      className={`flex flex-col border rounded-lg p-4 shadow-sm hover:shadow-md transition ${color} bg-opacity-30`}
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{title}</h3>
-        {warning && <span className="text-orange-500 text-lg">⚠️</span>}
+    <div className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-sm font-medium text-[#6B5D58]">
+            {title}
+          </h3>
+
+          <p
+            className={`text-2xl font-semibold mt-2 ${
+              warning ? "text-orange-700" : "text-[#1D1D1D]"
+            }`}
+          >
+            {value}
+          </p>
+
+          <p className="text-xs text-[#6B5D58] mt-1">
+            {subtitle}
+          </p>
+        </div>
+
+        <div className="text-xl text-[#6B5D58]">
+          {icon}
+        </div>
       </div>
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs text-gray-600 mt-1">{subtitle}</p>
     </div>
   );
 }
-
-function SectionCard({ icon, title, text }) {
-  return (
-    <div className="border rounded-lg p-4 bg-white hover:shadow-md transition">
-      <h3 className="font-semibold text-gray-700 flex items-center space-x-2">
-        <span>{icon}</span> <span>{title}</span>
-      </h3>
-      <p className="text-sm text-gray-500 mt-1">{text}</p>
-    </div>
-  );
-}
-

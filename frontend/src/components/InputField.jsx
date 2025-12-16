@@ -1,30 +1,42 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react"; 
+import { Eye, EyeOff } from "lucide-react";
 
-export default function InputField({ label, type = "text", placeholder }) {
+export default function InputField({
+  label,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  error = false,
+}) {
   const [showPassword, setShowPassword] = useState(false);
-
   const isPassword = type === "password";
 
   return (
-    <div className="flex flex-col text-left relative">
-      <label className="text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <div className="w-full flex flex-col text-left">
+      <label className={`label ${error ? "label-error" : ""}`}>
+        {label}
+      </label>
 
-      <div className="relative">
+      <div className="relative w-full">
         <input
           type={isPassword && showPassword ? "text" : type}
           placeholder={placeholder}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full
-                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500
-                     transition-colors duration-300 pr-10"
+          value={value}
+          onChange={onChange}
+          className={`input-base w-full ${
+            error ? "input-error" : "input-normal"
+          } ${isPassword ? "pr-10" : ""}`}
         />
 
-        {/* 👁️ Ícono de mostrar/ocultar contraseña */}
         {isPassword && (
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-3 flex items-center
+                       bg-transparent border-none p-0
+                       text-gray-400 hover:text-gray-600
+                       focus:outline-none focus:ring-0"
           >
             {showPassword ? (
               <EyeOff className="w-4 h-4" />

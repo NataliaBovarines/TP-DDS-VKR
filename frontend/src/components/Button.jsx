@@ -1,11 +1,14 @@
-export default function Button({ text }) {
+export default function Button({
+  text,
+  type = "submit",
+  variant = "primary",
+  onClick,
+}) {
   return (
     <button
-      type="submit"
-      className="w-full bg-orange-700 hover:bg-orange-800 
-                 text-white font-semibold py-2.5 rounded-lg 
-                 transition-all duration-300 shadow-md hover:shadow-lg 
-                 active:scale-[0.98] focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+      type={type}
+      onClick={onClick}
+      className={`btn btn-${variant}`}
     >
       {text}
     </button>

@@ -10,7 +10,6 @@ export default function RegisterBox({ onRegister, onBack }) {
 
   return (
     <div className="bg-white p-10 rounded-2xl shadow-lg w-[380px] text-center">
-      {/* Logo y título */}
       <div className="flex flex-col items-center mb-8">
         <img src={logo} alt="VKR logo" className="w-14 mb-2" />
         <h2 className="text-xl font-semibold text-gray-800">
@@ -21,7 +20,6 @@ export default function RegisterBox({ onRegister, onBack }) {
         </p>
       </div>
 
-      {/* Formulario */}
       <form className="space-y-5" onSubmit={handleSubmit}>
         <InputField
           label="Nombre de usuario"
@@ -40,22 +38,14 @@ export default function RegisterBox({ onRegister, onBack }) {
           placeholder="Repetí la contraseña"
         />
 
-        {/* Botón principal */}
-        <Button text="Registrarse" type="submit" />
+        <Button text="Registrarse" />
 
-        {/* Volver */}
-        
-
-        <button
+        <Button
+          text="Volver al login"
           type="button"
+          variant="outline"
           onClick={onBack}
-          className="w-full border border-gray-300 text-gray-600 py-2 rounded-xl
-                         hover:bg-gray-100 transition text-sm font-medium"
-        >
-        Volver al login
-        </button>
-
-        
+        />
       </form>
     </div>
   );
