@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -64,6 +65,13 @@ public class AppExceptionHandler {
         String mensaje = String.format("El método %s no está permitido en esta ruta", ex.getMethod());
     
         return crearErrorDto(mensaje, HttpStatus.METHOD_NOT_ALLOWED, req);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorDto> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
+        String mensaje = "Acceso denegado. No tiene los permisos necesarios.";
+        
+        return crearErrorDto(mensaje, HttpStatus.FORBIDDEN, req);
     }
 
     @ExceptionHandler(Exception.class)

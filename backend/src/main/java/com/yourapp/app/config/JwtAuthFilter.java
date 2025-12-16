@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.yourapp.app.exceptions.UnauthorizedException;
 import com.yourapp.app.services.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -27,20 +28,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (request.getRequestURI().startsWith("/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) throw new UnauthorizedException("Se requiere token de autenticación."); 
+        
+        try {
             String token = authHeader.substring(7);
             String username = jwtService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (jwtService.isTokenValid(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+                
+                if (!jwtService.isTokenValid(token, userDetails)) throw new UnauthorizedException("Token de autenticación inválido o expirado."); 
+                
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+            
+            filterChain.doFilter(request, response);
+        } catch (UnauthorizedException ex) {
+            throw ex; 
+        } catch (Exception ex) {
+            throw new UnauthorizedException("Token de autenticación inválido o corrupto.");
         }
-        
-        filterChain.doFilter(request, response);
     }
 }
