@@ -12,7 +12,6 @@ import com.yourapp.app.models.dto.TokenResponseDto;
 import com.yourapp.app.models.dto.UsuarioContraseniaDto;
 import com.yourapp.app.models.dto.UsuarioLoginDto;
 import com.yourapp.app.models.dto.UsuarioMeDto;
-import com.yourapp.app.models.dto.UsuarioRegisterDto;
 import com.yourapp.app.models.entities.Usuario;
 import com.yourapp.app.services.AuthService;
 
@@ -25,17 +24,12 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
     private final AuthService authService;
 
-    @PostMapping("/register")
-    public TokenResponseDto register(@RequestBody @Valid UsuarioRegisterDto usuarioDto) {
-        return authService.register(usuarioDto);
-    }
-
     @PostMapping("/login")
     public TokenResponseDto login(@RequestBody @Valid UsuarioLoginDto usuarioDto) {
         return authService.login(usuarioDto);
     }
 
-    @PatchMapping
+    @PostMapping("/cambiar-contrasenia")
     public void cambiarContrasenia(@RequestBody @Valid UsuarioContraseniaDto usuarioDto) {
         authService.cambiarContrasenia(usuarioDto);
     }

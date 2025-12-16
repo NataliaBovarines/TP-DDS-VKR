@@ -1,5 +1,7 @@
 package com.yourapp.app.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,4 +16,11 @@ public class Usuario extends Persistible {
 
     @ManyToOne
     private Rol rol;
+
+    @OneToOne(mappedBy = "usuario")
+    @JsonIgnore
+    private Empleado empleado;
+
+    @Column(nullable = false)
+    private Boolean primerLogin = true;
 }

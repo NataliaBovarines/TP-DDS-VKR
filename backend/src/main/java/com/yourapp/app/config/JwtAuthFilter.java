@@ -26,17 +26,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
-
-        if (request.getRequestURI().startsWith("/auth/")) {
+        if (request.getRequestURI().equals("/auth/register") || request.getRequestURI().equals("/auth/login")) {
             filterChain.doFilter(request, response);
             return;
         }
+
+        String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) throw new UnauthorizedException("Se requiere token de autenticación."); 
         
         try {
             String token = authHeader.substring(7);
+
+            Boolean primerLogin = jwtService.extractPrimerLogin(token);
+        
+            if (Boolean.TRUE.equals(primerLogin) && !request.getRequestURI().equals("/auth/cambiar-contrasenia")) throw new UnauthorizedException("Debe cambiar su contraseña inicial antes de acceder a otros recursos.");
+            
             String username = jwtService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

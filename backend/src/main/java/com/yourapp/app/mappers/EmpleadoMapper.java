@@ -20,8 +20,9 @@ public class EmpleadoMapper {
 
     public static EmpleadoResponseDto fromEntity(Empleado empleado) {
         EmpleadoResponseDto empleadoDto = new EmpleadoResponseDto();
+        empleadoDto.setId(empleado.getId());
         empleadoDto.setNombre(empleado.getNombre());
-        empleadoDto.setApellido(empleadoDto.getApellido());
+        empleadoDto.setApellido(empleado.getApellido());
         empleadoDto.setDni(empleado.getDni());
         empleadoDto.setDireccion(empleado.getDireccion());
         empleadoDto.setMail(empleado.getMail());

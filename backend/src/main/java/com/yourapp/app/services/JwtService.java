@@ -23,8 +23,9 @@ public class JwtService {
     public String generateToken(Usuario usuario) {
         return Jwts.builder()
             .setId(usuario.getId().toString())
-            .setSubject(usuario.getNombreDeUsuario())
+            .setSubject(usuario.getNombreDeUsuario().toLowerCase())
             .claim("rol", usuario.getRol().getNombre())
+            .claim("primerLogin", usuario.getPrimerLogin())
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
             .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
@@ -46,6 +47,10 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
+    }
+
+    public Boolean extractPrimerLogin(String token) {
+        return extractAllClaims(token).get("primerLogin", Boolean.class);
     }
 
     private Claims extractAllClaims(String token) {

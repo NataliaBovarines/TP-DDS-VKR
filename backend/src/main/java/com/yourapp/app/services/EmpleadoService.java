@@ -32,10 +32,16 @@ public class EmpleadoService {
 
     @Transactional
     public EmpleadoResponseDto crearEmpleado(EmpleadoDto empleadoDto) {
-        Usuario usuario = usuarioService.obtenerUsuarioCompleto(empleadoDto.getUsuarioId());
-        if (empleadoRepository.existsByUsuario(usuario)) throw new ConflictException("El usuario ya esta asignado a otro empleado");
+        if (empleadoRepository.existsByDniAndFueEliminadoFalse(empleadoDto.getDni())) throw new ConflictException("Ya existe un empleado con el DNI proporcionado");
+
+        Usuario usuario = usuarioService.crearUsuario(empleadoDto);
+
         Empleado empleado = EmpleadoMapper.toEntity(empleadoDto, usuario);
+
+        usuario.setEmpleado(empleado);
+
         Empleado empleadoGuardado = empleadoRepository.save(empleado);
+
         return EmpleadoMapper.fromEntity(empleadoGuardado);
     }
 
@@ -52,7 +58,6 @@ public class EmpleadoService {
     public EmpleadoResponseDto actualizarEmpleado(Long id, EmpleadoCambioDto empleadoDto) {
         Empleado empleado = obtenerEmpleadoCompleto(id);
 
-        if (empleadoDto.getNombre() != null && !empleadoDto.getNombre().isBlank()) empleado.setNombre(empleadoDto.getNombre());
         if (empleadoDto.getDireccion() != null && !empleadoDto.getDireccion().isBlank()) empleado.setDireccion(empleadoDto.getDireccion());
         if (empleadoDto.getMail() != null) empleado.setMail(empleadoDto.getMail());
         if (empleadoDto.getTelefono() != null) empleado.setTelefono(empleadoDto.getTelefono());
@@ -68,9 +73,10 @@ public class EmpleadoService {
 
         empleado.softDelete();
 
+        usuarioService.eliminarUsuario(empleado.getUsuario());
+
         empleadoRepository.save(empleado);
     }
-
 
     public Page<EmpleadoResponseDto> obtenerEmpleadosFiltrados(EmpleadoFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------

@@ -20,6 +20,7 @@ public class Empleado extends Persistible {
     private String mail;
     private String telefono;
     @OneToOne
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
     @Transient
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
