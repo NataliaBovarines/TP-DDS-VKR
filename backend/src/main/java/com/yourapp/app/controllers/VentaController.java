@@ -2,6 +2,7 @@ package com.yourapp.app.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,60 +33,70 @@ public class VentaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('VENTA_CREAR')")
     public Venta crearVenta(@RequestBody @Valid VentaDto ventaDto) {
         return ventaService.crearVenta(ventaDto.getEmpleadoId(), ventaDto.getClienteId());
     }
 
-    @PatchMapping("/{id}/detalles") 
+    @PostMapping("/{id}/detalles") 
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('VENTA_CREAR')")
     public Venta agregarProductoAVenta(@PathVariable Long id, @RequestBody @Valid DetalleVentaDto detalleVentaDto) {
         return ventaService.agregarProductoAVenta(id, detalleVentaDto);
     }
 
     @GetMapping("/{id}") 
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('VENTA_VER')")
     public Venta obtenerVenta(@PathVariable Long id) {
         return ventaService.obtenerVenta(id);
     }
 
     @PatchMapping("/{id}/pago")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_PAGAR')")
     public Venta pagarVentaCompleta(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
         return ventaService.pagarVentaCompleta(id, ventaPagoDto.getMetodoPago());
     }
 
     @PostMapping("/{id}/reserva")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_RESERVAR')")
     public PagoDeCredito reservarConCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
         return ventaService.reservarConCredito(id, ventaPagoDto.getMonto());
     }
 
     @PostMapping("/{id}/reserva-pagos")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_RESERVAR')")
     public PagoDeCredito agregarPagoParcialCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
         return ventaService.agregarPagoParcialCredito(id, ventaPagoDto.getMonto());
     }
 
     @PatchMapping("/{id}/cancelacion")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_CANCELAR')")
     public Venta cancelarVenta(@PathVariable Long id, @RequestBody @Valid VentaCambioDto ventaCambioDto) {
         return ventaService.cancelarVenta(id, ventaCambioDto.getMotivo());
     }
 
     @PatchMapping("/{id}/cambio")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_CAMBIAR')")
     public Venta procesarCambioProducto(@PathVariable Long id, @RequestBody @Valid VentaCambioDto ventaCambioDto) {
         return ventaService.procesarCambioProducto(id, ventaCambioDto.getDetalleVentaDtos(), ventaCambioDto.getMotivo());
     }
 
     @GetMapping("/reservas-vencidas")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_PROCESAR')")
     public void procesarReservasVencidas(@PathVariable Long id) {
         ventaService.procesarReservasVencidas(); // Cancela las ventas reservadas vencidas
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('VENTA_VER')")
     public Page<Venta> obtenerVentasFiltradas(@Valid @ModelAttribute VentaFiltroDto filtros) {
         return ventaService.obtenerVentasFiltradas(filtros);
     }

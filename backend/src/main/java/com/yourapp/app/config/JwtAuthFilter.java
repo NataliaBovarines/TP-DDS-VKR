@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.yourapp.app.exceptions.UnauthorizedException;
 import com.yourapp.app.services.JwtService;
 
 import jakarta.servlet.FilterChain;

@@ -2,6 +2,7 @@ package com.yourapp.app.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,18 +28,21 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('USUARIO_VER')")
     public UsuarioResponseDto obtenerUsuario(@PathVariable Long id) {
         return usuarioService.obtenerUsuario(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('USUARIO_MODIFICAR')")
     public UsuarioResponseDto actualizarRolUsuario(@PathVariable Long id, @RequestBody @Valid UsuarioRolDto usuarioDto ) {
         return usuarioService.actualizarRolUsuario(id, usuarioDto);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('USUARIO_VER')")
     public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(@Valid @ModelAttribute UsuarioFiltroDto filtros) {
         return usuarioService.obtenerUsuariosFiltrados(filtros);
     }

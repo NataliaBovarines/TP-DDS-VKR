@@ -2,6 +2,7 @@ package com.yourapp.app.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,30 +30,35 @@ public class ClienteController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('CLIENTE_CREAR')")
     public Cliente crearCliente(@RequestBody @Valid ClienteDto clienteDto) {
         return clienteService.crearCliente(clienteDto);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('CLIENTE_VER')")
     public Cliente obtenerCliente(@PathVariable Long id) {
         return clienteService.obtenerCliente(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('CLIENTE_MODIFICAR')")
     public Cliente actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteCambioDto clienteDto) {
         return clienteService.actualizarCliente(id, clienteDto);
     }
 
     @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('CLIENTE_ELIMINAR')")
     public void eliminarCliente(@PathVariable Long id) {
         clienteService.eliminarCliente(id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('CLIENTE_VER')")
     public Page<Cliente> obtenerClientesFiltrados(@Valid @ModelAttribute ClienteFiltroDto filtros) {
         return clienteService.obtenerClientesFiltrados(filtros);
     }

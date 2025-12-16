@@ -3,6 +3,7 @@ package com.yourapp.app.controllers;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,7 @@ public class TipoDePrendaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('TIPO_PRENDA_CREAR')")
     public TipoDePrenda crearTipoDePrenda(@RequestBody @Valid TipoDePrendaDto tipoDePrendaDto) {
         return tipoDePrendaService.crearTipoDePrenda(tipoDePrendaDto);
     }

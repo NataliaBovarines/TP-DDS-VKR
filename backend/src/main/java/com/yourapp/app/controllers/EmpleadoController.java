@@ -2,6 +2,7 @@ package com.yourapp.app.controllers;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,30 +30,35 @@ public class EmpleadoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('EMPLEADO_CREAR')")
     public EmpleadoResponseDto crearEmpleado(@RequestBody @Valid EmpleadoDto empleadoDto) {
         return empleadoService.crearEmpleado(empleadoDto);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('EMPLEADO_VER')")
     public EmpleadoResponseDto obtenerEmpleado(@PathVariable Long id) {
         return empleadoService.obtenerEmpleado(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('EMPLEADO_MODIFICAR')")
     public EmpleadoResponseDto actualizarEmpleado(@PathVariable Long id, @RequestBody @Valid EmpleadoCambioDto empleadoDto) {
         return empleadoService.actualizarEmpleado(id, empleadoDto);
     }
 
     @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('EMPLEADO_ELIMINAR')")
     public void eliminarEmpleado(@PathVariable Long id) {
         empleadoService.eliminarEmpleado(id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('EMPLEADO_VER')")
     public Page<EmpleadoResponseDto> obtenerTodosLosEmpleados(@Valid @ModelAttribute EmpleadoFiltroDto filtros) {
         return empleadoService.obtenerEmpleadosFiltrados(filtros);
     }

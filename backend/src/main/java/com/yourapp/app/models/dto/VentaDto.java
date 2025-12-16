@@ -8,6 +8,6 @@ import lombok.Setter;
 public class VentaDto {
     @NotNull
     private Long empleadoId;
-    @NotNull
+    
     private Long clienteId;
 }
