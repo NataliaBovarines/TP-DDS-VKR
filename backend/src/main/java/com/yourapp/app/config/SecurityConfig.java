@@ -23,7 +23,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/register", "/auth/login").permitAll()
+                .requestMatchers("/auth/login", "/auth/recuperar-contrasenia", "/auth/resetear-contrasenia").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)

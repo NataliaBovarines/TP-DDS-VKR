@@ -1,5 +1,7 @@
 package com.yourapp.app.models.entities;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -23,4 +25,8 @@ public class Usuario extends Persistible {
 
     @Column(nullable = false)
     private Boolean primerLogin = true;
+
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiracion;
 }

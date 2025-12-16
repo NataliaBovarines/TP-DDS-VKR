@@ -1,5 +1,6 @@
 package com.yourapp.app.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -92,6 +93,22 @@ public class UsuarioService {
         return usuario;
     }
 
+    public Usuario obtenerUsuarioByMail(String mail) {
+        Usuario usuario = usuarioRepository.findByEmpleadoMail(mail);
+    
+        if (usuario == null) throw new NotFoundException("Usuario no encontrado");
+    
+        return usuario;
+    }
+
+    public Usuario obtenerUsuarioByToken(String tokenPlano) {
+        return usuarioRepository.findAll().stream()
+            .filter(u -> u.getResetToken() != null)
+            .filter(u -> passwordEncoder.matches(tokenPlano, u.getResetToken()))
+            .findFirst()
+            .orElseThrow(() -> new UnauthorizedException("Token inválido"));
+    }
+
     @Transactional
     public UsuarioResponseDto actualizarRolUsuario(Long id, UsuarioRolDto usuarioDto) {
         Usuario usuario = obtenerUsuarioCompleto(id);
@@ -106,11 +123,36 @@ public class UsuarioService {
     }
 
     @Transactional
-    public void actualizarContraseniaUsuario(Usuario usuario, UsuarioContraseniaDto usuarioDto) {
+    public Usuario actualizarContraseniaUsuario(Usuario usuario, UsuarioContraseniaDto usuarioDto) {
         if (!passwordEncoder.matches(usuarioDto.getContraseniaActual(), usuario.getContrasenia())) throw new UnauthorizedException("La contraseña actual es incorrecta");
         
         usuario.setContrasenia(passwordEncoder.encode(usuarioDto.getContraseniaNueva()));
         usuario.setPrimerLogin(false);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void recuperarContrasenia(Usuario usuario, String tokenPlano) {
+        usuario.setResetToken(passwordEncoder.encode(tokenPlano));
+
+        usuario.setResetTokenExpiracion(LocalDateTime.now().plusMinutes(15));
+
+        usuarioRepository.save(usuario);
+
+        // ---------------------------------- TODO 
+        // ENVIAR EL MAIL CON EL LINK DE RECUPERACION (ESE LINK CONTIENE EL TOKEN)
+    }
+
+    @Transactional
+    public void resetearContrasenia(Usuario usuario, String contraseniaNueva) {
+        usuario.setContrasenia(passwordEncoder.encode(contraseniaNueva));
+
+        usuario.setPrimerLogin(false);
+
+        usuario.setResetToken(null);
+
+        usuario.setResetTokenExpiracion(null);
 
         usuarioRepository.save(usuario);
     }

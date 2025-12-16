@@ -1,7 +1,6 @@
 package com.yourapp.app.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yourapp.app.mappers.UsuarioMapper;
 import com.yourapp.app.models.dto.TokenResponseDto;
 import com.yourapp.app.models.dto.UsuarioContraseniaDto;
+import com.yourapp.app.models.dto.UsuarioContraseniaRecuperarDto;
+import com.yourapp.app.models.dto.UsuarioContraseniaResetearDto;
 import com.yourapp.app.models.dto.UsuarioLoginDto;
 import com.yourapp.app.models.dto.UsuarioMeDto;
 import com.yourapp.app.models.entities.Usuario;
@@ -30,8 +31,18 @@ public class AuthController {
     }
 
     @PostMapping("/cambiar-contrasenia")
-    public void cambiarContrasenia(@RequestBody @Valid UsuarioContraseniaDto usuarioDto) {
-        authService.cambiarContrasenia(usuarioDto);
+    public TokenResponseDto cambiarContrasenia(@RequestBody @Valid UsuarioContraseniaDto usuarioDto) {
+        return authService.cambiarContrasenia(usuarioDto);
+    }
+
+    @PostMapping("/recuperar-contrasenia")
+    public void recuperarContrasenia(@RequestBody @Valid UsuarioContraseniaRecuperarDto usuarioDto) {
+        authService.recuperarContrasenia(usuarioDto);
+    }
+
+    @PostMapping("/resetear-contrasenia") 
+    public void resetearContrasenia(@RequestBody @Valid UsuarioContraseniaResetearDto usuarioDto) {
+        authService.resetearContrasenia(usuarioDto);
     }
 
     @GetMapping("/me")
