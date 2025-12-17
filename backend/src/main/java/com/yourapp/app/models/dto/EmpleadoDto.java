@@ -18,6 +18,7 @@ public class EmpleadoDto {
     
     private String direccion;
     
+    @NotBlank
     private String mail;
     
     private String telefono;

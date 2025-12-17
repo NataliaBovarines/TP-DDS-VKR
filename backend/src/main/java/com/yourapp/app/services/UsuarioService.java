@@ -39,7 +39,7 @@ public class UsuarioService {
     public Usuario crearUsuario(EmpleadoDto empleadoDto) {
         Rol rol = rolService.obtenerRol(empleadoDto.getRolId());
 
-        String nombreDeUsuario = generarNombreDeUsuario(empleadoDto.getNombre(), empleadoDto.getApellido());
+        String nombreDeUsuario = generarNombreDeUsuario(empleadoDto.getNombre(), empleadoDto.getApellido()).toLowerCase();
 
         Usuario usuario = UsuarioMapper.toEntity(nombreDeUsuario, rol);
 
@@ -73,7 +73,7 @@ public class UsuarioService {
     }
 
     public boolean existeUsuarioByNombre(String nombreDeUsuario) {
-        return usuarioRepository.existsByNombreDeUsuario(nombreDeUsuario);
+        return usuarioRepository.existsByNombreDeUsuario(nombreDeUsuario.toLowerCase());
     }
 
     public Usuario obtenerUsuarioCompleto(Long id) {

@@ -47,6 +47,11 @@ public abstract class VentaState extends Persistible {
         throwUnsupportedError();
     }
 
+    public Venta procesarCambioProducto(Venta nuevaVenta, Double montoPagadoOriginal, Double totalNuevo) {
+        throwUnsupportedError();
+        return null;
+    }
+
     public void rechazar(String motivo) {
         throwUnsupportedError();
     }

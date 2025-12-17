@@ -24,6 +24,7 @@ public class PagoDeCredito extends Persistible {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
+    @JsonIgnore
     private Cliente cliente;
 
     @Column(nullable = false)
@@ -67,18 +68,16 @@ public class PagoDeCredito extends Persistible {
         ));
     }
 
-    public void revertirPago() {
-        if (cliente == null || venta == null) throw new ConflictException("No se puede revertir pago incompleto");
+    // public void revertirPago() {
+    //     if (cliente == null || venta == null) throw new ConflictException("No se puede revertir pago incompleto");
     
-        // Disminuir deuda del cliente
-        cliente.disminuirDeuda(monto);
+    //     if (this.esPagoInicial) {
+    //         cliente.disminuirDeuda(venta.getTotal() - monto);
+    //         cliente.aumentarSaldoAFavor(monto);
+    //     } else {
+    //         cliente.aumentarSaldoAFavor(monto);
+    //     }
 
-        // Actualizar monto pagado en venta
-        venta.setMontoPagado(venta.getMontoPagado() - monto);
-
-        System.out.println(String.format(
-            "Pago #%d revertido: $%.2f - Cliente: %s",
-            numeroPago, monto, cliente.getNombre()
-        ));
-    }
+    //     venta.setMontoPagado(venta.getMontoPagado() - monto);
+    // }
 }

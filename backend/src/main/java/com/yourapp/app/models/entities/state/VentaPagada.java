@@ -20,14 +20,19 @@ public class VentaPagada extends VentaState {
         Venta venta = getVenta();
 
         if (!puedeCancelarse()) throw new ConflictException("Solo se pueden cancelar ventas pagadas dentro del mismo mes");
-        
         if (motivo == null || motivo.trim().isEmpty()) throw new BadRequestException("Motivo de cancelación requerido");
 
-        venta.setMontoPagado(getSaldoPendiente());
+        if (venta.getCliente() != null) {
+            venta.getCliente().aumentarSaldoAFavor(venta.getMontoPagado());
+        } else {
+            throw new BadRequestException("No se puede generar saldo a favor en una venta sin cliente.");
+        }
+
         venta.getDetalles().forEach(DetalleVenta::aumentarStock);
 
         System.out.println("Venta pagada cancelada. Motivo: " + motivo);
     }
+
 
     @Override
     public boolean puedeCambiarA(Class<? extends VentaState> nuevoEstado) {

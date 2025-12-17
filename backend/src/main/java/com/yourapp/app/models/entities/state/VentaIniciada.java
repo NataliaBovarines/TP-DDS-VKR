@@ -20,11 +20,11 @@ public class VentaIniciada extends VentaState {
     public void cobrarTotal(Double monto, Venta.MetodoPago metodoPago) {
         Venta venta = getVenta();
 
-        if (monto < venta.getTotal()) throw new BadRequestException("Monto insuficiente");
+        if (monto < venta.getSaldoPendiente()) throw new BadRequestException("Monto insuficiente");
 
         venta.verificarStockDisponible();
         venta.confirmarStockProductos();
-        venta.setMontoPagado(venta.getTotal());
+        venta.setMontoPagado(venta.getMontoPagado() + monto);
         venta.setFecha(LocalDateTime.now());
     }
 
@@ -32,6 +32,8 @@ public class VentaIniciada extends VentaState {
     public void reservarConCredito(Double montoInicial) {
         Venta venta = getVenta();
         Cliente cliente = venta.getCliente();
+
+        Double montoTotal = venta.getMontoPagado() + montoInicial;
 
         if (cliente == null) throw new BadRequestException("Se requiere cliente para reserva");
         
@@ -57,8 +59,6 @@ public class VentaIniciada extends VentaState {
             );
         }
 
-        if (montoInicial < venta.getTotal() * 0.10) throw new BadRequestException("Monto inicial mínimo: 10% del total");
-        
         if(montoInicial > venta.getTotal()) throw new BadRequestException("Monto inicial excede el saldo total");
 
         if (!cliente.puedeReservar(montoInicial)) throw new ForbiddenException("Crédito insuficiente");
@@ -66,12 +66,13 @@ public class VentaIniciada extends VentaState {
         PagoDeCredito pagoInicial = new PagoDeCredito();
         pagoInicial.setVenta(venta);
         pagoInicial.setCliente(cliente);
-        pagoInicial.setMonto(montoInicial);
+        pagoInicial.setMonto(montoTotal);
         pagoInicial.setNumeroPago(1);
         pagoInicial.setFecha(LocalDateTime.now());
         pagoInicial.setEsPagoInicial(true);
         pagoInicial.procesarPagoInicial();
 
+        venta.setMontoPagado(montoTotal);
         venta.agregarPagoCredito(pagoInicial);
         venta.reservarStockProductos();
         venta.setFechaVencimientoReserva(LocalDateTime.now().plusMonths(3));
@@ -93,6 +94,7 @@ public class VentaIniciada extends VentaState {
 
     @Override
     public Double getSaldoPendiente() {
-        return getVenta().getTotal();
+        Venta venta = getVenta();
+        return venta.getTotal() - venta.getMontoPagado();
     }
 }

@@ -35,7 +35,7 @@ public class VentaController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('VENTA_CREAR')")
     public Venta crearVenta(@RequestBody @Valid VentaDto ventaDto) {
-        return ventaService.crearVenta(ventaDto.getEmpleadoId(), ventaDto.getClienteId());
+        return ventaService.crearVenta(ventaDto.getClienteId());
     }
 
     @PostMapping("/{id}/detalles") 
@@ -60,16 +60,16 @@ public class VentaController {
     }
 
     @PostMapping("/{id}/reserva")
-    @ResponseStatus(HttpStatus.OK) 
+    @ResponseStatus(HttpStatus.CREATED) 
     @PreAuthorize("hasAuthority('VENTA_RESERVAR')")
-    public PagoDeCredito reservarConCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
+    public Venta reservarConCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
         return ventaService.reservarConCredito(id, ventaPagoDto.getMonto());
     }
 
     @PostMapping("/{id}/reserva-pagos")
-    @ResponseStatus(HttpStatus.OK) 
+    @ResponseStatus(HttpStatus.CREATED) 
     @PreAuthorize("hasAuthority('VENTA_RESERVAR')")
-    public PagoDeCredito agregarPagoParcialCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
+    public Venta agregarPagoParcialCredito(@PathVariable Long id, @RequestBody @Valid VentaPagoDto ventaPagoDto) {
         return ventaService.agregarPagoParcialCredito(id, ventaPagoDto.getMonto());
     }
 

@@ -28,6 +28,8 @@ public class Cliente extends Persistible {
 
     private Double deuda = 0.0;
 
+    private Double saldoAFavor = 0.0;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria_cliente")
     private CategoriaCliente categoriaCliente;
@@ -63,6 +65,14 @@ public class Cliente extends Persistible {
 
     public boolean esConfiable() {
         return categoriaCliente == CategoriaCliente.CONFIABLE;
+    }
+
+    public void aumentarSaldoAFavor(Double monto) {
+        this.saldoAFavor += monto;
+    }
+
+    public void disminuirSaldoAFavor(Double monto) {
+        this.saldoAFavor -= monto;
     }
 
     public void ajustarSaldo(Double monto) {
