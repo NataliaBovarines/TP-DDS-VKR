@@ -1,4 +1,3 @@
-// LoginPage.jsx
 import { useState } from "react";
 import LoginBox from "../components/LoginBox";
 import RegisterBox from "../components/RegisterBox";
@@ -59,7 +58,7 @@ export default function LoginPage({ onLogin }) {
         </div>
       </div>
 
-      {/* Modal de Registro */}
+      {/* Modal de Registro 
       {showRegister && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <RegisterBox
@@ -67,7 +66,7 @@ export default function LoginPage({ onLogin }) {
             onBack={() => setShowRegister(false)}
           />
         </div>
-      )}
+      )}*/}
     </div>
   );
 }

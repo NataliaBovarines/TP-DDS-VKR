@@ -61,13 +61,14 @@ export default function LoginBox({ onLogin, onRegister }) {
         <Button text="Acceder al Sistema" variant="primary" className="ring-0" />
 
 
-
+{/*
         <Button
           text="Registrarse"
           type="button"
           variant="outline"
           onClick={onRegister}
         />
+        */}
       </form>
 
       <p className="text-xs text-gray-400 text-center mt-8">
