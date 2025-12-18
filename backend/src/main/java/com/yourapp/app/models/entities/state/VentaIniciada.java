@@ -54,18 +54,24 @@ public class VentaIniciada extends VentaState {
 
         if (montoInicial < minimoInicial) throw new BadRequestException("Monto inicial insuficiente");
         if (montoInicial > getSaldoPendiente()) throw new BadRequestException("Monto inicial excede el saldo pendiente");
-        if (!cliente.puedeReservar(montoInicial)) throw new ForbiddenException("Crédito insuficiente");
         
-        PagoDeCredito pagoInicial = new PagoDeCredito();
-        pagoInicial.setVenta(venta);
-        pagoInicial.setCliente(cliente);
-        pagoInicial.setMonto(montoInicial);
-        pagoInicial.setNumeroPago(1);
-        pagoInicial.setFecha(LocalDateTime.now());
-        pagoInicial.setEsPagoInicial(true);
-        pagoInicial.procesarPagoInicial();
+        if (montoInicial > 0) {
+            if (!cliente.puedeReservar(montoInicial)) throw new ForbiddenException("Crédito insuficiente");
 
-        venta.agregarPagoCredito(pagoInicial);
+            PagoDeCredito pagoInicial = new PagoDeCredito();
+            pagoInicial.setVenta(venta);
+            pagoInicial.setCliente(cliente);
+            pagoInicial.setMonto(montoInicial);
+            pagoInicial.setNumeroPago(1);
+            pagoInicial.setFecha(LocalDateTime.now());
+            pagoInicial.setEsPagoInicial(true);
+            pagoInicial.procesarPagoInicial();
+
+            venta.agregarPagoCredito(pagoInicial);
+        } else {
+            cliente.aumentarDeuda(venta.getTotal() - venta.getMontoPagado());
+        }
+
         venta.reservarStockProductos();
         venta.setFechaVencimientoReserva(LocalDateTime.now().plusMonths(3));
     }
