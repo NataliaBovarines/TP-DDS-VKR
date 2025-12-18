@@ -100,3 +100,17 @@ body,
   }
 
 }
+
+@layer utilities {
+  .text-danger {
+    color: #f3023e;
+  }
+
+  .bg-danger {
+    background-color: #f3023e;
+  }
+
+  .border-danger {
+    border-color: #f3023e;
+  }
+}
