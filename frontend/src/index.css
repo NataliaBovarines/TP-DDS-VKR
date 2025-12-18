@@ -102,6 +102,9 @@ body,
 }
 
 @layer utilities {
+
+
+  /* DANGER */
   .text-danger {
     color: #f3023e;
   }
@@ -113,4 +116,32 @@ body,
   .border-danger {
     border-color: #f3023e;
   }
+
+
+  /* WARNING */
+  .text-warning {
+    color: #f8c920;
+  }
+
+  .bg-warning {
+    background-color: #f8c920;
+  }
+
+  .border-warning {
+    border-color: #f8c920;
+  }
+
+  /* SUCCESS */
+  .text-success {
+    color: #12d025;
+  }
+
+  .bg-success {
+    background-color: #12d025;
+  }
+
+  .border-success {
+    border-color: #12d025;
+  }
+
 }

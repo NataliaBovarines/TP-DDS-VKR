@@ -1,9 +1,42 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import FormNewProducto from "../components/FormNewProducto";
+import DetalleProducto from "../components/DetalleProducto";
 
 export default function Productos() {
   const [showForm, setShowForm] = useState(false);
+  const [productoDetalle, setProductoDetalle] = useState(null);
+
+  // MOCK de productos (después esto viene del backend)
+  const productos = [
+    {
+      id: 1,
+      nombre: "Camisa Cuadros",
+      descripcion: "Camisa de algodón con diseño casual",
+      categoria: "Camisas",
+      proveedor: "Proveedor A",
+      precio: 45.99,
+      stock: 13,
+      variantes: [
+        { color: "Azul", talle: "S", stock: 3 },
+        { color: "Azul", talle: "M", stock: 10 },
+        { color: "Azul", talle: "L", stock: 0 },
+      ],
+    },
+    {
+      id: 2,
+      nombre: "Vestido Floral",
+      descripcion: "Vestido de verano con estampado floral",
+      categoria: "Vestidos",
+      proveedor: "Proveedor B",
+      precio: 89.99,
+      stock: 3,
+      variantes: [
+        { color: "Multicolor", talle: "S", stock: 3 },
+        { color: "Multicolor", talle: "M", stock: 0 },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -29,7 +62,7 @@ export default function Productos() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Productos</p>
-              <p className="text-2xl font-semibold">15</p>
+              <p className="text-2xl font-semibold">{productos.length}</p>
             </div>
           </div>
 
@@ -46,7 +79,6 @@ export default function Productos() {
 
         {/* ===================== FILTROS ===================== */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
-
           <div className="flex items-center gap-3">
             <input
               type="text"
@@ -62,7 +94,6 @@ export default function Productos() {
               <option>Accesorios</option>
             </select>
 
-            {/* BOTÓN STOCK BAJO CORREGIDO */}
             <button className="input-base w-auto h-[44px] px-4 flex items-center gap-2 hover:bg-gray-100">
               <span className="text-danger text-sm">⚠</span>
               <span className="text-sm font-medium">
@@ -110,65 +141,58 @@ export default function Productos() {
             </thead>
 
             <tbody>
-              <tr className="border-b">
-                <td className="py-3">
-                  Camisa Cuadros
-                  <p className="text-xs text-gray-500">
-                    Camisa de algodón con diseño casual
-                  </p>
-                </td>
-                <td>Camisas</td>
-                <td>Proveedor A</td>
-                <td>$45.99</td>
-                <td className="text-center font-semibold">13</td>
-                <td className="text-center space-x-3">
-                  <button className="px-2 py-1 text-xs border rounded hover:bg-gray-100">
-                    Detalle
-                  </button>
-                  <span
-                    title="Editar stock"
-                    className="cursor-pointer text-gray-600 hover:text-gray-900 text-sm"
-                  >
-                    ✏️
-                  </span>
-                </td>
-              </tr>
+              {productos.map((producto) => (
+                <tr key={producto.id} className="border-b">
+                  <td className="py-3">
+                    {producto.nombre}
+                    <p className="text-xs text-gray-500">
+                      {producto.descripcion}
+                    </p>
+                  </td>
+                  <td>{producto.categoria}</td>
+                  <td>{producto.proveedor}</td>
+                  <td>${producto.precio}</td>
 
-              <tr>
-                <td className="py-3">
-                  Vestido Floral
-                  <p className="text-xs text-gray-500">
-                    Vestido de verano con estampado floral
-                  </p>
-                </td>
-                <td>Vestidos</td>
-                <td>Proveedor B</td>
-                <td>$89.99</td>
-                <td className="text-center font-semibold text-danger">
-                  <span className="inline-flex items-center gap-1">
-                    <span className="text-danger text-sm">⚠</span>
-                    3
-                  </span>
-                </td>
-                <td className="text-center space-x-3">
-                  <button className="px-2 py-1 text-xs border rounded hover:bg-gray-100">
-                    Detalle
-                  </button>
-                  <span
-                    title="Editar stock"
-                    className="cursor-pointer text-gray-600 hover:text-gray-900 text-sm"
+                  <td
+                    className={`text-center font-semibold ${
+                      producto.stock < 5 ? "text-danger" : ""
+                    }`}
                   >
-                    ✏️
-                  </span>
-                </td>
-              </tr>
+                    {producto.stock < 5 && (
+                      <span className="mr-1 text-danger text-sm">⚠</span>
+                    )}
+                    {producto.stock}
+                  </td>
+
+                  <td className="text-center space-x-3">
+                    <button
+                      onClick={() => setProductoDetalle(producto)}
+                      className="px-2 py-1 text-xs border rounded hover:bg-gray-100"
+                    >
+                      Detalle
+                    </button>
+                    <span
+                      title="Editar stock"
+                      className="cursor-pointer text-gray-600 hover:text-gray-900 text-sm"
+                    >
+                      ✏️
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-
       </main>
 
       {showForm && <FormNewProducto onClose={() => setShowForm(false)} />}
+
+      {productoDetalle && (
+        <DetalleProducto
+          producto={productoDetalle}
+          onClose={() => setProductoDetalle(null)}
+        />
+      )}
     </div>
   );
 }
