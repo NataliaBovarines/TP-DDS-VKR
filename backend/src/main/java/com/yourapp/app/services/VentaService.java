@@ -172,16 +172,17 @@ public class VentaService {
     @Transactional
     public Venta procesarCambioProducto(Long ventaOriginalId, List<DetalleVentaDto> nuevosProductosDtos, String motivo) {
         Venta ventaOriginal = obtenerVenta(ventaOriginalId);
-        Cliente cliente = ventaOriginal.getCliente();
 
         if (ventaOriginal.getCliente() == null) throw new BadRequestException("No se puede realizar un cambio en una venta sin cliente asociado. Identifique al cliente primero.");
 
-        // --------- CANCELAR VENTA ----------
-        // Esta acción "muda" el dinero de la venta al saldo del cliente
+        Double totalOriginal = ventaOriginal.getTotal();
+        Double montoPagadoOriginal = ventaOriginal.getMontoPagado();
+
+        // ---------- CANCELAR VENTA ORIGINAL ----------
         cancelarVenta(ventaOriginalId, motivo);
 
-        // --------- CREAR NUEVA VENTA ----------
-        Venta nuevaVenta = crearVenta(cliente.getId());
+        // ---------- CREAR NUEVA VENTA ----------
+        Venta nuevaVenta = crearVenta(ventaOriginal.getCliente().getId());
 
         for (DetalleVentaDto dto : nuevosProductosDtos) {
             DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(dto.getDetalleProductoId());
@@ -190,25 +191,22 @@ public class VentaService {
         }
 
         nuevaVenta.calcularTotal();
-
-        // --------- RECUPERAR DINERO DEL CLIENTE ----------
-        Double saldoParaUsar = cliente.getSaldoAFavor();
         Double totalNuevo = nuevaVenta.getTotal();
 
-        if (saldoParaUsar >= totalNuevo) {
-            // El saldo cubre todo
-            nuevaVenta.setMontoPagado(totalNuevo);
-            cliente.setSaldoAFavor(saldoParaUsar - totalNuevo);
-            
+        // ---------- REGLA DE NEGOCIO ----------
+        if (totalNuevo < totalOriginal) throw new ConflictException("El cambio de productos debe ser por un monto igual o mayor a la venta original");
+
+        // ---------- TRANSFERIR PAGO ----------
+        nuevaVenta.setMontoPagado(montoPagadoOriginal);
+
+        if (totalNuevo.equals(totalOriginal)) {
+            // Queda PAGADA
             VentaPagada estado = new VentaPagada();
             estado.setVenta(nuevaVenta);
             nuevaVenta.setEstado(estado);
             nuevaVenta.setFecha(LocalDateTime.now());
         } else {
-            // El saldo no alcanza: usamos todo lo que hay
-            nuevaVenta.setMontoPagado(saldoParaUsar);
-            cliente.setSaldoAFavor(0.0);
-            
+            // totalNuevo > totalOriginal => SALDO PENDIENTE
             VentaIniciada estado = new VentaIniciada();
             estado.setVenta(nuevaVenta);
             nuevaVenta.setEstado(estado);

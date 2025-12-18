@@ -26,7 +26,6 @@ public class ConfiguracionService {
           nuevaConfig.setPorcentajeMinimoSena(0.10);
           nuevaConfig.setDiasValidezReserva(90);
           nuevaConfig.setStockMinimoGlobal(5);
-          nuevaConfig.setLimiteSaldoFavor(10000.0);
           nuevaConfig.setTiempoMaximoCancelacionMeses(1);
           return configuracionTiendaRepository.save(nuevaConfig);
         });

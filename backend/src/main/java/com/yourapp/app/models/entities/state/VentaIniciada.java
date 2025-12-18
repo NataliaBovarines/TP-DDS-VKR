@@ -19,9 +19,6 @@ public class VentaIniciada extends VentaState {
     @Override
     public void cobrarTotal(Double monto, Venta.MetodoPago metodoPago) {
         Venta venta = getVenta();
-
-        if (monto < venta.getSaldoPendiente()) throw new BadRequestException("Monto insuficiente");
-
         venta.verificarStockDisponible();
         venta.confirmarStockProductos();
         venta.setMontoPagado(venta.getMontoPagado() + monto);
@@ -33,17 +30,13 @@ public class VentaIniciada extends VentaState {
         Venta venta = getVenta();
         Cliente cliente = venta.getCliente();
 
-        Double montoTotal = venta.getMontoPagado() + montoInicial;
-
         if (cliente == null) throw new BadRequestException("Se requiere cliente para reserva");
-        
         if (!cliente.esConfiable()) throw new ForbiddenException("Cliente no es confiable");        
 
         ConfiguracionTienda config = ConfiguracionTienda.getInstance();
 
         // Validar si la tienda permite reservas
         if (config != null && !config.permiteReserva()) throw new ForbiddenException("La tienda no permite reservas en este momento");
-
 
         // Calcular mínimo usando configuración
         Double minimoInicial = venta.getTotal();
@@ -59,20 +52,19 @@ public class VentaIniciada extends VentaState {
             );
         }
 
-        if(montoInicial > venta.getTotal()) throw new BadRequestException("Monto inicial excede el saldo total");
-
+        if (montoInicial < minimoInicial) throw new BadRequestException("Monto inicial insuficiente");
+        if (montoInicial > getSaldoPendiente()) throw new BadRequestException("Monto inicial excede el saldo pendiente");
         if (!cliente.puedeReservar(montoInicial)) throw new ForbiddenException("Crédito insuficiente");
         
         PagoDeCredito pagoInicial = new PagoDeCredito();
         pagoInicial.setVenta(venta);
         pagoInicial.setCliente(cliente);
-        pagoInicial.setMonto(montoTotal);
+        pagoInicial.setMonto(montoInicial);
         pagoInicial.setNumeroPago(1);
         pagoInicial.setFecha(LocalDateTime.now());
         pagoInicial.setEsPagoInicial(true);
         pagoInicial.procesarPagoInicial();
 
-        venta.setMontoPagado(montoTotal);
         venta.agregarPagoCredito(pagoInicial);
         venta.reservarStockProductos();
         venta.setFechaVencimientoReserva(LocalDateTime.now().plusMonths(3));

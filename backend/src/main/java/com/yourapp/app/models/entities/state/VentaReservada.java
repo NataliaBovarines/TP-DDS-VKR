@@ -5,7 +5,6 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.ForbiddenException;
 import com.yourapp.app.models.entities.Cliente;
-import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.models.entities.PagoDeCredito;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -52,12 +51,10 @@ public class VentaReservada extends VentaState {
 
         if (motivo == null || motivo.trim().isEmpty()) throw new BadRequestException("Motivo de cancelación requerido");
 
-        double saldoPendienteVenta = venta.getTotal() - venta.getMontoPagado();
-        cliente.disminuirDeuda(saldoPendienteVenta);
-        cliente.aumentarSaldoAFavor(venta.getMontoPagado());
+        cliente.disminuirDeuda(venta.getTotal() - venta.getMontoPagado());
 
-        venta.setMontoPagado(0.0);
         venta.liberarStockProductos();
+        venta.setMontoPagado(0.0);
         System.out.println("Reserva cancelada. Motivo: " + motivo);
     }
 

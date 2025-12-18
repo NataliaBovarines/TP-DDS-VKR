@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yourapp.app.exceptions.BadRequestException;
-import com.yourapp.app.exceptions.ConflictException;
 
 @Entity
 @Table(name = "pagos_credito")
@@ -43,9 +42,9 @@ public class PagoDeCredito extends Persistible {
     public void procesarPagoInicial() {
         if (cliente == null || venta == null) throw new BadRequestException("No se puede procesar pago: falta cliente o venta");
         
-        venta.setMontoPagado(monto);
+        venta.setMontoPagado(venta.getMontoPagado() + monto);
 
-        cliente.aumentarDeuda(venta.getTotal() - monto);
+        cliente.aumentarDeuda(venta.getTotal() - venta.getMontoPagado());
         
         System.out.println(String.format(
             "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f", numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
@@ -67,17 +66,4 @@ public class PagoDeCredito extends Persistible {
             "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f", numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
         ));
     }
-
-    // public void revertirPago() {
-    //     if (cliente == null || venta == null) throw new ConflictException("No se puede revertir pago incompleto");
-    
-    //     if (this.esPagoInicial) {
-    //         cliente.disminuirDeuda(venta.getTotal() - monto);
-    //         cliente.aumentarSaldoAFavor(monto);
-    //     } else {
-    //         cliente.aumentarSaldoAFavor(monto);
-    //     }
-
-    //     venta.setMontoPagado(venta.getMontoPagado() - monto);
-    // }
 }

@@ -28,8 +28,6 @@ public class Cliente extends Persistible {
 
     private Double deuda = 0.0;
 
-    private Double saldoAFavor = 0.0;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria_cliente")
     private CategoriaCliente categoriaCliente;
@@ -65,41 +63,5 @@ public class Cliente extends Persistible {
 
     public boolean esConfiable() {
         return categoriaCliente == CategoriaCliente.CONFIABLE;
-    }
-
-    public void aumentarSaldoAFavor(Double monto) {
-        this.saldoAFavor += monto;
-    }
-
-    public void disminuirSaldoAFavor(Double monto) {
-        this.saldoAFavor -= monto;
-    }
-
-    public void ajustarSaldo(Double monto) {
-        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
-        Double nuevaDeuda = deuda + monto;
-
-        if (nuevaDeuda < 0 && config != null) {
-            if (config.excedeLimiteSaldoFavor(nuevaDeuda)) {
-                throw new ConflictException(
-                    String.format("Saldo a favor excede el límite permitido. Límite: $%.2f",
-                        config.getLimiteSaldoFavor())
-                );
-            }
-        }
-
-        if (nuevaDeuda > creditoLimite) {
-            throw new ConflictException(
-                String.format("Supera límite de crédito. Límite: $%.2f, Nueva deuda: $%.2f",
-                    creditoLimite, nuevaDeuda)
-            );
-        }
-
-        this.deuda = nuevaDeuda;
-
-        if (deuda < 0) {
-            System.out.println(String.format("Cliente %s tiene saldo a favor: $%.2f",
-                nombre, Math.abs(deuda)));
-        }
     }
 }
