@@ -56,7 +56,15 @@ public class VentaIniciada extends VentaState {
         if (montoInicial > getSaldoPendiente()) throw new BadRequestException("Monto inicial excede el saldo pendiente");
         
         if (montoInicial > 0) {
-            if (!cliente.puedeReservar(montoInicial)) throw new ForbiddenException("Crédito insuficiente");
+            if (!cliente.puedeReservar(venta.getTotal() - (venta.getMontoPagado() + montoInicial))) {
+                throw new ForbiddenException(
+                    String.format("Crédito insuficiente: El saldo pendiente ($%.2f) supera su crédito disponible ($%.2f). [Límite: $%.2f, Deuda actual: $%.2f]",
+                        venta.getTotal() - (venta.getMontoPagado() + montoInicial),
+                        cliente.getCreditoDisponible(),
+                        cliente.getCreditoLimite(),
+                        cliente.getDeuda())
+                );
+            }
 
             PagoDeCredito pagoInicial = new PagoDeCredito();
             pagoInicial.setVenta(venta);

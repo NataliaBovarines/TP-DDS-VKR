@@ -2,13 +2,12 @@ package com.yourapp.app.models.dto;
 
 import com.yourapp.app.models.entities.Venta.MetodoPago;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
 public class VentaPagoDto {
+    @NotNull(message = "El método de pago es obligatorio")
     private MetodoPago metodoPago;
-    @Min(value = 0)
-    private Double monto;
 }

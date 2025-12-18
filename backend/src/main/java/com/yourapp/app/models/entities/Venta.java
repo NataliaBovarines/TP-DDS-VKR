@@ -134,6 +134,19 @@ public class Venta extends Persistible {
         return montoPagado / total;
     }
 
+    public Double getPagoMinimoParaCredito() {
+        if (this.cliente == null) return 0.0;
+        
+        Double disponible = this.cliente.getCreditoDisponible();
+        Double totalVenta = this.getTotal();
+        
+        if (totalVenta > disponible) {
+            return totalVenta - disponible;
+        }
+        
+        return 0.0;
+    }
+
     public boolean estaCompletamentePagada() {
         return getSaldoPendiente() <= 0.01;
     }

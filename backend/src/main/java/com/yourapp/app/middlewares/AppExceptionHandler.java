@@ -48,9 +48,7 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDto> handleValid(MethodArgumentNotValidException ex, HttpServletRequest req) {
-        FieldError fieldError = ex.getBindingResult().getFieldErrors().get(0);
-        
-        String mensaje = String.format("El campo %s %s", fieldError.getField(), fieldError.getDefaultMessage());
+        String mensaje = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
 
         return crearErrorDto(mensaje, HttpStatus.BAD_REQUEST, req);
     }

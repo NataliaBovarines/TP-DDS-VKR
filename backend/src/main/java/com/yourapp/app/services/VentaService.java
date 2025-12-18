@@ -2,12 +2,16 @@ package com.yourapp.app.services;
 
 import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
-import com.yourapp.app.exceptions.ForbiddenException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleVentaMapper;
 import com.yourapp.app.mappers.VentaMapper;
 import com.yourapp.app.models.dto.DetalleVentaDto;
+import com.yourapp.app.models.dto.VentaCambioDto;
+import com.yourapp.app.models.dto.VentaCancelacionDto;
+import com.yourapp.app.models.dto.VentaDto;
 import com.yourapp.app.models.dto.VentaFiltroDto;
+import com.yourapp.app.models.dto.VentaPagoDto;
+import com.yourapp.app.models.dto.VentaReservaDto;
 import com.yourapp.app.models.entities.*;
 import com.yourapp.app.models.entities.Cliente.CategoriaCliente;
 import com.yourapp.app.models.entities.Venta.MetodoPago;
@@ -37,46 +41,38 @@ public class VentaService {
 
     // ============================ CREAR UNA VENTA ============================
     @Transactional
-    public Venta crearVenta(Long clienteId) {
+    public Venta crearVenta(VentaDto ventaDto) {
+        if (ventaDto.getDetalles() == null || ventaDto.getDetalles().isEmpty()) throw new BadRequestException("No se puede crear una venta sin productos");
+
+        // ---------- VALIDACION PARA EVITAR PRODUCTOS REPETIDOS ----------
+        long codigosUnicos = ventaDto.getDetalles().stream().map(DetalleVentaDto::getCodigo).distinct().count();
+        if (codigosUnicos < ventaDto.getDetalles().size()) throw new BadRequestException("La lista contiene códigos de producto duplicados. Agrupe las cantidades.");
+
+        // ---------- CREAR LA VENTA BASE ----------
         Usuario usuario = authService.obtenerUsuarioLogueado();
-
         Empleado empleado = usuario.getEmpleado();
-
         if (empleado == null) throw new NotFoundException("El usuario no tiene un empleado asociado");
-
-        Cliente cliente = null;
-
-        if (clienteId != null) {
-            cliente = clienteService.obtenerCliente(clienteId);
-        }
+        Cliente cliente = (ventaDto.getClienteId() != null) ? clienteService.obtenerCliente(ventaDto.getClienteId()) : null;
 
         Venta venta = VentaMapper.toEntity(empleado, cliente);
 
-        return ventaRepository.save(venta);
-    }
+        // ---------- CARGAR TODOS LOS PRODUCTOS ----------
+        for (DetalleVentaDto detalleDto : ventaDto.getDetalles()) {
+            DetalleProducto detalleProducto = productoService.obtenerDetalleByCodigo(detalleDto.getCodigo());
 
-    // ============================ AGREGAR UN PRODUCTO A UNA VENTA ============================
-    @Transactional
-    public Venta agregarProductoAVenta(Long ventaId, DetalleVentaDto detalleVentaDto) {
-        Venta venta = obtenerVenta(ventaId);
+            if (detalleProducto.getStockDisponible() < detalleDto.getCantidad()) throw new ConflictException("Stock insuficiente para: " + detalleProducto.getProducto().getNombre() + " [" + detalleDto.getCodigo() + "]");
 
-        if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden agregar productos a ventas INICIADAS");
+            DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleDto, detalleProducto, venta);
+            venta.getDetalles().add(detalleVenta);
+        }
 
-        DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(detalleVentaDto.getDetalleProductoId());
-
-        if (detalleVentaDto.getCantidad() <= 0) throw new BadRequestException("Cantidad debe ser positiva");
-        
-        if (detalleProducto.getStockDisponible() < detalleVentaDto.getCantidad()) throw new ConflictException("Stock insuficiente");
-
-        DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleVentaDto, detalleProducto, venta);
-
-        venta.getDetalles().add(detalleVenta);
+        // ---------- CALCULAR EL TOTAL Y GUARDAR ----------
         venta.calcularTotal();
-
+        
         return ventaRepository.save(venta);
     }
 
-    // ============================ OBTENER UNA VENTA ============================
+    // ============================ OBTENER UNA VENTA POR ID ============================
     public Venta obtenerVenta(Long ventaId) {
         Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
         
@@ -99,19 +95,19 @@ public class VentaService {
 
     // ============================ PAGAR POR COMPLETO UNA VENTA ============================
     @Transactional
-    public Venta pagarVentaCompleta(Long ventaId, MetodoPago metodoPago) {
+    public Venta pagarVentaCompleta(Long ventaId, VentaPagoDto ventaDto) {
         Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden pagar ventas INICIADAS");
         
-        if (metodoPago == MetodoPago.CREDITO) throw new ConflictException("Crédito solo para reservas");
+        if (ventaDto.getMetodoPago() == MetodoPago.CREDITO) throw new ConflictException("Crédito solo para reservas");
 
-        venta.getEstado().cobrarTotal(venta.getSaldoPendiente(), metodoPago);
+        venta.getEstado().cobrarTotal(venta.getSaldoPendiente(), ventaDto.getMetodoPago());
 
         VentaPagada nuevoEstado = new VentaPagada();
         nuevoEstado.setVenta(venta);
         venta.setEstado(nuevoEstado);
-        venta.setMetodoPago(metodoPago);
+        venta.setMetodoPago(ventaDto.getMetodoPago());
         venta.setFecha(LocalDateTime.now());
 
         return ventaRepository.save(venta);
@@ -119,14 +115,14 @@ public class VentaService {
 
     // ============================ RESERVAR UNA VENTA CON SEÑA ============================
     @Transactional
-    public Venta reservarConCredito(Long ventaId, Double montoInicial) {
+    public Venta reservarConCredito(Long ventaId, VentaReservaDto ventaDto) {
         Venta venta = obtenerVenta(ventaId);
 
         if (venta.getCliente().getCategoriaCliente() == CategoriaCliente.NO_CONFIABLE) throw new ConflictException("Los clientes NO CONFIABLES no pueden realizar reservas"); 
 
         if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden reservar ventas INICIADAS");
         
-        venta.getEstado().reservarConCredito(montoInicial);
+        venta.getEstado().reservarConCredito(ventaDto.getMonto());
 
         VentaReservada nuevoEstado = new VentaReservada();
         nuevoEstado.setVenta(venta);
@@ -138,12 +134,12 @@ public class VentaService {
 
     // ============================ AGREGAR UN PAGO A UNA VENTA RESERVADA ============================
     @Transactional
-    public Venta agregarPagoParcialCredito(Long ventaId, Double monto) {
+    public Venta agregarPagoParcialCredito(Long ventaId, VentaReservaDto ventaDto) {
         Venta venta = obtenerVenta(ventaId);
 
         if (!(venta.getEstado() instanceof VentaReservada)) throw new ConflictException("Solo se pueden agregar pagos a ventas RESERVADAS");
         
-        venta.getEstado().agregarPagoCredito(monto);
+        venta.getEstado().agregarPagoCredito(ventaDto.getMonto());
 
         if (venta.estaCompletamentePagada()) {
             VentaPagada nuevoEstado = new VentaPagada();
@@ -156,10 +152,10 @@ public class VentaService {
 
     // ============================ CANCELAR UNA VENTA ============================
     @Transactional
-    public Venta cancelarVenta(Long ventaId, String motivo) {
+    public Venta cancelarVenta(Long ventaId, VentaCancelacionDto ventaDto) {
         Venta venta = obtenerVenta(ventaId);
 
-        venta.getEstado().cancelar(motivo);
+        venta.getEstado().cancelar(ventaDto.getMotivo());
 
         VentaCancelada nuevoEstado = new VentaCancelada();
         nuevoEstado.setVenta(venta);
@@ -170,7 +166,7 @@ public class VentaService {
 
     // ============================ CAMBIAR PRODUCTOS DE UNA VENTA (PAGADA O RESERVADA) ============================
     @Transactional
-    public Venta procesarCambioProducto(Long ventaOriginalId, List<DetalleVentaDto> nuevosProductosDtos, String motivo) {
+    public Venta procesarCambioProducto(Long ventaOriginalId, VentaCambioDto ventaDto) {
         Venta ventaOriginal = obtenerVenta(ventaOriginalId);
 
         if (ventaOriginal.getCliente() == null) throw new BadRequestException("No se puede realizar un cambio en una venta sin cliente asociado. Identifique al cliente primero.");
@@ -179,18 +175,18 @@ public class VentaService {
         Double montoPagadoOriginal = ventaOriginal.getMontoPagado();
 
         // ---------- CANCELAR VENTA ORIGINAL ----------
-        cancelarVenta(ventaOriginalId, motivo);
+        VentaCancelacionDto ventaCancelacionDto = new VentaCancelacionDto();
+        ventaCancelacionDto.setMotivo(ventaDto.getMotivo());
+
+        cancelarVenta(ventaOriginalId, ventaCancelacionDto);
 
         // ---------- CREAR NUEVA VENTA ----------
-        Venta nuevaVenta = crearVenta(ventaOriginal.getCliente().getId());
+        VentaDto nuevaVentaDto = new VentaDto();
+        nuevaVentaDto.setClienteId(ventaOriginal.getCliente().getId());
+        nuevaVentaDto.setDetalles(ventaDto.getDetalles());
 
-        for (DetalleVentaDto dto : nuevosProductosDtos) {
-            DetalleProducto detalleProducto = productoService.obtenerDetalleProducto(dto.getDetalleProductoId());
-            DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(dto, detalleProducto, nuevaVenta);
-            nuevaVenta.getDetalles().add(detalleVenta);
-        }
+        Venta nuevaVenta = crearVenta(nuevaVentaDto);
 
-        nuevaVenta.calcularTotal();
         Double totalNuevo = nuevaVenta.getTotal();
 
         // ---------- REGLA DE NEGOCIO ----------
@@ -205,11 +201,7 @@ public class VentaService {
             estado.setVenta(nuevaVenta);
             nuevaVenta.setEstado(estado);
             nuevaVenta.setFecha(LocalDateTime.now());
-        } else {
-            // totalNuevo > totalOriginal => SALDO PENDIENTE
-            VentaIniciada estado = new VentaIniciada();
-            estado.setVenta(nuevaVenta);
-            nuevaVenta.setEstado(estado);
+            nuevaVenta.setMetodoPago(ventaOriginal.getMetodoPago());
         }
 
         return ventaRepository.save(nuevaVenta);

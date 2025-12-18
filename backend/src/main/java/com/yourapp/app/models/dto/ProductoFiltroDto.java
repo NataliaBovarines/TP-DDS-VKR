@@ -7,7 +7,7 @@ import lombok.Setter;
 public class ProductoFiltroDto {
     private String nombre;
     private Long categoriaId;
-    private Long tipoId;
+    private Long subcategoriaId;
     private Long talleId;
     private Long colorId;
     private Long proveedorId;

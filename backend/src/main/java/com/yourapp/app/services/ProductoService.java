@@ -19,14 +19,14 @@ import com.yourapp.app.models.dto.DetalleProductoCambioDto;
 import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.dto.ProductoFiltroDto;
-import com.yourapp.app.models.dto.ProductoPatchDto;
+import com.yourapp.app.models.dto.ProductoCambioDto;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
 import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.models.entities.Talle;
-import com.yourapp.app.models.entities.TipoDePrenda;
+import com.yourapp.app.models.entities.Subcategoria;
 import com.yourapp.app.repositories.DetalleProductoRepository;
 import com.yourapp.app.repositories.ProductoRepository;
 
@@ -40,30 +40,53 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final DetalleProductoRepository detalleProductoRepository;
     private final CategoriaService categoriaService;
-    private final TipoDePrendaService tipoDePrendaService;
+    private final SubcategoriaService subcategoriaService;
     private final TalleService talleService;
     private final ColorService colorService;
     private final ProveedorService proveedorService;
 
+    // ============================ CREAR UN PRODUCTO ============================
     @Transactional
     public Producto crearProducto(ProductoDto productoDto) {
-        Categoria categoria = categoriaService.obtenerCategoria(productoDto.getCategoriaId());
-        if(!categoria.getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
-        TipoDePrenda tipoDePrenda = tipoDePrendaService.obtenerTipoDePrenda(productoDto.getTipoDePrendaId());
-        Proveedor proveedor = proveedorService.obtenerProveedor(productoDto.getProveedorId());
-        Producto producto = ProductoMapper.toEntity(productoDto, categoria, tipoDePrenda, proveedor);
+        // Categoria categoria = (productoDto.getCategoriaId() != null) ? categoriaService.obtenerCategoria(productoDto.getCategoriaId()) : null;
+
+        Subcategoria subcategoria = (productoDto.getSubcategoriaId() != null) ? subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId()) : null;
+
+        if(!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
+
+        Proveedor proveedor = (productoDto.getProveedorId() != null) ? proveedorService.obtenerProveedor(productoDto.getProveedorId()) : null;
+
+        Producto producto = ProductoMapper.toEntity(productoDto, subcategoria, proveedor);
+
         return productoRepository.save(producto);
     }
 
+    // ============================ CREAR UN DETALLE PRODUCTO ============================
     @Transactional
     public DetalleProducto crearDetalleProducto(Long productoId, DetalleProductoDto detalleDto) {
         Producto producto = obtenerProducto(productoId);
-        Talle talle = talleService.obtenerTalle(detalleDto.getTalleId());
-        Color color = colorService.obtenerColor(detalleDto.getColorId());
+
+        // --------- OBTENER TALLE Y COLOR SI VIENEN EN EL DTO ----------
+        Talle talle = (detalleDto.getTalleId() != null) ? talleService.obtenerTalle(detalleDto.getTalleId()) : null;
+        Color color = (detalleDto.getColorId() != null) ? colorService.obtenerColor(detalleDto.getColorId()) : null;
+
+        // --------- GENERACION DEL CODIGO UNICO ----------
+        String codigoGenerado = String.format("%d-%d-%d", 
+            producto.getId(), 
+            (talle != null) ? talle.getId() : 0, 
+            (color != null) ? color.getId() : 0
+        );
+
+        // --------- PERSISTIR DETALLE DE PRODUCTO ----------
         DetalleProducto detalle = DetalleProductoMapper.toEntity(detalleDto, producto, talle, color);
+        detalle.setCodigo(codigoGenerado);
+        
+        if (detalleProductoRepository.existsByCodigo(codigoGenerado)) throw new ConflictException("Ya existe este producto con estas características (Talle/Color/Unico)");
+
         return detalleProductoRepository.save(detalle);
     }
 
+    // ============================ OBTENER UN PRODUCTO POR ID ============================
     public Producto obtenerProducto(Long productoId) {
         Producto producto = productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
 
@@ -72,40 +95,49 @@ public class ProductoService {
         return producto;
     }
 
+    // ============================ OBTENER UN DETALLE PRODUCTO POR ID ============================
     public DetalleProducto obtenerDetalleProducto(Long detalleId) {
         DetalleProducto detalle = detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
         
-        if (Boolean.TRUE.equals(detalle.getFueEliminado())) throw new NotFoundException("Producto eliminado");
+        if (detalle.getFueEliminado()) throw new NotFoundException("Producto eliminado");
 
         return detalle;
     }
 
+    // ============================ OBTENER UN DETALLE PRODUCTO POR CODIGO UNICO ============================
+    public DetalleProducto obtenerDetalleByCodigo(String detalleCodigo) {
+        DetalleProducto detalle = detalleProductoRepository.findByCodigo(detalleCodigo).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
+        
+        if (detalle.getFueEliminado()) throw new NotFoundException("Producto eliminado");
+
+        return detalle;
+    }
+
+    // ============================ ACTUALIZAR UN PRODUCTO ============================
     @Transactional
-    public Producto actualizarProducto(Long id, ProductoPatchDto productoDto) {
+    public Producto actualizarProducto(Long id, ProductoCambioDto productoDto) {
         Producto producto = obtenerProducto(id);
 
         if (productoDto.getNombre() != null) producto.setNombre(productoDto.getNombre());
         if (productoDto.getDescripcion() != null) producto.setDescripcion(productoDto.getDescripcion());
-        if (productoDto.getCategoriaId() != null) {
-            Categoria categoria = categoriaService.obtenerCategoria(productoDto.getCategoriaId());
-            if (!categoria.getEstaActiva()) throw new ConflictException("No se puede asignar una categoria inactiva");
-            producto.setCategoria(categoria);
+        if (productoDto.getSubcategoriaId() != null) {
+            Subcategoria subcategoria = subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId());
+            if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede asignar una categoria inactiva");
+            producto.setSubcategoria(subcategoria);
         }
-        if (productoDto.getTipoDePrendaId() != null) producto.setTipoDePrenda(tipoDePrendaService.obtenerTipoDePrenda(productoDto.getTipoDePrendaId()));
         if (productoDto.getProveedorId() != null) producto.setProveedor(proveedorService.obtenerProveedor(productoDto.getProveedorId()));
         if (productoDto.getPrecio() != null) producto.setPrecio(productoDto.getPrecio());
 
         return productoRepository.save(producto);
     }
 
+    // ============================ ACTUALIZAR UN DETALLE PRODUCTO ============================
     @Transactional
     public DetalleProducto actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoCambioDto detalleDto) {
         DetalleProducto detalle = obtenerDetalleProducto(detalleId);
 
-        if (!detalle.getProducto().getId().equals(id)) {
-            throw new BadRequestException("El detalle no pertenece al producto especificado");
-        }
-
+        if (!detalle.getProducto().getId().equals(id)) throw new BadRequestException("El detalle no pertenece al producto especificado");
+        
         if (detalleDto.getStockAumento() != null) detalle.setStockActual(detalle.getStockActual() + detalleDto.getStockAumento());
 
         if (detalleDto.getStockMinimo() != null) detalle.setStockMinimo(detalleDto.getStockMinimo());
@@ -113,6 +145,7 @@ public class ProductoService {
         return detalleProductoRepository.save(detalle);
     }
 
+    // ============================ ELIMINAR UN PRODUCTO ============================
     @Transactional
     public void eliminarProducto(Long id) {
         Producto producto = obtenerProducto(id);
@@ -122,6 +155,7 @@ public class ProductoService {
         productoRepository.save(producto);
     }
 
+    // ============================ ELIMINAR UN DETALLE PRODUCTO ============================
     @Transactional
     public void eliminarDetalleProducto(Long id, Long detalleId) {
         Producto producto = obtenerProducto(id);
@@ -135,6 +169,7 @@ public class ProductoService {
         detalleProductoRepository.save(detalle);
     }
 
+    // ============================ OBTENER VENTAS CON FILTROS ============================
     public Page<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
@@ -170,14 +205,14 @@ public class ProductoService {
         // Filtrar por categoría
         if (filtros.getCategoriaId() != null) {
             spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("categoria").get("id"), filtros.getCategoriaId())
+                cb.equal(root.get("subcategoria").get("categoria").get("id"), filtros.getCategoriaId())
             );
         }
 
-        // Filtrar por tipo
-        if (filtros.getTipoId() != null) {
+        // Filtrar por subcategoría
+        if (filtros.getSubcategoriaId() != null) {
             spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("tipoDePrenda").get("id"), filtros.getTipoId())
+                cb.equal(root.get("subcategoria").get("id"), filtros.getSubcategoriaId())
             );
         }
 

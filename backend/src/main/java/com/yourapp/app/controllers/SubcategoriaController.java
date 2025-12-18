@@ -5,35 +5,37 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.TipoDePrendaDto;
-import com.yourapp.app.models.entities.TipoDePrenda;
-import com.yourapp.app.services.TipoDePrendaService;
+import com.yourapp.app.models.dto.SubcategoriaDto;
+import com.yourapp.app.models.dto.SubcategoriaFiltroDto;
+import com.yourapp.app.models.entities.Subcategoria;
+import com.yourapp.app.services.SubcategoriaService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/tipos-de-prenda")
+@RequestMapping("/subcategorias")
 @RequiredArgsConstructor
-public class TipoDePrendaController {
-    private final TipoDePrendaService tipoDePrendaService;
+public class SubcategoriaController {
+    private final SubcategoriaService subcategoriaService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('TIPO_PRENDA_CREAR')")
-    public TipoDePrenda crearTipoDePrenda(@RequestBody @Valid TipoDePrendaDto tipoDePrendaDto) {
-        return tipoDePrendaService.crearTipoDePrenda(tipoDePrendaDto);
+    public Subcategoria crearSubcategoria(@RequestBody @Valid SubcategoriaDto subcategoriaDto) {
+        return subcategoriaService.crearSubcategoria(subcategoriaDto);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK) 
-    public List<TipoDePrenda> obtenerTodosLosTipos() {
-        return tipoDePrendaService.obtenerTodosLosTipos();
+    public List<Subcategoria> obtenerSubcategoriasByCategoria(@Valid @ModelAttribute SubcategoriaFiltroDto filtros) {
+        return subcategoriaService.obtenerSubcategoriasByCategoria(filtros);
     }
 }

@@ -1,13 +1,14 @@
 package com.yourapp.app.models.dto;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
 public class DetalleProductoCambioDto {
-    @Min(value = 0)
+    @PositiveOrZero(message = "El stock a aumentar no puede ser un valor negativo")
     private Integer stockAumento;
-    @Min(value = 0)
+
+    @PositiveOrZero(message = "El stock mínimo no puede ser un valor negativo")
     private Integer stockMinimo;
 }

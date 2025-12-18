@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter @Setter
 public class CategoriaDto {
     @NotBlank
-    @Size(max = 100)
+    @Size(max = 100, message = "La descripción no puede superar los 100 caracteres")
     private String descripcion;    
 }

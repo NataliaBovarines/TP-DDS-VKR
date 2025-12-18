@@ -24,12 +24,8 @@ public class Producto extends Persistible {
     private String descripcion;
 
     @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
-
-    @ManyToOne
-    @JoinColumn(name = "tipo_prenda_id")
-    private TipoDePrenda tipoDePrenda;
+    @JoinColumn(name = "subcategoria_id")
+    private Subcategoria subcategoria;
 
     @ManyToOne
     @JoinColumn(name = "proveedor_id")

@@ -17,7 +17,7 @@ import com.yourapp.app.models.dto.DetalleProductoCambioDto;
 import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.dto.ProductoFiltroDto;
-import com.yourapp.app.models.dto.ProductoPatchDto;
+import com.yourapp.app.models.dto.ProductoCambioDto;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
 import com.yourapp.app.services.ProductoService;
@@ -55,7 +55,7 @@ public class ProductoController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('PRODUCTO_ACTUALIZAR')")
-    public Producto actualizarProducto(@PathVariable Long id, @RequestBody @Valid ProductoPatchDto productoDto) {
+    public Producto actualizarProducto(@PathVariable Long id, @RequestBody @Valid ProductoCambioDto productoDto) {
         return productoService.actualizarProducto(id, productoDto);
     }
 

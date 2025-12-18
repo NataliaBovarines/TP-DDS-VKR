@@ -14,14 +14,22 @@ public class DetalleProducto extends Persistible {
     @ManyToOne
     @JsonIgnore
     private Producto producto;
+
+    @Column(unique = true, nullable = false)
+    private String codigo;
+
     @ManyToOne
     private Talle talle;
+
     @ManyToOne
     private Color color;
+
     @Column(nullable = false)
     private Integer stockActual = 0;
+
     @Column(nullable = false)
     private Integer stockReservado = 0;
+    
     @Column(nullable = false)
     private Integer stockMinimo = 0;
 
