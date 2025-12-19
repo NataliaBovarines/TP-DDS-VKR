@@ -7,7 +7,7 @@ public enum Permiso {
 
     // --------- CLIENTE ----------
     CLIENTE_CREAR("Crear un cliente"),
-    CLIENTE_VER("Ver clientes"),
+    CLIENTE_VER("Ver todos los clientes"),
     CLIENTE_MODIFICAR("Modificar un cliente"),
     CLIENTE_ELIMINAR("Eliminar un cliente"),
 
@@ -21,13 +21,13 @@ public enum Permiso {
 
     // --------- EMPLEADO ----------
     EMPLEADO_CREAR("Crear un empleado"),
-    EMPLEADO_VER("Ver empleados"),
+    EMPLEADO_VER("Ver todos los empleados"),
     EMPLEADO_MODIFICAR("Modificar un empleado"),
     EMPLEADO_ELIMINAR("Eliminar un empleado"),
 
     // --------- PRODUCTO ----------
     PRODUCTO_CREAR("Crear un producto o un detalle de producto"),
-    PRODUCTO_VER("Ver productos"),
+    PRODUCTO_VER("Ver todos los productos"),
     PRODUCTO_MODIFICAR("Modificar un producto o un detalle de producto"),
     PRODUCTO_ELIMINAR("Eliminar un producto o un detalle de producto"),
 
@@ -39,7 +39,7 @@ public enum Permiso {
     ROL_CREAR("Crear un rol"),
     ROL_ACTUALIZAR("Actualizar los permisos de un rol"),
     ROL_ELIMINAR("Eliminar un rol"),
-    ROL_VER("Ver roles"),
+    ROL_VER("Ver todos los roles"),
 
     // --------- SUBCATEGORIA ----------
     SUBCATEGORIA_CREAR("Crear una subcategoria"),
@@ -50,12 +50,12 @@ public enum Permiso {
     TALLE_ELIMINAR("Eliminar un talle"),
 
     // --------- USUARIO ----------
-    USUARIO_VER("Ver usuarios"),
+    USUARIO_VER("Ver todos los usuarios"),
     USUARIO_MODIFICAR("Modificar el rol de un usuario"),
 
     // --------- VENTA ----------
     VENTA_CREAR("Crear una venta"),
-    VENTA_VER("Ver ventas"),
+    VENTA_VER("Ver todas las ventas"),
     VENTA_PAGAR("Pagar una venta"),
     VENTA_RESERVAR("Reservar una venta"),
     VENTA_CANCELAR("Cancelar una venta"),

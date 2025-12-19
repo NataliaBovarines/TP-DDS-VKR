@@ -37,14 +37,14 @@ public class EmpleadoController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('EMPLEADO_VER')")
+    @PreAuthorize("hasAuthority('EMPLEADO_VER') or #id == authentication.principal.id")
     public EmpleadoResponseDto obtenerEmpleado(@PathVariable Long id) {
         return empleadoService.obtenerEmpleado(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('EMPLEADO_MODIFICAR')")
+    @PreAuthorize("hasAuthority('EMPLEADO_MODIFICAR') or #id == authentication.principal.id")
     public EmpleadoResponseDto actualizarEmpleado(@PathVariable Long id, @RequestBody @Valid EmpleadoUpdateDto empleadoDto) {
         return empleadoService.actualizarEmpleado(id, empleadoDto);
     }

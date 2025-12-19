@@ -28,7 +28,7 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('USUARIO_VER')")
+    @PreAuthorize("hasAuthority('USUARIO_VER') or #id == authentication.principal.id")
     public UsuarioResponseDto obtenerUsuario(@PathVariable Long id) {
         return usuarioService.obtenerUsuario(id);
     }
