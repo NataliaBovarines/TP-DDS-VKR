@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.VentaCambioDto;
-import com.yourapp.app.models.dto.VentaCancelacionDto;
+import com.yourapp.app.models.dto.VentaMotivoDto;
 import com.yourapp.app.models.dto.VentaDto;
 import com.yourapp.app.models.dto.VentaFiltroDto;
 import com.yourapp.app.models.dto.VentaPagoDto;
@@ -69,8 +69,15 @@ public class VentaController {
     @PatchMapping("/{id}/cancelacion")
     @ResponseStatus(HttpStatus.OK) 
     @PreAuthorize("hasAuthority('VENTA_CANCELAR')")
-    public Venta cancelarVenta(@PathVariable Long id, @RequestBody @Valid VentaCancelacionDto ventaDto) {
+    public Venta cancelarVenta(@PathVariable Long id, @RequestBody @Valid VentaMotivoDto ventaDto) {
         return ventaService.cancelarVenta(id, ventaDto);
+    }
+
+    @PatchMapping("/{id}/rechazo")
+    @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_CANCELAR')")
+    public Venta rechazarVenta(@PathVariable Long id, @RequestBody @Valid VentaMotivoDto ventaDto) {
+        return ventaService.rechazarVenta(id, ventaDto);
     }
 
     @PatchMapping("/{id}/cambio")

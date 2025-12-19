@@ -7,7 +7,7 @@ import com.yourapp.app.mappers.DetalleVentaMapper;
 import com.yourapp.app.mappers.VentaMapper;
 import com.yourapp.app.models.dto.DetalleVentaDto;
 import com.yourapp.app.models.dto.VentaCambioDto;
-import com.yourapp.app.models.dto.VentaCancelacionDto;
+import com.yourapp.app.models.dto.VentaMotivoDto;
 import com.yourapp.app.models.dto.VentaDto;
 import com.yourapp.app.models.dto.VentaFiltroDto;
 import com.yourapp.app.models.dto.VentaPagoDto;
@@ -152,12 +152,26 @@ public class VentaService {
 
     // ============================ CANCELAR UNA VENTA ============================
     @Transactional
-    public Venta cancelarVenta(Long ventaId, VentaCancelacionDto ventaDto) {
+    public Venta cancelarVenta(Long ventaId, VentaMotivoDto ventaDto) {
         Venta venta = obtenerVenta(ventaId);
 
         venta.getEstado().cancelar(ventaDto.getMotivo());
 
         VentaCancelada nuevoEstado = new VentaCancelada();
+        nuevoEstado.setVenta(venta);
+        venta.setEstado(nuevoEstado);
+
+        return ventaRepository.save(venta);
+    }
+
+    // ============================ RECHAZAR UNA VENTA ============================
+    @Transactional
+    public Venta rechazarVenta(Long ventaId, VentaMotivoDto ventaDto) {
+        Venta venta = obtenerVenta(ventaId);
+
+        venta.getEstado().rechazar(ventaDto.getMotivo());
+
+        VentaRechazada nuevoEstado = new VentaRechazada();
         nuevoEstado.setVenta(venta);
         venta.setEstado(nuevoEstado);
 
@@ -175,7 +189,7 @@ public class VentaService {
         Double montoPagadoOriginal = ventaOriginal.getMontoPagado();
 
         // ---------- CANCELAR VENTA ORIGINAL ----------
-        VentaCancelacionDto ventaCancelacionDto = new VentaCancelacionDto();
+        VentaMotivoDto ventaCancelacionDto = new VentaMotivoDto();
         ventaCancelacionDto.setMotivo(ventaDto.getMotivo());
 
         cancelarVenta(ventaOriginalId, ventaCancelacionDto);
