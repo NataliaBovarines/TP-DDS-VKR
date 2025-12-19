@@ -5,9 +5,11 @@ export default function Navbar() {
 
   const links = [
     { name: "Dashboard", path: "/dashboard" },
-    { name: "Productos", path: "/productos" },
+    { name: "Ventas", path: "/ventas" },
     { name: "Reservas", path: "/reservas" },
+    { name: "Productos", path: "/productos" },
     { name: "Empleados", path: "/empleados" },
+    { name: "Clientes", path: "/clientes" },
     { name: "Configuración", path: "/settings" },
   ];
 

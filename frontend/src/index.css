@@ -3,3 +3,117 @@
 body {
   @apply bg-gray-100;
 }
+
+/* =====================================
+   Design Tokens – VIKIARA / VKR UI
+   Generated from provided screens
+   ===================================== */
+
+:root {
+  /* ---------- Brand Colors ---------- */
+  --color-primary-900: #1f2ae0;
+  --color-primary-700: #2f3bf5;
+  --color-primary-500: #3b49ff;
+  --color-primary-100: #e9ebff;
+
+  --color-secondary-900: #EF773A;
+  --color-secondary-500: #8b5a5a;
+
+  /* ---------- Feedback Colors ---------- */
+  --color-success-700: #0f9d58;
+  --color-success-500: #22c55e;
+  --color-success-100: #e9f9ef;
+
+  --color-warning-700: #d4a106;
+  --color-warning-500: #facc15;
+  --color-warning-100: #fff7db;
+
+  --color-danger-700: #b42318;
+  --color-danger-500: #ef4444;
+  --color-danger-100: #fdecec;
+
+    /* ---------- Tags Colors ---------- */
+    /* Sale status colors */
+    /* Sale status – badge & tag colors */
+    --sale-pending-bg: #f8d8b1;
+    --sale-pending-text: #C2410C;
+
+    --sale-reserved-bg: #f2c8c8;
+    --sale-reserved-text: #EC4899;
+
+    --sale-completed-bg: #cbcbcb;
+    --sale-completed-text: #27272A;
+
+
+
+  /* ---------- Neutral Palette ---------- */
+  --color-white: #ffffff;
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f3f3f3;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-700: #404040;
+  --color-gray-900: #1f1f1f;
+
+  /* ---------- Backgrounds ---------- */
+  --bg-app: var(--color-gray-50);
+  --bg-card: var(--color-white);
+  --bg-navbar: var(--color-white);
+
+  /* ---------- Text ---------- */
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-500);
+  --text-inverse: var(--color-white);
+
+  /* ---------- Typography ---------- */
+  --font-family-base: "Inter", "Segoe UI", Roboto, sans-serif;
+
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.5rem;    /* 24px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ---------- Spacing (8px system) ---------- */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* ---------- Shadows ---------- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 10px rgba(0,0,0,0.08);
+
+  /* ---------- Components ---------- */
+  --btn-primary-bg: var(--color-primary-700);
+  --btn-primary-text: var(--color-white);
+  --btn-primary-radius: var(--radius-md);
+
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-sm);
+
+  --input-bg: var(--color-white);
+  --input-border: var(--color-gray-300);
+  --input-focus: var(--color-primary-500);
+
+  /* ---------- Status Pills ---------- */
+  --status-reservada-bg: var(--color-danger-500);
+  --status-pendiente-bg: var(--color-warning-500);
+  --status-confirmada-bg: var(--color-primary-500);
+  --status-completada-bg: var(--color-success-500);
+}

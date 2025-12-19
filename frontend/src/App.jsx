@@ -6,13 +6,10 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
-import Sales from "./pages/Sales";
+import Ventas from "./pages/Ventas";
 import Reservas from "./pages/Reservas";
 import Empleados from "./pages/Empleados";
 import Productos from "./pages/Productos";
-
-
-
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,7 +35,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/sales" element={<Sales />} />
+            <Route path="/ventas" element={<Ventas />} />
             <Route path="/reservas" element={<Reservas />} />
             <Route path="/empleados" element={<Empleados />} />
             <Route path="/productos" element={<Productos />} />
