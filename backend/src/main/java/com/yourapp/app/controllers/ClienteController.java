@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ClienteCambioDto;
+import com.yourapp.app.models.dto.ClienteUpdateDto;
 import com.yourapp.app.models.dto.ClienteDto;
 import com.yourapp.app.models.dto.ClienteFiltroDto;
 import com.yourapp.app.models.entities.Cliente;
@@ -45,7 +45,7 @@ public class ClienteController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('CLIENTE_MODIFICAR')")
-    public Cliente actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteCambioDto clienteDto) {
+    public Cliente actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteUpdateDto clienteDto) {
         return clienteService.actualizarCliente(id, clienteDto);
     }
 

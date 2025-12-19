@@ -11,6 +11,7 @@ import com.yourapp.app.mappers.CategoriaMapper;
 import com.yourapp.app.models.dto.CategoriaDto;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.repositories.CategoriaRepository;
+import com.yourapp.app.repositories.ProductoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
+    private final ProductoRepository productoRepository;
 
     // ============================ CREAR CATEGORIA ============================
     @Transactional
@@ -28,8 +30,10 @@ public class CategoriaService {
     }
 
     // ============================ ELIMINAR UNA CATEGORIA + SUBCATEGORIAS ============================
+    @Transactional
     public void eliminarCategoria(Long id) {
         Categoria categoria = obtenerCategoria(id);
+        if (productoRepository.existsBySubcategoriaCategoriaIdAndFueEliminadoFalse(id)) throw new ConflictException("No se puede eliminar la categoría: una o más de sus subcategorías tienen productos asociados");
         categoria.softDelete();
         categoriaRepository.save(categoria);
     }

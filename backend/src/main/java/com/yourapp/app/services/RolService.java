@@ -8,9 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.RolMapper;
-import com.yourapp.app.models.dto.RolCambioDto;
+import com.yourapp.app.models.dto.RolUpdateDto;
 import com.yourapp.app.models.dto.RolDto;
-import com.yourapp.app.models.entities.Permiso;
 import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.repositories.RolRepository;
 
@@ -32,7 +31,7 @@ public class RolService {
     // ============================ ACTUALIZAR LOS PERMISOS DE UN ROL ============================
     // El front debe enviar la lista completa de los permisos que quedaron seleccionados finalmente
     @Transactional
-    public Rol actualizarPermisos(Long rolId, RolCambioDto rolDto) {
+    public Rol actualizarPermisos(Long rolId, RolUpdateDto rolDto) {
         Rol rol = obtenerRol(rolId);
 
         rol.getPermisos().clear();
@@ -42,6 +41,7 @@ public class RolService {
     }
     
     // ============================ ELIMINAR UN ROL ============================
+    @Transactional
     public void eliminarRol(Long id) {
         Rol rol = obtenerRol(id);
         rol.softDelete();

@@ -35,7 +35,7 @@ public class SubcategoriaController {
         return subcategoriaService.crearSubcategoria(subcategoriaDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('SUBCATEGORIA_ELIMINAR')")
     public void eliminarSubcategoria(@PathVariable Long id) {

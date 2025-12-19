@@ -15,6 +15,10 @@ public enum Permiso {
     COLOR_CREAR("Crear un color"),
     COLOR_ELIMINAR("Eliminar un color"),
 
+    // --------- CONFIGURACION ----------
+    CONFIGURACION_VER("Ver la configuracion de la tienda"),
+    CONFIGURACION_EDITAR("Editar la configuracion de la tienda"),
+
     // --------- EMPLEADO ----------
     EMPLEADO_CREAR("Crear un empleado"),
     EMPLEADO_VER("Ver empleados"),
@@ -37,13 +41,13 @@ public enum Permiso {
     ROL_ELIMINAR("Eliminar un rol"),
     ROL_VER("Ver roles"),
 
-    // --------- TALLE ----------
-    TALLE_CREAR("Crear un talle"),
-    TALLE_ELIMINAR("Eliminar un talle"),
-
     // --------- SUBCATEGORIA ----------
     SUBCATEGORIA_CREAR("Crear una subcategoria"),
     SUBCATEGORIA_ELIMINAR("Eliminar una subcategoria"),
+
+    // --------- TALLE ----------
+    TALLE_CREAR("Crear un talle"),
+    TALLE_ELIMINAR("Eliminar un talle"),
 
     // --------- USUARIO ----------
     USUARIO_VER("Ver usuarios"),

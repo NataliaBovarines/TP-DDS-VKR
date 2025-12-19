@@ -13,7 +13,7 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ClienteMapper;
-import com.yourapp.app.models.dto.ClienteCambioDto;
+import com.yourapp.app.models.dto.ClienteUpdateDto;
 import com.yourapp.app.models.dto.ClienteDto;
 import com.yourapp.app.models.dto.ClienteFiltroDto;
 import com.yourapp.app.models.entities.Cliente;
@@ -46,7 +46,7 @@ public class ClienteService {
 
     // ============================ ACTUALIZAR UN CLIENTE ============================
     @Transactional
-    public Cliente actualizarCliente(Long id, ClienteCambioDto clienteDto) {
+    public Cliente actualizarCliente(Long id, ClienteUpdateDto clienteDto) {
         Cliente cliente = obtenerCliente(id);
 
         if (clienteDto.getNombre() != null && !clienteDto.getNombre().isBlank()) cliente.setNombre(clienteDto.getNombre());

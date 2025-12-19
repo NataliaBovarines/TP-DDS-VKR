@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class RolCambioDto {
+public class RolUpdateDto {
     @NotEmpty
     private List<Permiso> permisos;
 }

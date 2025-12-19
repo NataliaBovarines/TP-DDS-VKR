@@ -14,7 +14,7 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.EmpleadoMapper;
-import com.yourapp.app.models.dto.EmpleadoCambioDto;
+import com.yourapp.app.models.dto.EmpleadoUpdateDto;
 import com.yourapp.app.models.dto.EmpleadoDto;
 import com.yourapp.app.models.dto.EmpleadoFiltroDto;
 import com.yourapp.app.models.dto.EmpleadoResponseDto;
@@ -61,7 +61,7 @@ public class EmpleadoService {
 
     // ============================ ACTUALIZAR UN EMPLEADO ============================
     @Transactional
-    public EmpleadoResponseDto actualizarEmpleado(Long id, EmpleadoCambioDto empleadoDto) {
+    public EmpleadoResponseDto actualizarEmpleado(Long id, EmpleadoUpdateDto empleadoDto) {
         Empleado empleado = obtenerEmpleadoCompleto(id);
 
         if (empleadoDto.getDireccion() != null && !empleadoDto.getDireccion().isBlank()) empleado.setDireccion(empleadoDto.getDireccion());

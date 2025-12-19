@@ -33,7 +33,7 @@ public class TalleController {
         return talleService.crearTalle(talleDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('TALLE_ELIMINAR')")
     public void eliminarTalle(@PathVariable Long id) {

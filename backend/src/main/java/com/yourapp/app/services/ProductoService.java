@@ -15,11 +15,11 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleProductoMapper;
 import com.yourapp.app.mappers.ProductoMapper;
-import com.yourapp.app.models.dto.DetalleProductoCambioDto;
+import com.yourapp.app.models.dto.DetalleProductoUpdateDto;
 import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.dto.ProductoFiltroDto;
-import com.yourapp.app.models.dto.ProductoCambioDto;
+import com.yourapp.app.models.dto.ProductoUpdateDto;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
@@ -47,7 +47,7 @@ public class ProductoService {
     // ============================ CREAR UN PRODUCTO ============================
     @Transactional
     public Producto crearProducto(ProductoDto productoDto) {
-        Subcategoria subcategoria = (productoDto.getSubcategoriaId() != null) ? subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId()) : null;
+        Subcategoria subcategoria = subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId());
 
         if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
 
@@ -112,7 +112,7 @@ public class ProductoService {
 
     // ============================ ACTUALIZAR UN PRODUCTO ============================
     @Transactional
-    public Producto actualizarProducto(Long id, ProductoCambioDto productoDto) {
+    public Producto actualizarProducto(Long id, ProductoUpdateDto productoDto) {
         Producto producto = obtenerProducto(id);
 
         if (productoDto.getNombre() != null) producto.setNombre(productoDto.getNombre());
@@ -130,7 +130,7 @@ public class ProductoService {
 
     // ============================ ACTUALIZAR UN DETALLE PRODUCTO ============================
     @Transactional
-    public DetalleProducto actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoCambioDto detalleDto) {
+    public DetalleProducto actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoUpdateDto detalleDto) {
         DetalleProducto detalle = obtenerDetalleProducto(detalleId);
 
         if (!detalle.getProducto().getId().equals(id)) throw new BadRequestException("El detalle no pertenece al producto especificado");
@@ -166,7 +166,6 @@ public class ProductoService {
         detalleProductoRepository.save(detalle);
     }
 
-    // ============================ OBTENER VENTAS CON FILTROS ============================
     public Page<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();

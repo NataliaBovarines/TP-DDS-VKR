@@ -11,4 +11,6 @@ public interface SubcategoriaRepository extends JpaRepository<Subcategoria, Long
     List<Subcategoria> findByCategoriaId(Long categoriaId);
 
     List<Subcategoria> findByFueEliminadoFalse();
+
+    Boolean existsByCategoriaIdAndFueEliminadoFalse(Long id);
 }

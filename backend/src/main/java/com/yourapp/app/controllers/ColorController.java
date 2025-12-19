@@ -33,7 +33,7 @@ public class ColorController {
         return colorService.crearColor(colorDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('COLOR_ELIMINAR')")
     public void eliminarColor(@PathVariable Long id) {

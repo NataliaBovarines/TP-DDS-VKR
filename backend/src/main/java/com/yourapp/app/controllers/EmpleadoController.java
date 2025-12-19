@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.EmpleadoCambioDto;
+import com.yourapp.app.models.dto.EmpleadoUpdateDto;
 import com.yourapp.app.models.dto.EmpleadoDto;
 import com.yourapp.app.models.dto.EmpleadoFiltroDto;
 import com.yourapp.app.models.dto.EmpleadoResponseDto;
@@ -45,7 +45,7 @@ public class EmpleadoController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('EMPLEADO_MODIFICAR')")
-    public EmpleadoResponseDto actualizarEmpleado(@PathVariable Long id, @RequestBody @Valid EmpleadoCambioDto empleadoDto) {
+    public EmpleadoResponseDto actualizarEmpleado(@PathVariable Long id, @RequestBody @Valid EmpleadoUpdateDto empleadoDto) {
         return empleadoService.actualizarEmpleado(id, empleadoDto);
     }
 

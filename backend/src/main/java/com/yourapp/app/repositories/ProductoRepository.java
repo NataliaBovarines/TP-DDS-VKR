@@ -6,5 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.yourapp.app.models.entities.Producto;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSpecificationExecutor<Producto> {
-    
+    Boolean existsBySubcategoriaIdAndFueEliminadoFalse(Long id);
+
+    Boolean existsBySubcategoriaCategoriaIdAndFueEliminadoFalse(Long categoriaId);
 }

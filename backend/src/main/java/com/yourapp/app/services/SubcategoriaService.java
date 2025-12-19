@@ -12,6 +12,7 @@ import com.yourapp.app.models.dto.SubcategoriaDto;
 import com.yourapp.app.models.dto.SubcategoriaFiltroDto;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.models.entities.Subcategoria;
+import com.yourapp.app.repositories.ProductoRepository;
 import com.yourapp.app.repositories.SubcategoriaRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class SubcategoriaService {
     private final SubcategoriaRepository subcategoriaRepository;
     private final CategoriaService categoriaService;
+    private final ProductoRepository productoRepository;
     
     // ============================ CREAR UNA SUBCATEGORIA ============================
     @Transactional
@@ -32,8 +34,10 @@ public class SubcategoriaService {
     }
 
     // ============================ ELIMINAR UN SUBCATEGORIA ============================
+    @Transactional
     public void eliminarSubcategoria(Long id) {
         Subcategoria subcategoria = obtenerSubcategoria(id);
+        if (productoRepository.existsBySubcategoriaIdAndFueEliminadoFalse(id)) throw new ConflictException("No se puede eliminar la subcategoría porque tiene productos asociados");
         subcategoria.softDelete();
         subcategoriaRepository.save(subcategoria);
     }

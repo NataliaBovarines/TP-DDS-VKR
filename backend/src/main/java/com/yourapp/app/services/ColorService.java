@@ -28,6 +28,7 @@ public class ColorService {
     }
 
     // ============================ ELIMINAR UN COLOR ============================
+    @Transactional
     public void eliminarColor(Long id) {
         Color color = obtenerColor(id);
         color.softDelete();

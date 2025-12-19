@@ -28,6 +28,7 @@ public class ProveedorService {
     }
 
     // ============================ ELIMINAR UN PROVEEDOR ============================
+    @Transactional
     public void eliminarProveedor(Long id) {
         Proveedor proveedor = obtenerProveedor(id);
         proveedor.softDelete();
