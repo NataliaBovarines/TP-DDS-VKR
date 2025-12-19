@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.CategoriaDto;
+import com.yourapp.app.models.dto.CategoriaCreateRequest;
+import com.yourapp.app.models.dto.CategoriaResponse;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.services.CategoriaService;
 
@@ -29,7 +30,7 @@ public class CategoriaController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('CATEGORIA_CREAR')")
-    public Categoria crearCategoria(@RequestBody @Valid CategoriaDto categoriaDto) {
+    public CategoriaResponse crearCategoria(@RequestBody @Valid CategoriaCreateRequest categoriaDto) {
         return categoriaService.crearCategoria(categoriaDto);
     }
 
@@ -42,7 +43,7 @@ public class CategoriaController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK) 
-    public List<Categoria> obtenerTodasLasCategorias() {
+    public List<CategoriaResponse> obtenerTodasLasCategorias() {
         return categoriaService.obtenerTodasLasCategorias();
     }
 }

@@ -47,7 +47,7 @@ public class ProductoService {
     // ============================ CREAR UN PRODUCTO ============================
     @Transactional
     public Producto crearProducto(ProductoDto productoDto) {
-        Subcategoria subcategoria = subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId());
+        Subcategoria subcategoria = subcategoriaService.obtenerEntidad(productoDto.getSubcategoriaId());
 
         if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
 
@@ -118,7 +118,7 @@ public class ProductoService {
         if (productoDto.getNombre() != null) producto.setNombre(productoDto.getNombre());
         if (productoDto.getDescripcion() != null) producto.setDescripcion(productoDto.getDescripcion());
         if (productoDto.getSubcategoriaId() != null) {
-            Subcategoria subcategoria = subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId());
+            Subcategoria subcategoria = subcategoriaService.obtenerEntidad(productoDto.getSubcategoriaId());
             if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede asignar una categoria inactiva");
             producto.setSubcategoria(subcategoria);
         }

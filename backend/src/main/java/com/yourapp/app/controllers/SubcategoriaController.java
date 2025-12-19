@@ -1,11 +1,7 @@
 package com.yourapp.app.controllers;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,9 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.SubcategoriaDto;
-import com.yourapp.app.models.dto.SubcategoriaFiltroDto;
-import com.yourapp.app.models.entities.Subcategoria;
+import com.yourapp.app.models.dto.SubcategoriaCreateRequest;
+import com.yourapp.app.models.dto.SubcategoriaResponse;
 import com.yourapp.app.services.SubcategoriaService;
 
 import jakarta.validation.Valid;
@@ -31,7 +26,7 @@ public class SubcategoriaController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('SUBCATEGORIA_CREAR')")
-    public Subcategoria crearSubcategoria(@RequestBody @Valid SubcategoriaDto subcategoriaDto) {
+    public SubcategoriaResponse crearSubcategoria(@RequestBody @Valid SubcategoriaCreateRequest subcategoriaDto) {
         return subcategoriaService.crearSubcategoria(subcategoriaDto);
     }
 
@@ -40,11 +35,5 @@ public class SubcategoriaController {
     @PreAuthorize("hasAuthority('SUBCATEGORIA_ELIMINAR')")
     public void eliminarSubcategoria(@PathVariable Long id) {
         subcategoriaService.eliminarSubcategoria(id);
-    }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK) 
-    public List<Subcategoria> obtenerSubcategoriasByCategoria(@Valid @ModelAttribute SubcategoriaFiltroDto filtros) {
-        return subcategoriaService.obtenerSubcategoriasByCategoria(filtros);
     }
 }

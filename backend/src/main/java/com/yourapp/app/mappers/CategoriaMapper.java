@@ -1,12 +1,25 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.CategoriaDto;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.CategoriaCreateRequest;
+import com.yourapp.app.models.dto.CategoriaResponse;
 import com.yourapp.app.models.entities.Categoria;
 
-public class CategoriaMapper {
-    public static Categoria toEntity(CategoriaDto categoriaDto) {
-        Categoria categoria = new Categoria();
-        categoria.setDescripcion(categoriaDto.getDescripcion());
-        return categoria;
-    }
+@Mapper(
+    componentModel = "spring", 
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    uses = { SubcategoriaMapper.class }
+)
+public interface CategoriaMapper {
+    // --- ENTRADA ---
+    Categoria toEntity(CategoriaCreateRequest dto);
+
+    // --- SALIDA ---
+    CategoriaResponse toResponse(Categoria entity);
+
+    List<CategoriaResponse> toResponseList(List<Categoria> entities);
 }

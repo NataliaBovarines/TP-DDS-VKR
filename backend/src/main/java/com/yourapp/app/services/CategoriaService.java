@@ -8,7 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.CategoriaMapper;
-import com.yourapp.app.models.dto.CategoriaDto;
+import com.yourapp.app.models.dto.CategoriaCreateRequest;
+import com.yourapp.app.models.dto.CategoriaResponse;
 import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.repositories.CategoriaRepository;
 import com.yourapp.app.repositories.ProductoRepository;
@@ -20,33 +21,37 @@ import lombok.RequiredArgsConstructor;
 public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
     private final ProductoRepository productoRepository;
+    private final CategoriaMapper categoriaMapper;
 
     // ============================ CREAR CATEGORIA ============================
     @Transactional
-    public Categoria crearCategoria(CategoriaDto categoriaDto) {
+    public CategoriaResponse crearCategoria(CategoriaCreateRequest categoriaDto) {
         if (categoriaRepository.existsByDescripcionAndFueEliminadoFalse(categoriaDto.getDescripcion())) throw new ConflictException("La descripción de la categoria ya está en uso");
-        Categoria categoria = CategoriaMapper.toEntity(categoriaDto);
-        return categoriaRepository.save(categoria);
+        Categoria categoria = categoriaMapper.toEntity(categoriaDto);
+        Categoria guardada = categoriaRepository.save(categoria);
+        return categoriaMapper.toResponse(guardada);
     }
 
     // ============================ ELIMINAR UNA CATEGORIA + SUBCATEGORIAS ============================
     @Transactional
     public void eliminarCategoria(Long id) {
-        Categoria categoria = obtenerCategoria(id);
+        Categoria categoria = obtenerEntidad(id);
         if (productoRepository.existsBySubcategoriaCategoriaIdAndFueEliminadoFalse(id)) throw new ConflictException("No se puede eliminar la categoría: una o más de sus subcategorías tienen productos asociados");
         categoria.softDelete();
         categoriaRepository.save(categoria);
     }
 
-    // ============================ OBTENER CATEGORIA ============================
-    public Categoria obtenerCategoria(Long categoriaId) {
-        Categoria categoria = categoriaRepository.findById(categoriaId).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
-        if (categoria.getFueEliminado()) throw new NotFoundException("Categoria eliminada");
-        return categoria;
+    // ============================ OBTENER TODAS LAS CATEGORIAS ============================
+    public List<CategoriaResponse> obtenerTodasLasCategorias() {
+        List<Categoria> categorias = categoriaRepository.findByFueEliminadoFalse();
+
+        return categoriaMapper.toResponseList(categorias);
     }
 
-    // ============================ OBTENER TODAS LAS CATEGORIAS ============================
-    public List<Categoria> obtenerTodasLasCategorias() {
-        return categoriaRepository.findByFueEliminadoFalse();
+    // ============================ MÉTODO DE APOYO ============================
+    public Categoria obtenerEntidad(Long id) {
+        Categoria categoria = categoriaRepository.findById(id).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
+        if (categoria.getFueEliminado()) throw new NotFoundException("Categoria eliminada");
+        return categoria;
     }
 }
