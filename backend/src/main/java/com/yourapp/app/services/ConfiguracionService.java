@@ -10,7 +10,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +42,7 @@ public class ConfiguracionService {
   @Transactional
   public ConfiguracionTienda actualizarConfiguracion(ConfiguracionUpdateDto dto) {
     ConfiguracionTienda configActual = configuracionTiendaRepository.findFirstByOrderByIdAsc().orElseThrow(() -> new NotFoundException("No se encontró la configuración"));
-    configuracionMapper.toUpdateEntity(dto, configActual);
+    configuracionMapper.updateEntity(dto, configActual);
     ConfiguracionTienda guardada = configuracionTiendaRepository.save(configActual);
     ConfiguracionTienda.setInstance(guardada);
     

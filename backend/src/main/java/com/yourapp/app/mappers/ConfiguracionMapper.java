@@ -11,5 +11,5 @@ import com.yourapp.app.models.entities.ConfiguracionTienda;
     unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface ConfiguracionMapper {
-    void toUpdateEntity(ConfiguracionUpdateDto dto, @MappingTarget ConfiguracionTienda entity);
+    void updateEntity(ConfiguracionUpdateDto dto, @MappingTarget ConfiguracionTienda entity);
 }
