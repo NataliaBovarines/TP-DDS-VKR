@@ -28,7 +28,7 @@ public class SubcategoriaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAuthority('TIPO_PRENDA_CREAR')")
+    @PreAuthorize("hasAuthority('SUBCATEGORIA_CREAR')")
     public Subcategoria crearSubcategoria(@RequestBody @Valid SubcategoriaDto subcategoriaDto) {
         return subcategoriaService.crearSubcategoria(subcategoriaDto);
     }

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class CategoriaService {
     private final CategoriaRepository categoriaRepository;
 
+    // ============================ CREAR CATEGORIA ============================
     @Transactional
     public Categoria crearCategoria(CategoriaDto categoriaDto) {
         if (categoriaRepository.existsByDescripcion(categoriaDto.getDescripcion())) throw new ConflictException("La descripción de la categoria ya está en uso");
@@ -26,10 +27,12 @@ public class CategoriaService {
         return categoriaRepository.save(categoria);
     }
 
+    // ============================ OBTENER CATEGORIA ============================
     public Categoria obtenerCategoria(Long categoriaId) {
         return categoriaRepository.findById(categoriaId).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
     }
 
+    // ============================ OBTENER TODAS LAS CATEGORIAS ============================
     public List<Categoria> obtenerTodasLasCategorias() {
         return categoriaRepository.findAll();
     }

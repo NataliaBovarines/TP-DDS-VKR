@@ -29,6 +29,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    // ============================ LOGIN ============================
     public TokenResponseDto login(UsuarioLoginDto usuarioDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usuarioDto.getNombreDeUsuario(), usuarioDto.getContrasenia()));
@@ -43,6 +44,7 @@ public class AuthService {
         return new TokenResponseDto(jwtToken);
     }
 
+    // ============================ CAMBIAR CONTRASEÑA (CON CONTRASEÑA ANTERIOR) ============================
     public TokenResponseDto cambiarContrasenia(UsuarioContraseniaDto usuarioDto) {
         Usuario usuario = obtenerUsuarioLogueado();
 
@@ -53,6 +55,7 @@ public class AuthService {
         return new TokenResponseDto(jwtToken);
     }
 
+    // ============================ PEDIR RECUPERACION DE CONTRASEÑA ============================
     public void recuperarContrasenia(UsuarioContraseniaRecuperarDto usuarioDto) {
         try {
             Usuario usuario = usuarioService.obtenerUsuarioByMail(usuarioDto.getMail());
@@ -61,6 +64,7 @@ public class AuthService {
         } catch (NotFoundException e) {}
     }
 
+    // ============================ CAMBIAR CONTRASEÑA (CON TOKEN) ============================
     public void resetearContrasenia(UsuarioContraseniaResetearDto usuarioDto) {
         Usuario usuario = usuarioService.obtenerUsuarioByToken(usuarioDto.getToken());
 
@@ -69,6 +73,7 @@ public class AuthService {
         usuarioService.resetearContrasenia(usuario, usuarioDto.getContraseniaNueva());
     }
 
+    // ============================ OBTENER EL USUARIO DE LA SESION ============================
     public Usuario obtenerUsuarioLogueado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         

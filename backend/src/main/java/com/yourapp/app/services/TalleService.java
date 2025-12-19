@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class TalleService {
     private final TalleRepository talleRepository;
 
+    // ============================ CREAR TALLE ============================
     @Transactional
     public Talle crearTalle(TalleDto talleDto) {
         if (talleRepository.existsByDescripcion(talleDto.getDescripcion())) throw new ConflictException("La descripción del talle ya está en uso");
@@ -26,10 +27,12 @@ public class TalleService {
         return talleRepository.save(talle);
     }
 
+    // ============================ OBTENER TALLE ============================
     public Talle obtenerTalle(Long talleId) {
         return talleRepository.findById(talleId).orElseThrow(() -> new NotFoundException("Talle no encontrado"));
     }
 
+    // ============================ OBTENER TODOS LOS TALLES ============================
     public List<Talle> obtenerTodosLosTalles() {
         return talleRepository.findAll();
     }

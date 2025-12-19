@@ -35,6 +35,7 @@ public class UsuarioService {
     private final RolService rolService;
     private final PasswordEncoder passwordEncoder;
 
+    // ============================ CREAR UN USUARIO ============================
     @Transactional
     public Usuario crearUsuario(EmpleadoDto empleadoDto) {
         Rol rol = rolService.obtenerRol(empleadoDto.getRolId());
@@ -75,16 +76,19 @@ public class UsuarioService {
     public boolean existeUsuarioByNombre(String nombreDeUsuario) {
         return usuarioRepository.existsByNombreDeUsuario(nombreDeUsuario.toLowerCase());
     }
-
+    
+    // ============================ OBTENER USUARIO ============================
     public Usuario obtenerUsuarioCompleto(Long id) {
         return usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
     }
 
+    // ============================ OBTENER USUARIO RESPONSE ============================
     public UsuarioResponseDto obtenerUsuario(Long id) {
         Usuario usuarioGuardado = obtenerUsuarioCompleto(id);
         return UsuarioMapper.fromEntity(usuarioGuardado);
     }
 
+    // ============================ OBTENER USUARIO POR SU NOMBRE DE USUARIO ============================
     public Usuario obtenerUsuarioByNombre(String nombreDeUsuario) {
         Usuario usuario = usuarioRepository.findByNombreDeUsuario(nombreDeUsuario);
     
@@ -93,6 +97,7 @@ public class UsuarioService {
         return usuario;
     }
 
+    // ============================ OBTENER USUARIO POR SU MAIL ============================
     public Usuario obtenerUsuarioByMail(String mail) {
         Usuario usuario = usuarioRepository.findByEmpleadoMail(mail);
     
@@ -101,6 +106,7 @@ public class UsuarioService {
         return usuario;
     }
 
+    // ============================ OBTENER USUARIO POR SU TOKEN ============================
     public Usuario obtenerUsuarioByToken(String tokenPlano) {
         return usuarioRepository.findAll().stream()
             .filter(u -> u.getResetToken() != null)
@@ -109,6 +115,7 @@ public class UsuarioService {
             .orElseThrow(() -> new UnauthorizedException("Token inválido"));
     }
 
+    // ============================ ACTUALIZAR ROL DE UN USUARIO ============================
     @Transactional
     public UsuarioResponseDto actualizarRolUsuario(Long id, UsuarioRolDto usuarioDto) {
         Usuario usuario = obtenerUsuarioCompleto(id);
@@ -122,6 +129,7 @@ public class UsuarioService {
         return UsuarioMapper.fromEntity(usuarioGuardado);
     }
 
+    // ============================ CAMBIAR CONTRASEÑA DE UN USUARIO (CON CONTRASEÑA ANTERIOR) ============================
     @Transactional
     public Usuario actualizarContraseniaUsuario(Usuario usuario, UsuarioContraseniaDto usuarioDto) {
         if (!passwordEncoder.matches(usuarioDto.getContraseniaActual(), usuario.getContrasenia())) throw new UnauthorizedException("La contraseña actual es incorrecta");
@@ -132,6 +140,7 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    // ============================ PEDIR RECUPERACION DE CONTRASEÑA ============================
     @Transactional
     public void recuperarContrasenia(Usuario usuario, String tokenPlano) {
         usuario.setResetToken(passwordEncoder.encode(tokenPlano));
@@ -144,6 +153,7 @@ public class UsuarioService {
         // ENVIAR EL MAIL CON EL LINK DE RECUPERACION (ESE LINK CONTIENE EL TOKEN)
     }
 
+    // ============================ CAMBIAR CONTRASEÑA DE UN USUARIO (CON TOKEN) ============================
     @Transactional
     public void resetearContrasenia(Usuario usuario, String contraseniaNueva) {
         usuario.setContrasenia(passwordEncoder.encode(contraseniaNueva));
@@ -157,13 +167,15 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    // ============================ ELIMINAR UN USUARIO ============================
     @Transactional
     public void eliminarUsuario(Usuario usuario) {
         usuario.softDelete();
 
         usuarioRepository.save(usuario);
     }
-    
+
+    // ============================ OBTENER USUARIOS CON FILTROS ============================
     public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(UsuarioFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();

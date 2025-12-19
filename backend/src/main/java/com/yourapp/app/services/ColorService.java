@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class ColorService {
     private final ColorRepository colorRepository;
 
+    // ============================ CREAR COLOR ============================
     @Transactional
     public Color crearColor(ColorDto colorDto) {
         if (colorRepository.existsByDescripcion(colorDto.getDescripcion())) throw new ConflictException("La descripción del color ya está en uso");
@@ -26,10 +27,12 @@ public class ColorService {
         return colorRepository.save(color);
     }
 
+    // ============================ OBTENER COLOR ============================
     public Color obtenerColor(Long colorId) {
         return colorRepository.findById(colorId).orElseThrow(() -> new NotFoundException("Color no encontrado"));
     }
 
+    // ============================ OBTENER TODOS LOS COLORES ============================
     public List<Color> obtenerTodosLosColores() {
         return colorRepository.findAll();
     }

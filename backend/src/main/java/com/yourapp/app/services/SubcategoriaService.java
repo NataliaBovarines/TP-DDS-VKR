@@ -22,6 +22,7 @@ public class SubcategoriaService {
     private final SubcategoriaRepository subcategoriaRepository;
     private final CategoriaService categoriaService;
     
+    // ============================ CREAR UNA SUBCATEGORIA ============================
     @Transactional
     public Subcategoria crearSubcategoria(SubcategoriaDto subcategoriaDto) {
         if (subcategoriaRepository.existsByDescripcion(subcategoriaDto.getDescripcion())) throw new ConflictException("La descripción de la subcategoría ya está en uso");
@@ -33,10 +34,12 @@ public class SubcategoriaService {
         return subcategoriaRepository.save(subcategoria);
     }
 
+    // ============================ OBTENER UNA SUBCATEGORIA ============================
     public Subcategoria obtenerSubcategoria(Long subcategoriaId) {
         return subcategoriaRepository.findById(subcategoriaId).orElseThrow(() -> new NotFoundException("Subcategoría no encontrada"));
     }
 
+    // ============================ OBTENER TODAS LAS SUBCATEGORIAS DE UNA CATEGORIA ============================
     public List<Subcategoria> obtenerSubcategoriasByCategoria(SubcategoriaFiltroDto filtros) {
         if (filtros.getCategoriaId() != null) return subcategoriaRepository.findByCategoriaId(filtros.getCategoriaId());
         

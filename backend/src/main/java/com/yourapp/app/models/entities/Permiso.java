@@ -37,7 +37,7 @@ public enum Permiso {
     TALLE_CREAR("Crear un talle"),
 
     // --------- TIPO DE PRENDA ----------
-    TIPO_PRENDA_CREAR("Crear un tipo de prenda"),
+    SUBCATEGORIA_CREAR("Crear un tipo de prenda"),
 
     // --------- USUARIO ----------
     USUARIO_VER("Ver usuarios"),

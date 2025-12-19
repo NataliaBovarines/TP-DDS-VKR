@@ -26,7 +26,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ClienteService {
     private final ClienteRepository clienteRepository;
-    
+ 
+    // ============================ CREAR UN CLIENTE ============================
     @Transactional
     public Cliente crearCliente(ClienteDto clienteDto) {
         Cliente cliente = ClienteMapper.toEntity(clienteDto);
@@ -34,10 +35,12 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
+    // ============================ OBTENER UN CLIENTE ============================
     public Cliente obtenerCliente(Long id) {
         return clienteRepository.findById(id).orElseThrow(() -> new NotFoundException("Cliente no encontrado"));
     }
 
+    // ============================ ACTUALIZAR UN CLIENTE ============================
     @Transactional
     public Cliente actualizarCliente(Long id, ClienteCambioDto clienteDto) {
         Cliente cliente = obtenerCliente(id);
@@ -51,6 +54,7 @@ public class ClienteService {
         return clienteRepository.save(cliente);  
     }
 
+    // ============================ ELIMINAR UN CLIENTE ============================
     @Transactional
     public void eliminarCliente(Long id) {
         Cliente cliente = obtenerCliente(id);
@@ -60,6 +64,7 @@ public class ClienteService {
         clienteRepository.save(cliente);
     }
 
+    // ============================ OBTENER CLIENTES CON FILTROS ============================
     public Page<Cliente> obtenerClientesFiltrados(ClienteFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();

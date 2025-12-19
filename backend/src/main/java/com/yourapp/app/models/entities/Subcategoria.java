@@ -15,5 +15,6 @@ public class Subcategoria {
     private String descripcion;
 
     @ManyToOne
+    @JsonIgnore
     private Categoria categoria;
 }

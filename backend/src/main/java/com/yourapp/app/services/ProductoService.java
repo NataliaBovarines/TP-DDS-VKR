@@ -20,7 +20,6 @@ import com.yourapp.app.models.dto.DetalleProductoDto;
 import com.yourapp.app.models.dto.ProductoDto;
 import com.yourapp.app.models.dto.ProductoFiltroDto;
 import com.yourapp.app.models.dto.ProductoCambioDto;
-import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
@@ -39,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 public class ProductoService {
     private final ProductoRepository productoRepository;
     private final DetalleProductoRepository detalleProductoRepository;
-    private final CategoriaService categoriaService;
     private final SubcategoriaService subcategoriaService;
     private final TalleService talleService;
     private final ColorService colorService;

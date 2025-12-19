@@ -30,6 +30,7 @@ public class EmpleadoService {
     private final EmpleadoRepository empleadoRepository;
     private final UsuarioService usuarioService;
 
+    // ============================ CREAR EMPLEADO (CREANDOLE ADEMAS SU USUARIO) ============================
     @Transactional
     public EmpleadoResponseDto crearEmpleado(EmpleadoDto empleadoDto) {
         if (empleadoRepository.existsByDniAndFueEliminadoFalse(empleadoDto.getDni())) throw new ConflictException("Ya existe un empleado con el DNI proporcionado");
@@ -45,15 +46,18 @@ public class EmpleadoService {
         return EmpleadoMapper.fromEntity(empleadoGuardado);
     }
 
+    // ============================ OBTENER UN EMPLEADO RESPONSE ============================
     public EmpleadoResponseDto obtenerEmpleado(Long id) {
         Empleado empleadoGuardado = obtenerEmpleadoCompleto(id);
         return EmpleadoMapper.fromEntity(empleadoGuardado);
     }
 
+    // ============================ OBTENER UN EMPLEADO ============================
     public Empleado obtenerEmpleadoCompleto(Long id) {
         return empleadoRepository.findById(id).orElseThrow(() -> new NotFoundException("Empleado no encontrado"));
     }
 
+    // ============================ ACTUALIZAR UN EMPLEADO ============================
     @Transactional
     public EmpleadoResponseDto actualizarEmpleado(Long id, EmpleadoCambioDto empleadoDto) {
         Empleado empleado = obtenerEmpleadoCompleto(id);
@@ -67,6 +71,7 @@ public class EmpleadoService {
         return EmpleadoMapper.fromEntity(empleadoGuardado);
     }
 
+    // ============================ ELIMINAR UN EMPLEADO ============================
     @Transactional
     public void eliminarEmpleado(Long id) {
         Empleado empleado = obtenerEmpleadoCompleto(id);
@@ -78,6 +83,7 @@ public class EmpleadoService {
         empleadoRepository.save(empleado);
     }
 
+    // ============================ OBTENER EMPLEADOS CON FILTROS ============================
     public Page<EmpleadoResponseDto> obtenerEmpleadosFiltrados(EmpleadoFiltroDto filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
