@@ -15,7 +15,7 @@ public class DetalleProducto extends Persistible {
     @JsonIgnore
     private Producto producto;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String codigo;
 
     @ManyToOne

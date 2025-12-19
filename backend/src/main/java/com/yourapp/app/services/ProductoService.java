@@ -31,6 +31,7 @@ import com.yourapp.app.repositories.ProductoRepository;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -46,11 +47,9 @@ public class ProductoService {
     // ============================ CREAR UN PRODUCTO ============================
     @Transactional
     public Producto crearProducto(ProductoDto productoDto) {
-        // Categoria categoria = (productoDto.getCategoriaId() != null) ? categoriaService.obtenerCategoria(productoDto.getCategoriaId()) : null;
-
         Subcategoria subcategoria = (productoDto.getSubcategoriaId() != null) ? subcategoriaService.obtenerSubcategoria(productoDto.getSubcategoriaId()) : null;
 
-        if(!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
+        if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
 
         Proveedor proveedor = (productoDto.getProveedorId() != null) ? proveedorService.obtenerProveedor(productoDto.getProveedorId()) : null;
 
@@ -79,7 +78,7 @@ public class ProductoService {
         DetalleProducto detalle = DetalleProductoMapper.toEntity(detalleDto, producto, talle, color);
         detalle.setCodigo(codigoGenerado);
         
-        if (detalleProductoRepository.existsByCodigo(codigoGenerado)) throw new ConflictException("Ya existe este producto con estas características (Talle/Color/Unico)");
+        if (detalleProductoRepository.existsByCodigoAndFueEliminadoFalse(codigoGenerado)) throw new ConflictException("Ya existe este producto con estas características (Talle/Color/Unico)");
 
         return detalleProductoRepository.save(detalle);
     }
@@ -87,28 +86,28 @@ public class ProductoService {
     // ============================ OBTENER UN PRODUCTO POR ID ============================
     public Producto obtenerProducto(Long productoId) {
         Producto producto = productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
-
+        
         if (producto.getFueEliminado()) throw new NotFoundException("Producto eliminado");
-    
+
         return producto;
     }
 
     // ============================ OBTENER UN DETALLE PRODUCTO POR ID ============================
     public DetalleProducto obtenerDetalleProducto(Long detalleId) {
-        DetalleProducto detalle = detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
+        DetalleProducto detalleProducto = detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
         
-        if (detalle.getFueEliminado()) throw new NotFoundException("Producto eliminado");
-
-        return detalle;
+        if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto o producto eliminado");
+        
+        return detalleProducto;
     }
 
     // ============================ OBTENER UN DETALLE PRODUCTO POR CODIGO UNICO ============================
     public DetalleProducto obtenerDetalleByCodigo(String detalleCodigo) {
-        DetalleProducto detalle = detalleProductoRepository.findByCodigo(detalleCodigo).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
-        
-        if (detalle.getFueEliminado()) throw new NotFoundException("Producto eliminado");
+        DetalleProducto detalleProducto = detalleProductoRepository.findByCodigo(detalleCodigo).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
 
-        return detalle;
+        if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto o producto eliminado");
+    
+        return detalleProducto;
     }
 
     // ============================ ACTUALIZAR UN PRODUCTO ============================
@@ -143,7 +142,7 @@ public class ProductoService {
         return detalleProductoRepository.save(detalle);
     }
 
-    // ============================ ELIMINAR UN PRODUCTO ============================
+    // ============================ ELIMINAR UN PRODUCTO + DETALLES DEL PRODUCTO ============================
     @Transactional
     public void eliminarProducto(Long id) {
         Producto producto = obtenerProducto(id);
@@ -188,11 +187,18 @@ public class ProductoService {
             }
         }
 
-        // --------- ESPECIFICACION ----------
-        Specification<Producto> spec = (root, query, cb) -> cb.conjunction();
-
-        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
-
+        // --------- ESPECIFICACION ----------        
+        Specification<Producto> spec = (root, query, cb) -> {
+            query.distinct(true);
+            
+            Predicate productoNoEliminado = cb.equal(root.get("fueEliminado"), false);
+            
+            Join<Producto, DetalleProducto> detalles = root.join("detallesProductos", JoinType.LEFT);
+            Predicate detallesNoEliminados = cb.equal(detalles.get("fueEliminado"), false);
+            
+            return cb.and(productoNoEliminado, detallesNoEliminados);
+        };
+        
         // Filtrar por nombre
         if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {
             spec = spec.and((root, query, cb) ->

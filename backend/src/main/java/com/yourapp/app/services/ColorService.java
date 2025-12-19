@@ -22,18 +22,27 @@ public class ColorService {
     // ============================ CREAR COLOR ============================
     @Transactional
     public Color crearColor(ColorDto colorDto) {
-        if (colorRepository.existsByDescripcion(colorDto.getDescripcion())) throw new ConflictException("La descripción del color ya está en uso");
+        if (colorRepository.existsByDescripcionAndFueEliminadoFalse(colorDto.getDescripcion())) throw new ConflictException("La descripción del color ya está en uso");
         Color color = ColorMapper.toEntity(colorDto);
         return colorRepository.save(color);
     }
 
+    // ============================ ELIMINAR UN COLOR ============================
+    public void eliminarColor(Long id) {
+        Color color = obtenerColor(id);
+        color.softDelete();
+        colorRepository.save(color);
+    }
+
     // ============================ OBTENER COLOR ============================
     public Color obtenerColor(Long colorId) {
-        return colorRepository.findById(colorId).orElseThrow(() -> new NotFoundException("Color no encontrado"));
+        Color color = colorRepository.findById(colorId).orElseThrow(() -> new NotFoundException("Color no encontrado"));
+        if (color.getFueEliminado()) throw new NotFoundException("Color eliminado");
+        return color;
     }
 
     // ============================ OBTENER TODOS LOS COLORES ============================
     public List<Color> obtenerTodosLosColores() {
-        return colorRepository.findAll();
+        return colorRepository.findByFueEliminadoFalse();
     }
 }

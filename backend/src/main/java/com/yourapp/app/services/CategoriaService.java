@@ -22,18 +22,27 @@ public class CategoriaService {
     // ============================ CREAR CATEGORIA ============================
     @Transactional
     public Categoria crearCategoria(CategoriaDto categoriaDto) {
-        if (categoriaRepository.existsByDescripcion(categoriaDto.getDescripcion())) throw new ConflictException("La descripción de la categoria ya está en uso");
+        if (categoriaRepository.existsByDescripcionAndFueEliminadoFalse(categoriaDto.getDescripcion())) throw new ConflictException("La descripción de la categoria ya está en uso");
         Categoria categoria = CategoriaMapper.toEntity(categoriaDto);
         return categoriaRepository.save(categoria);
     }
 
+    // ============================ ELIMINAR UNA CATEGORIA + SUBCATEGORIAS ============================
+    public void eliminarCategoria(Long id) {
+        Categoria categoria = obtenerCategoria(id);
+        categoria.softDelete();
+        categoriaRepository.save(categoria);
+    }
+
     // ============================ OBTENER CATEGORIA ============================
     public Categoria obtenerCategoria(Long categoriaId) {
-        return categoriaRepository.findById(categoriaId).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
+        Categoria categoria = categoriaRepository.findById(categoriaId).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
+        if (categoria.getFueEliminado()) throw new NotFoundException("Categoria eliminada");
+        return categoria;
     }
 
     // ============================ OBTENER TODAS LAS CATEGORIAS ============================
     public List<Categoria> obtenerTodasLasCategorias() {
-        return categoriaRepository.findAll();
+        return categoriaRepository.findByFueEliminadoFalse();
     }
 }

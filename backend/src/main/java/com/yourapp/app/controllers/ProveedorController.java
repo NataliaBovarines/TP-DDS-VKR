@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,13 @@ public class ProveedorController {
     @PreAuthorize("hasAuthority('PROVEEDOR_CREAR')")
     public Proveedor crearProveedor(@RequestBody @Valid ProveedorDto proveedorDto) {
         return proveedorService.crearProveedor(proveedorDto);
+    }
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ROL_ELIMINAR')")
+    public void eliminarProveedor(@PathVariable Long id) {
+        proveedorService.eliminarProveedor(id);
     }
 
     @GetMapping

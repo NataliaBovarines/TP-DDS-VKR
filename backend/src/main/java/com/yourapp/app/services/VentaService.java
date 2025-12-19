@@ -74,14 +74,10 @@ public class VentaService {
 
     // ============================ OBTENER UNA VENTA POR ID ============================
     public Venta obtenerVenta(Long ventaId) {
-        Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
-        
-        if(venta.getFueEliminado()) throw new NotFoundException("Venta eliminada");
-        
-        return venta;
+        return ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
     }
 
-    // ============================ ELIMINAR UNA VENTA ============================
+    // ============================ ELIMINAR UNA VENTA + DETALLES DE LA VENTA + PAGOS DE CREDITO ============================
     @Transactional
     public void eliminarVenta(Long id) {
         Venta venta = obtenerVenta(id);
@@ -254,8 +250,6 @@ public class VentaService {
 
         // --------- ESPECIFICACION ----------
         Specification<Venta> spec = (root, query, cb) -> cb.conjunction();
-
-        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
 
         // Filtrar por empleado
         if (filtros.getEmpleadoId() != null) {

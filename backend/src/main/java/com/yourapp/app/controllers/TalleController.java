@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,13 @@ public class TalleController {
     @PreAuthorize("hasAuthority('TALLE_CREAR')")
     public Talle crearTalle(@RequestBody @Valid TalleDto talleDto) {
         return talleService.crearTalle(talleDto);
+    }
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('TALLE_ELIMINAR')")
+    public void eliminarTalle(@PathVariable Long id) {
+        talleService.eliminarTalle(id);
     }
 
     @GetMapping

@@ -6,9 +6,6 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Talle {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Talle extends Persistible {
     private String descripcion;
 }

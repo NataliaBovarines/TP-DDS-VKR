@@ -16,7 +16,6 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Producto extends Persistible {
-
     @Column(nullable = false)
     private String nombre;
 

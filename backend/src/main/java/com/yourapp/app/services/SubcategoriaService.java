@@ -25,24 +25,29 @@ public class SubcategoriaService {
     // ============================ CREAR UNA SUBCATEGORIA ============================
     @Transactional
     public Subcategoria crearSubcategoria(SubcategoriaDto subcategoriaDto) {
-        if (subcategoriaRepository.existsByDescripcion(subcategoriaDto.getDescripcion())) throw new ConflictException("La descripción de la subcategoría ya está en uso");
-        
+        if (subcategoriaRepository.existsByDescripcionAndFueEliminadoFalse(subcategoriaDto.getDescripcion())) throw new ConflictException("La descripción de la subcategoría ya está en uso");
         Categoria categoria = categoriaService.obtenerCategoria(subcategoriaDto.getCategoriaId());
-        
         Subcategoria subcategoria = SubcategoriaMapper.toEntity(subcategoriaDto, categoria);
-
         return subcategoriaRepository.save(subcategoria);
+    }
+
+    // ============================ ELIMINAR UN SUBCATEGORIA ============================
+    public void eliminarSubcategoria(Long id) {
+        Subcategoria subcategoria = obtenerSubcategoria(id);
+        subcategoria.softDelete();
+        subcategoriaRepository.save(subcategoria);
     }
 
     // ============================ OBTENER UNA SUBCATEGORIA ============================
     public Subcategoria obtenerSubcategoria(Long subcategoriaId) {
-        return subcategoriaRepository.findById(subcategoriaId).orElseThrow(() -> new NotFoundException("Subcategoría no encontrada"));
+        Subcategoria subcategoria = subcategoriaRepository.findById(subcategoriaId).orElseThrow(() -> new NotFoundException("Subcategoría no encontrada"));
+        if (subcategoria.getFueEliminado() || subcategoria.getCategoria().getFueEliminado()) throw new NotFoundException("Subcategoria o categoria eliminada");
+        return subcategoria;
     }
 
     // ============================ OBTENER TODAS LAS SUBCATEGORIAS DE UNA CATEGORIA ============================
     public List<Subcategoria> obtenerSubcategoriasByCategoria(SubcategoriaFiltroDto filtros) {
         if (filtros.getCategoriaId() != null) return subcategoriaRepository.findByCategoriaId(filtros.getCategoriaId());
-        
-        return subcategoriaRepository.findAll();
+        return subcategoriaRepository.findByFueEliminadoFalse();
     }
 }

@@ -54,7 +54,9 @@ public class EmpleadoService {
 
     // ============================ OBTENER UN EMPLEADO ============================
     public Empleado obtenerEmpleadoCompleto(Long id) {
-        return empleadoRepository.findById(id).orElseThrow(() -> new NotFoundException("Empleado no encontrado"));
+        Empleado empleado = empleadoRepository.findById(id).orElseThrow(() -> new NotFoundException("Empleado no encontrado"));
+        if (empleado.getFueEliminado()) throw new NotFoundException("Empleado eliminado");
+        return empleado;
     }
 
     // ============================ ACTUALIZAR UN EMPLEADO ============================
@@ -71,15 +73,13 @@ public class EmpleadoService {
         return EmpleadoMapper.fromEntity(empleadoGuardado);
     }
 
-    // ============================ ELIMINAR UN EMPLEADO ============================
+    // ============================ ELIMINAR UN EMPLEADO + SU USUARIO ============================
     @Transactional
     public void eliminarEmpleado(Long id) {
         Empleado empleado = obtenerEmpleadoCompleto(id);
 
         empleado.softDelete();
-
-        usuarioService.eliminarUsuario(empleado.getUsuario());
-
+        
         empleadoRepository.save(empleado);
     }
 

@@ -8,10 +8,7 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Subcategoria {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Subcategoria extends Persistible {
     private String descripcion;
 
     @ManyToOne

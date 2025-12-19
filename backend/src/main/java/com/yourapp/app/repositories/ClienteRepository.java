@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.yourapp.app.models.entities.Cliente;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long>, JpaSpecificationExecutor<Cliente> {
-    boolean existsByDni(String dni);
+    boolean existsByDniAndFueEliminadoFalse(String dni);
 }

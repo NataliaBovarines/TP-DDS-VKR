@@ -9,10 +9,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "ventas")
-@Getter
-@Setter
+@Getter @Setter
+@SQLRestriction("fue_eliminado = false")
 public class Venta extends Persistible {
 
     @ManyToOne
@@ -44,9 +46,11 @@ public class Venta extends Persistible {
     private String estadoNombre;
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("fue_eliminado = false")
     private List<DetalleVenta> detalles = new ArrayList<>();
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("fue_eliminado = false")
     private List<PagoDeCredito> pagosCredito = new ArrayList<>();
 
     public enum MetodoPago {
@@ -143,7 +147,7 @@ public class Venta extends Persistible {
         if (totalVenta > disponible) {
             return totalVenta - disponible;
         }
-        
+
         return 0.0;
     }
 

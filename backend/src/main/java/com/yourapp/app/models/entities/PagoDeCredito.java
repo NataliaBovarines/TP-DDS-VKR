@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yourapp.app.exceptions.BadRequestException;
 
@@ -14,6 +16,7 @@ import com.yourapp.app.exceptions.BadRequestException;
 @Getter
 @Setter
 @NoArgsConstructor
+@SQLRestriction("fue_eliminado = false")
 public class PagoDeCredito extends Persistible {
 
     @ManyToOne(fetch = FetchType.LAZY)

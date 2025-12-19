@@ -80,6 +80,13 @@ public class VentaController {
         return ventaService.rechazarVenta(id, ventaDto);
     }
 
+    @PatchMapping("/{id}/eliminacion")
+    @ResponseStatus(HttpStatus.OK) 
+    @PreAuthorize("hasAuthority('VENTA_ELIMINAR')")
+    public void eliminarVenta(@PathVariable Long id) {
+        ventaService.eliminarVenta(id);
+    }
+
     @PatchMapping("/{id}/cambio")
     @ResponseStatus(HttpStatus.OK) 
     @PreAuthorize("hasAuthority('VENTA_CAMBIAR')")

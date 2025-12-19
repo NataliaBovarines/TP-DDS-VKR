@@ -49,6 +49,7 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    // --------- Generacion del nombre de usuario ----------
     public String generarNombreDeUsuario(String nombre, String apellido) {
         String nombreLimpio = nombre.trim().toLowerCase();
         String apellidoLimpio = apellido.trim().toLowerCase().replaceAll("\\s+", "");
@@ -73,18 +74,24 @@ public class UsuarioService {
         throw new ConflictException("No se pudo generar un nombre de usuario");
     }
 
+    // --------- Verificar si ese nombre de usuario ya esta registrado ----------
     public boolean existeUsuarioByNombre(String nombreDeUsuario) {
-        return usuarioRepository.existsByNombreDeUsuario(nombreDeUsuario.toLowerCase());
+        return usuarioRepository.existsByNombreDeUsuarioAndFueEliminadoFalse(nombreDeUsuario.toLowerCase());
     }
     
     // ============================ OBTENER USUARIO ============================
     public Usuario obtenerUsuarioCompleto(Long id) {
-        return usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        if (usuario.getFueEliminado()) throw new NotFoundException("Usuario eliminado");
+
+        return usuario;
     }
 
     // ============================ OBTENER USUARIO RESPONSE ============================
     public UsuarioResponseDto obtenerUsuario(Long id) {
         Usuario usuarioGuardado = obtenerUsuarioCompleto(id);
+
         return UsuarioMapper.fromEntity(usuarioGuardado);
     }
 
@@ -93,6 +100,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByNombreDeUsuario(nombreDeUsuario);
     
         if (usuario == null) throw new NotFoundException("Usuario no encontrado");
+        if (usuario.getFueEliminado()) throw new NotFoundException("Usuario eliminado");
     
         return usuario;
     }
@@ -102,6 +110,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmpleadoMail(mail);
     
         if (usuario == null) throw new NotFoundException("Usuario no encontrado");
+        if (usuario.getFueEliminado()) throw new NotFoundException("Usuario eliminado");
     
         return usuario;
     }
@@ -109,6 +118,7 @@ public class UsuarioService {
     // ============================ OBTENER USUARIO POR SU TOKEN ============================
     public Usuario obtenerUsuarioByToken(String tokenPlano) {
         return usuarioRepository.findAll().stream()
+            .filter(u -> !u.getFueEliminado())
             .filter(u -> u.getResetToken() != null)
             .filter(u -> passwordEncoder.matches(tokenPlano, u.getResetToken()))
             .findFirst()
@@ -167,62 +177,52 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-    // ============================ ELIMINAR UN USUARIO ============================
-    @Transactional
-    public void eliminarUsuario(Usuario usuario) {
-        usuario.softDelete();
+    // // ============================ OBTENER USUARIOS CON FILTROS ============================
+    // public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(UsuarioFiltroDto filtros) {
+    //     // --------- ORDENAMIENTO ----------
+    //     Sort sort = Sort.unsorted();
 
-        usuarioRepository.save(usuario);
-    }
+    //     if (filtros.getOrden() != null) {
+    //         List<String> camposPermitidos = List.of("nombreDeUsuario");
 
-    // ============================ OBTENER USUARIOS CON FILTROS ============================
-    public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(UsuarioFiltroDto filtros) {
-        // --------- ORDENAMIENTO ----------
-        Sort sort = Sort.unsorted();
+    //         String campo = filtros.getOrden().toLowerCase();
 
-        if (filtros.getOrden() != null) {
-            List<String> camposPermitidos = List.of("nombreDeUsuario");
+    //         if (camposPermitidos.contains(campo)) {
+    //             Sort.Direction direccion = Sort.Direction.ASC;
+    //             if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
+    //                 direccion = Sort.Direction.DESC;
+    //             }
+    //             sort = Sort.by(direccion, campo);
+    //         } else {
+    //             throw new BadRequestException("No se puede ordenar por el campo: " + campo);
+    //         }
+    //     }
 
-            String campo = filtros.getOrden().toLowerCase();
+    //     // --------- ESPECIFICACION ----------
+    //     Specification<Usuario> spec = (root, query, cb) -> cb.conjunction();
 
-            if (camposPermitidos.contains(campo)) {
-                Sort.Direction direccion = Sort.Direction.ASC;
-                if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
-                    direccion = Sort.Direction.DESC;
-                }
-                sort = Sort.by(direccion, campo);
-            } else {
-                throw new BadRequestException("No se puede ordenar por el campo: " + campo);
-            }
-        }
+    //     // Filtrar por nombre de usuario
+    //     if (filtros.getNombreDeUsuario() != null && !filtros.getNombreDeUsuario().isBlank()) {
+    //         spec = spec.and((root, query, cb) ->
+    //             cb.like(cb.lower(root.get("nombreDeUsuario")), "%" + filtros.getNombreDeUsuario().toLowerCase() + "%")
+    //         );
+    //     }
 
-        // --------- ESPECIFICACION ----------
-        Specification<Usuario> spec = (root, query, cb) -> cb.conjunction();
+    //     // Filtrar por rol
+    //     if (filtros.getRolId() != null) {
+    //         spec = spec.and((root, query, cb) ->
+    //             cb.equal(root.get("rol").get("id"), filtros.getRolId())
+    //         );
+    //     }
 
-        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
+    //     // --------- PAGINACION ----------
+    //     int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
+    //     int tamanio = 10;
+    //     Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 
-        // Filtrar por nombre de usuario
-        if (filtros.getNombreDeUsuario() != null && !filtros.getNombreDeUsuario().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("nombreDeUsuario")), "%" + filtros.getNombreDeUsuario().toLowerCase() + "%")
-            );
-        }
+    //     // --------- CONSULTA ----------
+    //     Page<Usuario> usuarios = usuarioRepository.findAll(spec, pageable);
 
-        // Filtrar por rol
-        if (filtros.getRolId() != null) {
-            spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("rol").get("id"), filtros.getRolId())
-            );
-        }
-
-        // --------- PAGINACION ----------
-        int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
-        int tamanio = 10;
-        Pageable pageable = PageRequest.of(pagina, tamanio, sort);
-
-        // --------- CONSULTA ----------
-        Page<Usuario> usuarios = usuarioRepository.findAll(spec, pageable);
-
-        return usuarios.map(UsuarioMapper::fromEntity);
-    }
+    //     return usuarios.map(UsuarioMapper::fromEntity);
+    // }
 }

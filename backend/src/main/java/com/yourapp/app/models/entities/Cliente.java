@@ -20,7 +20,6 @@ public class Cliente extends Persistible {
 
     private String telefono;
 
-    @Column(unique = true)
     private String dni;
 
     @Column(name = "credito_limite")

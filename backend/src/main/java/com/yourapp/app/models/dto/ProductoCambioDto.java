@@ -17,7 +17,7 @@ public class ProductoCambioDto {
     @Positive(message = "El ID de categoría debe ser un valor válido")
     private Long categoriaId;
 
-    @Positive(message = "El ID de tipo de prenda debe ser un valor válido")
+    @Positive(message = "El ID de subcategoría debe ser un valor válido")
     private Long subcategoriaId;
 
     @Positive(message = "El ID de proveedor debe ser un valor válido")

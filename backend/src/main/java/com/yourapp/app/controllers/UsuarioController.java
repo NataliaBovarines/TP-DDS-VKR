@@ -40,10 +40,10 @@ public class UsuarioController {
         return usuarioService.actualizarRolUsuario(id, usuarioDto);
     }
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('USUARIO_VER')")
-    public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(@Valid @ModelAttribute UsuarioFiltroDto filtros) {
-        return usuarioService.obtenerUsuariosFiltrados(filtros);
-    }
+    // @GetMapping
+    // @ResponseStatus(HttpStatus.OK)
+    // @PreAuthorize("hasAuthority('USUARIO_VER')")
+    // public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(@Valid @ModelAttribute UsuarioFiltroDto filtros) {
+    //     return usuarioService.obtenerUsuariosFiltrados(filtros);
+    // }
 }

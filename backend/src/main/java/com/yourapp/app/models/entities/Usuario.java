@@ -11,7 +11,6 @@ import lombok.Setter;
 @Entity
 @Getter @Setter
 public class Usuario extends Persistible {
-    @Column(unique = true)
     private String nombreDeUsuario;
 
     private String contrasenia;

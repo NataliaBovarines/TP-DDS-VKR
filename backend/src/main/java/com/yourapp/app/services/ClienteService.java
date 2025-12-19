@@ -30,14 +30,18 @@ public class ClienteService {
     // ============================ CREAR UN CLIENTE ============================
     @Transactional
     public Cliente crearCliente(ClienteDto clienteDto) {
+        if (clienteRepository.existsByDniAndFueEliminadoFalse(clienteDto.getDni())) throw new ConflictException("El DNI ya esta asignado a otro cliente");
+        
         Cliente cliente = ClienteMapper.toEntity(clienteDto);
-        if (clienteRepository.existsByDni(clienteDto.getDni())) throw new ConflictException("El DNI ya esta asignado a otro cliente");
+
         return clienteRepository.save(cliente);
     }
 
     // ============================ OBTENER UN CLIENTE ============================
     public Cliente obtenerCliente(Long id) {
-        return clienteRepository.findById(id).orElseThrow(() -> new NotFoundException("Cliente no encontrado"));
+        Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new NotFoundException("Cliente no encontrado"));
+        if (cliente.getFueEliminado()) throw new NotFoundException(("Cliente eliminado"));
+        return cliente;
     }
 
     // ============================ ACTUALIZAR UN CLIENTE ============================

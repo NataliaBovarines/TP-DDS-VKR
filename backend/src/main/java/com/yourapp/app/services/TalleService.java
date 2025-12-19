@@ -22,18 +22,28 @@ public class TalleService {
     // ============================ CREAR TALLE ============================
     @Transactional
     public Talle crearTalle(TalleDto talleDto) {
-        if (talleRepository.existsByDescripcion(talleDto.getDescripcion())) throw new ConflictException("La descripción del talle ya está en uso");
+        if (talleRepository.existsByDescripcionAndFueEliminadoFalse(talleDto.getDescripcion())) throw new ConflictException("La descripción del talle ya está en uso");
         Talle talle = TalleMapper.toEntity(talleDto);
         return talleRepository.save(talle);
     }
 
+    // ============================ ELIMINAR UN TALLE ============================
+    @Transactional
+    public void eliminarTalle(Long id) {
+        Talle talle = obtenerTalle(id);
+        talle.softDelete();
+        talleRepository.save(talle);
+    }
+
     // ============================ OBTENER TALLE ============================
     public Talle obtenerTalle(Long talleId) {
-        return talleRepository.findById(talleId).orElseThrow(() -> new NotFoundException("Talle no encontrado"));
+        Talle talle = talleRepository.findById(talleId).orElseThrow(() -> new NotFoundException("Talle no encontrado"));
+        if (talle.getFueEliminado()) throw new NotFoundException("Talle eliminado");
+        return talle;
     }
 
     // ============================ OBTENER TODOS LOS TALLES ============================
     public List<Talle> obtenerTodosLosTalles() {
-        return talleRepository.findAll();
+        return talleRepository.findByFueEliminadoFalse();
     }
 }

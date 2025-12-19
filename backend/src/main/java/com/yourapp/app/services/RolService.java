@@ -23,28 +23,27 @@ public class RolService {
     // ============================ CREAR UN ROL ============================
     @Transactional
     public Rol crearRol(RolDto rolDto) {
-        if (rolRepository.existsByNombre(rolDto.getNombre())) throw new ConflictException("El nombre del rol ya está en uso");
+        if (rolRepository.existsByNombreAndFueEliminadoFalse(rolDto.getNombre())) throw new ConflictException("El nombre del rol ya está en uso");
         Rol rol = RolMapper.toEntity(rolDto);
-        rol.setFechaCreacion(LocalDateTime.now());
         return rolRepository.save(rol);
+    }
+    
+    // ============================ ELIMINAR UN ROL ============================
+    public void eliminarRol(Long id) {
+        Rol rol = obtenerRol(id);
+        rol.softDelete();
+        rolRepository.save(rol);
     }
 
     // ============================ OBTENER UN ROL ============================
     public Rol obtenerRol(Long rolId) {
-        return rolRepository.findById(rolId).orElseThrow(() -> new NotFoundException("Rol no encontrado"));
-    }
-
-    // ============================ ELIMINAR UN ROL ============================
-    public void eliminarRol(Long id) {
-        Rol rol = obtenerRol(id);
-
-        rol.softDelete();
-
-        rolRepository.save(rol);
+        Rol rol = rolRepository.findById(rolId).orElseThrow(() -> new NotFoundException("Rol no encontrado"));
+        if (rol.getFueEliminado()) throw new NotFoundException("Rol eliminado");
+        return rol;
     }
 
     // ============================ OBTENER TODOS LOS ROLES ============================
     public List<Rol> obtenerTodosLosRoles() {
-        return rolRepository.findAll();
+        return rolRepository.findByFueEliminadoFalse();
     }
 }

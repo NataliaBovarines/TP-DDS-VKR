@@ -22,18 +22,27 @@ public class ProveedorService {
     // ============================ CREAR UN PROVEEDOR ============================
     @Transactional
     public Proveedor crearProveedor(ProveedorDto proveedorDto) {
-        if (proveedorRepository.existsByNombre(proveedorDto.getNombre())) throw new ConflictException("El nombre del proveedor ya está en uso");
+        if (proveedorRepository.existsByNombreAndFueEliminadoFalse(proveedorDto.getNombre())) throw new ConflictException("El nombre del proveedor ya está en uso");
         Proveedor proveedor = ProveedorMapper.toEntity(proveedorDto);
         return proveedorRepository.save(proveedor);
     }
 
+    // ============================ ELIMINAR UN PROVEEDOR ============================
+    public void eliminarProveedor(Long id) {
+        Proveedor proveedor = obtenerProveedor(id);
+        proveedor.softDelete();
+        proveedorRepository.save(proveedor);
+    }
+
     // ============================ OBTENER UN PROVEEDOR ============================
     public Proveedor obtenerProveedor(Long proveedorId) {
-        return proveedorRepository.findById(proveedorId).orElseThrow(() -> new NotFoundException("Proveedor no encontrado"));
+        Proveedor proveedor = proveedorRepository.findById(proveedorId).orElseThrow(() -> new NotFoundException("Proveedor no encontrado"));
+        if (proveedor.getFueEliminado()) throw new NotFoundException("Proveedor eliminado");
+        return proveedor;
     }
 
     // ============================ OBTENER TODOS LOS PROVEEDORES ============================
     public List<Proveedor> obtenerTodosLosProveedores() {
-        return proveedorRepository.findAll();
+        return proveedorRepository.findByFueEliminadoFalse();
     }
 }

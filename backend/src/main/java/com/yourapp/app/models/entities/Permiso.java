@@ -3,6 +3,7 @@ package com.yourapp.app.models.entities;
 public enum Permiso {
     // --------- CATEGORIA ----------
     CATEGORIA_CREAR("Crear una categoria"),
+    CATEGORIA_ELIMINAR("Eliminar una categoria"),
 
     // --------- CLIENTE ----------
     CLIENTE_CREAR("Crear un cliente"),
@@ -12,6 +13,7 @@ public enum Permiso {
 
     // --------- COLOR ----------
     COLOR_CREAR("Crear un color"),
+    COLOR_ELIMINAR("Eliminar un color"),
 
     // --------- EMPLEADO ----------
     EMPLEADO_CREAR("Crear un empleado"),
@@ -27,6 +29,7 @@ public enum Permiso {
 
     // --------- PROVEEDOR ----------
     PROVEEDOR_CREAR("Crear un proveedor"),
+    PROVEEDOR_ELIMINAR("Eliminar un proveedor"),
 
     // --------- ROL ----------
     ROL_CREAR("Crear un rol"),
@@ -35,9 +38,11 @@ public enum Permiso {
 
     // --------- TALLE ----------
     TALLE_CREAR("Crear un talle"),
+    TALLE_ELIMINAR("Eliminar un talle"),
 
-    // --------- TIPO DE PRENDA ----------
-    SUBCATEGORIA_CREAR("Crear un tipo de prenda"),
+    // --------- SUBCATEGORIA ----------
+    SUBCATEGORIA_CREAR("Crear una subcategoria"),
+    SUBCATEGORIA_ELIMINAR("Eliminar una subcategoria"),
 
     // --------- USUARIO ----------
     USUARIO_VER("Ver usuarios"),
@@ -49,6 +54,8 @@ public enum Permiso {
     VENTA_PAGAR("Pagar una venta"),
     VENTA_RESERVAR("Reservar una venta"),
     VENTA_CANCELAR("Cancelar una venta"),
+    VENTA_RECHAZAR("Rechazar una venta"),
+    VENTA_ELIMINAR("Eliminar una venta"),
     VENTA_CAMBIAR("Cambiar productos en una venta"),
     VENTA_PROCESAR("Cancelar reservas vencidas automáticamente");
     
