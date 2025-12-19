@@ -1,5 +1,7 @@
 package com.yourapp.app.services;
 
+import com.yourapp.app.exceptions.NotFoundException;
+import com.yourapp.app.mappers.ConfiguracionMapper;
 import com.yourapp.app.models.dto.ConfiguracionUpdateDto;
 import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.repositories.ConfiguracionTiendaRepository;
@@ -8,12 +10,13 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 @Service
 @RequiredArgsConstructor
 public class ConfiguracionService {
-
   private final ConfiguracionTiendaRepository configuracionTiendaRepository;
+  private final ConfiguracionMapper configuracionMapper;
 
   @EventListener(ApplicationReadyEvent.class)
   @Transactional
@@ -39,17 +42,9 @@ public class ConfiguracionService {
 
   @Transactional
   public ConfiguracionTienda actualizarConfiguracion(ConfiguracionUpdateDto dto) {
-    ConfiguracionTienda configActual = ConfiguracionTienda.getInstance();
-
-    if (dto.getNombreEmpresa() != null && !dto.getNombreEmpresa().isBlank()) configActual.setNombreEmpresa(dto.getNombreEmpresa());
-    if (dto.getPermiteReserva() != null) configActual.setPermiteReserva(dto.getPermiteReserva());
-    if (dto.getPorcentajeMinimoSena() != null) configActual.setPorcentajeMinimoSena(dto.getPorcentajeMinimoSena());
-    if (dto.getDiasValidezReserva() != null) configActual.setDiasValidezReserva(dto.getDiasValidezReserva());
-    if (dto.getStockMinimoGlobal() != null) configActual.setStockMinimoGlobal(dto.getStockMinimoGlobal());
-    if (dto.getTiempoMaximoCancelacionMeses() != null) configActual.setTiempoMaximoCancelacionMeses(dto.getTiempoMaximoCancelacionMeses());
-    
+    ConfiguracionTienda configActual = configuracionTiendaRepository.findFirstByOrderByIdAsc().orElseThrow(() -> new NotFoundException("No se encontró la configuración"));
+    configuracionMapper.toUpdateEntity(dto, configActual);
     ConfiguracionTienda guardada = configuracionTiendaRepository.save(configActual);
-    
     ConfiguracionTienda.setInstance(guardada);
     
     return guardada;
