@@ -33,6 +33,7 @@ public enum Permiso {
 
     // --------- ROL ----------
     ROL_CREAR("Crear un rol"),
+    ROL_ACTUALIZAR("Actualizar los permisos de un rol"),
     ROL_ELIMINAR("Eliminar un rol"),
     ROL_VER("Ver roles"),
 
@@ -49,7 +50,7 @@ public enum Permiso {
     USUARIO_MODIFICAR("Modificar el rol de un usuario"),
 
     // --------- VENTA ----------
-    VENTA_CREAR("Crear una venta o un detalle de venta"),
+    VENTA_CREAR("Crear una venta"),
     VENTA_VER("Ver ventas"),
     VENTA_PAGAR("Pagar una venta"),
     VENTA_RESERVAR("Reservar una venta"),

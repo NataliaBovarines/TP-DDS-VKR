@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yourapp.app.models.dto.RolCambioDto;
 import com.yourapp.app.models.dto.RolDto;
 import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.services.RolService;
@@ -34,6 +35,13 @@ public class RolController {
     }
 
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ROL_ACTUALIZAR')")
+    public Rol actualizarPermisos(@PathVariable Long id, @RequestBody @Valid RolCambioDto rolDto) {
+        return rolService.actualizarPermisos(id, rolDto);
+    }
+
+    @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('ROL_ELIMINAR')")
     public void eliminarRol(@PathVariable Long id) {
