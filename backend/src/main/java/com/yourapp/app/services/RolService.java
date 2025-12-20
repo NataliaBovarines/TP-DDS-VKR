@@ -6,7 +6,7 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.RolMapper;
 import com.yourapp.app.models.dto.RolDto;
-import com.yourapp.app.models.entities.Rol;
+import com.yourapp.app.models.entities.usuario.Rol;
 import com.yourapp.app.repositories.RolRepository;
 
 @Service

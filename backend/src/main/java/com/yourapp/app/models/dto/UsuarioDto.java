@@ -9,6 +9,19 @@ import lombok.Setter;
 public class UsuarioDto {
     @NotBlank
     private String nombreDeUsuario;
+
+    public String getNombreDeUsuario() {
+        return nombreDeUsuario;
+    }
+
+    public String getContrasenia() {
+        return contrasenia;
+    }
+
+    public Long getRolId() {
+        return rolId;
+    }
+
     @NotBlank
     private String contrasenia;
     @NotNull

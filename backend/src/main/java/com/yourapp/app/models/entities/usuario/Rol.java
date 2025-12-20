@@ -1,4 +1,4 @@
-package com.yourapp.app.models.entities;
+package com.yourapp.app.models.entities.usuario;
 
 import java.util.ArrayList;
 import java.util.List;

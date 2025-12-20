@@ -1,7 +1,7 @@
 package com.yourapp.app.models.ValidadorContrasenia;
+import com.yourapp.app.exception.ContraseniaInvalidaExcepcion;
+import com.yourapp.app.models.entities.usuario.Usuario;
 
-import domain.exception.ContraseniaInvalidaExcepcion;
-import domain.modelo.entities.Entidades.Usuario.Usuario;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,7 +26,7 @@ public class ValidadorContrasenia {
         if(!usuario.estaPenalizado()) {
             try {
                 opcionesDeValidacion.stream().
-                        forEach(opcion -> opcion.validarContrasenia(usuario.getNombre(), usuario.getContrasenia()));
+                        forEach(opcion -> opcion.validarContrasenia(usuario.getNombreDeUsuario(), usuario.getContrasenia()));
             } catch (ContraseniaInvalidaExcepcion ex) {
                 usuario.penalizar(tiempoPenalizacion);
                 return false;

@@ -6,8 +6,8 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.mappers.UsuarioMapper;
 import com.yourapp.app.models.dto.UsuarioDto;
 import com.yourapp.app.models.dto.UsuarioResponseDto;
-import com.yourapp.app.models.entities.Rol;
-import com.yourapp.app.models.entities.Usuario;
+import com.yourapp.app.models.entities.usuario.Rol;
+import com.yourapp.app.models.entities.usuario.Usuario;
 import com.yourapp.app.repositories.UsuarioRepository;
 
 @Service

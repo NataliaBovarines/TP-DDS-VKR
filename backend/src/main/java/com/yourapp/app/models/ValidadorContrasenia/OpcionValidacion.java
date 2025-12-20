@@ -1,6 +1,6 @@
 package com.yourapp.app.models.ValidadorContrasenia;
 
-import domain.exception.ContraseniaInvalidaExcepcion;
+import com.yourapp.app.exception.ContraseniaInvalidaExcepcion;
 
 public abstract class OpcionValidacion {
 

@@ -2,8 +2,8 @@ package com.yourapp.app.mappers;
 
 import com.yourapp.app.models.dto.UsuarioDto;
 import com.yourapp.app.models.dto.UsuarioResponseDto;
-import com.yourapp.app.models.entities.Rol;
-import com.yourapp.app.models.entities.Usuario;
+import com.yourapp.app.models.entities.usuario.Rol;
+import com.yourapp.app.models.entities.usuario.Usuario;
 
 public class UsuarioMapper {
     public static Usuario toEntity(UsuarioDto usuarioDto, Rol rol) {

@@ -1,4 +1,4 @@
-package com.yourapp.app.models.entities;
+package com.yourapp.app.models.entities.usuario;
 
 public enum Permiso {
     CREAR_VENTA, 

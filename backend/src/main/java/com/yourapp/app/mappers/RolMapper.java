@@ -1,7 +1,7 @@
 package com.yourapp.app.mappers;
 
 import com.yourapp.app.models.dto.RolDto;
-import com.yourapp.app.models.entities.Rol;
+import com.yourapp.app.models.entities.usuario.Rol;
 
 public class RolMapper {
     public static Rol toEntity(RolDto rolDto) {

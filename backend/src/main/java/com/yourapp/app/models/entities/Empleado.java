@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.yourapp.app.models.entities.adapters.MedioDeNotificacion;
 
+import com.yourapp.app.models.entities.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
