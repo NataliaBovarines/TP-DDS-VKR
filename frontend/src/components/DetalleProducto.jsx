@@ -1,8 +1,37 @@
 import { useState } from "react";
+import {
+  actualizarDetalleProducto,
+  eliminarProducto,
+} from "../services/productoService";
 
-export default function DetalleProducto({ producto, onClose }) {
+export default function DetalleProducto({ producto, onClose, onUpdate }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleActualizarDetalle(detalleId, cambios) {
+    try {
+      setLoading(true);
+      await actualizarDetalleProducto(producto.id, detalleId, cambios);
+      await onUpdate(); // recarga productos desde back
+    } catch (e) {
+      console.error(e);
+      alert("Error actualizando stock");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEliminarProducto() {
+    try {
+      await eliminarProducto(producto.id);
+      onClose();
+      onUpdate();
+    } catch (e) {
+      console.error(e);
+      alert("Error eliminando producto");
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -31,12 +60,25 @@ export default function DetalleProducto({ producto, onClose }) {
         <div className="grid grid-cols-2 gap-4 text-sm mb-6">
           <div>
             <span className="text-gray-500">Categoría</span>
-            <p className="font-medium">{producto.categoria}</p>
+            <p className="font-medium">
+              {producto.categoria?.descripcion ?? "-"}
+            </p>
           </div>
+
+          <div>
+            <span className="text-gray-500">Subcategoría</span>
+            <p className="font-medium">
+              {producto.tipoDePrenda?.descripcion ?? "-"}
+            </p>
+          </div>
+
           <div>
             <span className="text-gray-500">Proveedor</span>
-            <p className="font-medium">{producto.proveedor}</p>
+            <p className="font-medium">
+              {producto.proveedor?.nombre ?? "-"}
+            </p>
           </div>
+
           <div>
             <span className="text-gray-500">Precio</span>
             <p className="font-medium">${producto.precio}</p>
@@ -46,7 +88,7 @@ export default function DetalleProducto({ producto, onClose }) {
         {/* VARIANTES */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Variantes disponibles
+            Variantes
           </h3>
 
           <div className="border rounded-lg overflow-hidden">
@@ -56,37 +98,66 @@ export default function DetalleProducto({ producto, onClose }) {
                   <th className="py-2 px-3 text-left">Color</th>
                   <th className="py-2 px-3 text-left">Talle</th>
                   <th className="py-2 px-3 text-center">Stock</th>
+                  <th className="py-2 px-3 text-center">Mínimo</th>
                   <th className="py-2 px-3 text-center">Acción</th>
                 </tr>
               </thead>
 
               <tbody>
-                {producto.variantes.map((v, idx) => (
-                  <tr key={idx} className="border-b last:border-0">
-                    <td className="py-2 px-3">{v.color}</td>
-                    <td className="py-2 px-3">{v.talle}</td>
+                {producto.detalles?.map((d) => {
+                  const bajoStock = d.stockActual < d.stockMinimo;
 
-                    <td
-                      className={`py-2 px-3 text-center font-semibold ${
-                        v.stock < 5 ? "text-warning" : ""
-                      }`}
-                    >
-                      {v.stock < 5 && (
-                        <span className="mr-1">⚠</span>
-                      )}
-                      {v.stock}
-                    </td>
+                  return (
+                    <tr key={d.id} className="border-b last:border-0">
+                      <td className="py-2 px-3">
+                        {d.color?.descripcion ?? "-"}
+                      </td>
 
-                    <td className="py-2 px-3 text-center">
-                      <span
-                        title="Editar stock"
-                        className="cursor-pointer text-gray-600 hover:text-gray-900 text-sm"
+                      <td className="py-2 px-3">
+                        {d.talle?.descripcion ?? "-"}
+                      </td>
+
+                      <td
+                        className={`py-2 px-3 text-center font-semibold ${
+                          bajoStock ? "text-warning" : ""
+                        }`}
                       >
-                        ✏️
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                        {bajoStock && <span className="mr-1">⚠</span>}
+                        {d.stockActual}
+                      </td>
+
+                      <td className="py-2 px-3 text-center">
+                        {d.stockMinimo}
+                      </td>
+
+                      <td className="py-2 px-3 text-center space-x-2">
+                        <button
+                          disabled={loading}
+                          onClick={() =>
+                            handleActualizarDetalle(d.id, {
+                              stockAumento: 1,
+                            })
+                          }
+                          className="px-2 py-1 border rounded hover:bg-gray-100"
+                        >
+                          +1
+                        </button>
+
+                        <button
+                          disabled={loading}
+                          onClick={() =>
+                            handleActualizarDetalle(d.id, {
+                              stockMinimo: d.stockMinimo + 1,
+                            })
+                          }
+                          className="px-2 py-1 border rounded hover:bg-gray-100"
+                        >
+                          ↑ mín
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -122,6 +193,7 @@ export default function DetalleProducto({ producto, onClose }) {
               <div className="flex gap-3">
                 <button
                   disabled={confirmText !== "ELIMINAR"}
+                  onClick={handleEliminarProducto}
                   className="btn bg-danger text-white w-auto px-5 disabled:opacity-40"
                 >
                   Confirmar eliminación
