@@ -1,20 +1,31 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.ClienteDto;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.ClienteCreateRequest;
+import com.yourapp.app.models.dto.ClienteResponse;
+import com.yourapp.app.models.dto.ClienteUpdateRequest;
 import com.yourapp.app.models.entities.Cliente;
 
-public class ClienteMapper {
-    public static Cliente toEntity(ClienteDto clienteDto) {
-        Cliente cliente = new Cliente();
-        cliente.setNombre(clienteDto.getNombre());
-        cliente.setApellido(clienteDto.getApellido());
-        cliente.setTelefono(clienteDto.getTelefono());
-        cliente.setDni(clienteDto.getDni());
-        cliente.setCreditoLimite(clienteDto.getCreditoLimite() != null ? clienteDto.getCreditoLimite() : 0.0);
-        
-        if (clienteDto.getCategoria() != null) cliente.setCategoriaCliente(clienteDto.getCategoria());
-        else cliente.setCategoriaCliente(Cliente.CategoriaCliente.NO_CONFIABLE);
-        
-        return cliente;
-    }
+@Mapper(
+    componentModel = "spring", 
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
+public interface ClienteMapper {
+    // --- ENTRADA ---
+    @Mapping(target = "categoriaCliente", source = "dto.categoria")
+    Cliente toEntity(ClienteCreateRequest dto);
+
+    @Mapping(target = "categoriaCliente", source = "updateDto.categoria")
+    void updateEntity(ClienteUpdateRequest updateDto, @MappingTarget Cliente clienteEntidad);
+
+    // --- SALIDA ---
+    ClienteResponse toResponse(Cliente entity);
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.CategoriaCreateRequest;
 import com.yourapp.app.models.dto.CategoriaResponse;
-import com.yourapp.app.models.entities.Categoria;
 import com.yourapp.app.services.CategoriaService;
 
 import jakarta.validation.Valid;

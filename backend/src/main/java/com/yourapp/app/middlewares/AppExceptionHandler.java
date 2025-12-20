@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -69,6 +70,26 @@ public class AppExceptionHandler {
         String mensaje = "Acceso denegado. No tiene los permisos necesarios.";
         
         return crearErrorDto(mensaje, HttpStatus.FORBIDDEN, req);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorDto> handleReadableException(HttpMessageNotReadableException ex, HttpServletRequest req) {
+        String mensaje = "Error en el formato del JSON";
+            
+        if (ex.getMessage() != null && ex.getMessage().contains("not one of the values accepted for Enum class")) {
+            String detalle = ex.getMessage();
+            int inicio = detalle.lastIndexOf("[");
+            int fin = detalle.lastIndexOf("]");
+            
+            if (inicio != -1 && fin != -1) {
+                String valores = detalle.substring(inicio, fin + 1);
+                mensaje = "Valor inválido. Los valores permitidos son: " + valores;
+            } else {
+                mensaje = "El valor enviado no es válido para el tipo de dato requerido.";
+            }
+        }
+
+        return crearErrorDto(mensaje, HttpStatus.BAD_REQUEST, req);
     }
 
     @ExceptionHandler(Exception.class)

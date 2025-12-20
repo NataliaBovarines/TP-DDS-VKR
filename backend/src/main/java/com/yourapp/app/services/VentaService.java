@@ -52,7 +52,7 @@ public class VentaService {
         Usuario usuario = authService.obtenerUsuarioLogueado();
         Empleado empleado = usuario.getEmpleado();
         if (empleado == null) throw new NotFoundException("El usuario no tiene un empleado asociado");
-        Cliente cliente = (ventaDto.getClienteId() != null) ? clienteService.obtenerCliente(ventaDto.getClienteId()) : null;
+        Cliente cliente = (ventaDto.getClienteId() != null) ? clienteService.obtenerEntidad(ventaDto.getClienteId()) : null;
 
         Venta venta = VentaMapper.toEntity(empleado, cliente);
 

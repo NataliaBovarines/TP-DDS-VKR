@@ -48,7 +48,7 @@ public class CategoriaService {
         return categoriaMapper.toResponseList(categorias);
     }
 
-    // ============================ MÉTODO DE APOYO ============================
+    // ============================ OBTENER UNA CATEGORIA (ENTIDAD) ============================
     public Categoria obtenerEntidad(Long id) {
         Categoria categoria = categoriaRepository.findById(id).orElseThrow(() -> new NotFoundException("Categoria no encontrada"));
         if (categoria.getFueEliminado()) throw new NotFoundException("Categoria eliminada");

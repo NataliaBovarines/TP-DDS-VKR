@@ -13,9 +13,10 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ClienteMapper;
-import com.yourapp.app.models.dto.ClienteUpdateDto;
-import com.yourapp.app.models.dto.ClienteDto;
-import com.yourapp.app.models.dto.ClienteFiltroDto;
+import com.yourapp.app.models.dto.ClienteUpdateRequest;
+import com.yourapp.app.models.dto.ClienteCreateRequest;
+import com.yourapp.app.models.dto.ClienteQuery;
+import com.yourapp.app.models.dto.ClienteResponse;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.repositories.ClienteRepository;
 
@@ -26,19 +27,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ClienteService {
     private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
  
     // ============================ CREAR UN CLIENTE ============================
     @Transactional
-    public Cliente crearCliente(ClienteDto clienteDto) {
+    public ClienteResponse crearCliente(ClienteCreateRequest clienteDto) {
         if (clienteRepository.existsByDniAndFueEliminadoFalse(clienteDto.getDni())) throw new ConflictException("El DNI ya esta asignado a otro cliente");
         
-        Cliente cliente = ClienteMapper.toEntity(clienteDto);
+        Cliente cliente = clienteMapper.toEntity(clienteDto);
 
-        return clienteRepository.save(cliente);
+        return clienteMapper.toResponse(clienteRepository.save(cliente));
     }
 
     // ============================ OBTENER UN CLIENTE ============================
-    public Cliente obtenerCliente(Long id) {
+    public ClienteResponse obtenerCliente(Long id) {
+        return clienteMapper.toResponse(obtenerEntidad(id));
+    }
+    
+    // ============================ OBTENER UN CLIENTE (ENTIDAD) ============================
+    public Cliente obtenerEntidad(Long id) {
         Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new NotFoundException("Cliente no encontrado"));
         if (cliente.getFueEliminado()) throw new NotFoundException(("Cliente eliminado"));
         return cliente;
@@ -46,22 +53,18 @@ public class ClienteService {
 
     // ============================ ACTUALIZAR UN CLIENTE ============================
     @Transactional
-    public Cliente actualizarCliente(Long id, ClienteUpdateDto clienteDto) {
-        Cliente cliente = obtenerCliente(id);
+    public ClienteResponse actualizarCliente(Long id, ClienteUpdateRequest clienteDto) {
+        Cliente cliente = obtenerEntidad(id);
 
-        if (clienteDto.getNombre() != null && !clienteDto.getNombre().isBlank()) cliente.setNombre(clienteDto.getNombre());
-        if (clienteDto.getApellido() != null && !clienteDto.getApellido().isBlank()) cliente.setApellido(clienteDto.getApellido());
-        if (clienteDto.getTelefono() != null) cliente.setTelefono(clienteDto.getTelefono());
-        if (clienteDto.getCreditoLimite() != null) cliente.setCreditoLimite(clienteDto.getCreditoLimite());
-        if (clienteDto.getCategoria() != null) cliente.setCategoriaCliente(clienteDto.getCategoria());
+        clienteMapper.updateEntity(clienteDto, cliente);
 
-        return clienteRepository.save(cliente);  
+        return clienteMapper.toResponse(clienteRepository.save(cliente)); 
     }
 
     // ============================ ELIMINAR UN CLIENTE ============================
     @Transactional
     public void eliminarCliente(Long id) {
-        Cliente cliente = obtenerCliente(id);
+        Cliente cliente = obtenerEntidad(id);
 
         cliente.softDelete();
 
@@ -69,7 +72,7 @@ public class ClienteService {
     }
 
     // ============================ OBTENER CLIENTES CON FILTROS ============================
-    public Page<Cliente> obtenerClientesFiltrados(ClienteFiltroDto filtros) {
+    public Page<ClienteResponse> obtenerClientesFiltrados(ClienteQuery filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
 
@@ -128,6 +131,7 @@ public class ClienteService {
         Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 
         // --------- CONSULTA CON ESPECIFICACION, ORDENAMIENTO Y PAGINACION ----------
-        return clienteRepository.findAll(spec, pageable);
+        Page<Cliente> clientes = clienteRepository.findAll(spec, pageable);
+        return clientes.map(clienteMapper::toResponse);
     }
 }

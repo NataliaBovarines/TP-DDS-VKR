@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ClienteUpdateDto;
-import com.yourapp.app.models.dto.ClienteDto;
-import com.yourapp.app.models.dto.ClienteFiltroDto;
+import com.yourapp.app.models.dto.ClienteUpdateRequest;
+import com.yourapp.app.models.dto.ClienteCreateRequest;
+import com.yourapp.app.models.dto.ClienteQuery;
+import com.yourapp.app.models.dto.ClienteResponse;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.services.ClienteService;
 
@@ -31,21 +32,21 @@ public class ClienteController {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('CLIENTE_CREAR')")
-    public Cliente crearCliente(@RequestBody @Valid ClienteDto clienteDto) {
+    public ClienteResponse crearCliente(@RequestBody @Valid ClienteCreateRequest clienteDto) {
         return clienteService.crearCliente(clienteDto);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK) 
     @PreAuthorize("hasAuthority('CLIENTE_VER')")
-    public Cliente obtenerCliente(@PathVariable Long id) {
+    public ClienteResponse obtenerCliente(@PathVariable Long id) {
         return clienteService.obtenerCliente(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('CLIENTE_MODIFICAR')")
-    public Cliente actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteUpdateDto clienteDto) {
+    public ClienteResponse actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteUpdateRequest clienteDto) {
         return clienteService.actualizarCliente(id, clienteDto);
     }
 
@@ -59,7 +60,7 @@ public class ClienteController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('CLIENTE_VER')")
-    public Page<Cliente> obtenerClientesFiltrados(@Valid @ModelAttribute ClienteFiltroDto filtros) {
+    public Page<ClienteResponse> obtenerClientesFiltrados(@Valid @ModelAttribute ClienteQuery filtros) {
         return clienteService.obtenerClientesFiltrados(filtros);
     }
 }

@@ -29,8 +29,7 @@ public class SubcategoriaService {
         if (subcategoriaRepository.existsByDescripcionAndFueEliminadoFalse(subcategoriaDto.getDescripcion())) throw new ConflictException("La descripción de la subcategoría ya está en uso");
         Categoria categoria = categoriaService.obtenerEntidad(subcategoriaDto.getCategoriaId());
         Subcategoria subcategoria = subcategoriaMapper.toEntity(subcategoriaDto, categoria);
-        Subcategoria guardada = subcategoriaRepository.save(subcategoria);
-        return subcategoriaMapper.toResponse(guardada);
+        return subcategoriaMapper.toResponse(subcategoriaRepository.save(subcategoria));
     }
 
     // ============================ ELIMINAR UN SUBCATEGORIA ============================
@@ -44,11 +43,10 @@ public class SubcategoriaService {
 
     // ============================ OBTENER UNA SUBCATEGORIA ============================
     public SubcategoriaResponse obtenerSubcategoria(Long subcategoriaId) {
-        Subcategoria subcategoria = obtenerEntidad(subcategoriaId);
-        return subcategoriaMapper.toResponse(subcategoria);
+        return subcategoriaMapper.toResponse(obtenerEntidad(subcategoriaId));
     }
 
-    // ============================ MÉTODO DE APOYO ============================
+    // ============================ OBTENER UNA SUBCATEGORIA (ENTIDAD) ============================
     public Subcategoria obtenerEntidad(Long subcategoriaId) {
         Subcategoria subcategoria = subcategoriaRepository.findById(subcategoriaId).orElseThrow(() -> new NotFoundException("Subcategoría no encontrada"));
         if (subcategoria.getFueEliminado() || subcategoria.getCategoria().getFueEliminado()) throw new NotFoundException("Subcategoria o categoria eliminada");
