@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ColorDto {
+public class ProveedorCreateRequest {
     @NotBlank
     @Size(max = 100, message = "La descripción no puede superar los 100 caracteres")
-    private String descripcion;    
+    private String nombre;    
 }

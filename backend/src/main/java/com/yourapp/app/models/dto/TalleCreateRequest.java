@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ProveedorDto {
+public class TalleCreateRequest {
     @NotBlank
     @Size(max = 100, message = "La descripción no puede superar los 100 caracteres")
-    private String nombre;    
+    private String descripcion;    
 }

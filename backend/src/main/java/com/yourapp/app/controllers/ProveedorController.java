@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ProveedorDto;
+import com.yourapp.app.models.dto.ProveedorCreateRequest;
+import com.yourapp.app.models.dto.ProveedorResponse;
 import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.services.ProveedorService;
 
@@ -29,7 +30,7 @@ public class ProveedorController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('PROVEEDOR_CREAR')")
-    public Proveedor crearProveedor(@RequestBody @Valid ProveedorDto proveedorDto) {
+    public ProveedorResponse crearProveedor(@RequestBody @Valid ProveedorCreateRequest proveedorDto) {
         return proveedorService.crearProveedor(proveedorDto);
     }
 
@@ -42,7 +43,7 @@ public class ProveedorController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Proveedor> obtenerTodosLosProveedores() {
+    public List<ProveedorResponse> obtenerTodosLosProveedores() {
         return proveedorService.obtenerTodosLosProveedores();
     } 
 }

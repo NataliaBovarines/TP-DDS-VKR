@@ -1,12 +1,24 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.TalleDto;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.TalleCreateRequest;
+import com.yourapp.app.models.dto.TalleResponse;
 import com.yourapp.app.models.entities.Talle;
 
-public class TalleMapper {
-    public static Talle toEntity(TalleDto talleDto) {
-        Talle talle = new Talle();
-        talle.setDescripcion(talleDto.getDescripcion());
-        return talle;
-    }
+@Mapper(
+    componentModel = "spring", 
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
+public interface TalleMapper {
+    // --- ENTRADA ---
+    Talle toEntity(TalleCreateRequest dto);
+
+    // --- SALIDA ---
+    TalleResponse toResponse(Talle entity);
+
+    List<TalleResponse> toResponseList(List<Talle> entities);
 }

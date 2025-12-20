@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.TalleDto;
+import com.yourapp.app.models.dto.TalleCreateRequest;
+import com.yourapp.app.models.dto.TalleResponse;
 import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.services.TalleService;
 
@@ -29,7 +30,7 @@ public class TalleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('TALLE_CREAR')")
-    public Talle crearTalle(@RequestBody @Valid TalleDto talleDto) {
+    public TalleResponse crearTalle(@RequestBody @Valid TalleCreateRequest talleDto) {
         return talleService.crearTalle(talleDto);
     }
 
@@ -42,7 +43,7 @@ public class TalleController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK) 
-    public List<Talle> obtenerTodosLosTalles() {
+    public List<TalleResponse> obtenerTodosLosTalles() {
         return talleService.obtenerTodosLosTalles();
     }
 }

@@ -1,12 +1,25 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.ProveedorDto;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.ProveedorCreateRequest;
+import com.yourapp.app.models.dto.ProveedorResponse;
 import com.yourapp.app.models.entities.Proveedor;
 
-public class ProveedorMapper {
-    public static Proveedor toEntity(ProveedorDto proveedorDto) {
-        Proveedor proveedor = new Proveedor();
-        proveedor.setNombre(proveedorDto.getNombre());
-        return proveedor;
-    }
+@Mapper(
+    componentModel = "spring", 
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
+public interface ProveedorMapper {
+    // --- ENTRADA ---
+    Proveedor toEntity(ProveedorCreateRequest dto);
+
+    // --- SALIDA ---
+    ProveedorResponse toResponse(Proveedor entity);
+
+    List<ProveedorResponse> toResponseList(List<Proveedor> entities);
 }
+

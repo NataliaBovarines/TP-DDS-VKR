@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ColorDto;
+import com.yourapp.app.models.dto.ColorCreateRequest;
+import com.yourapp.app.models.dto.ColorResponse;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.services.ColorService;
 
@@ -29,7 +30,7 @@ public class ColorController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('COLOR_CREAR')")
-    public Color crearColor(@RequestBody @Valid ColorDto colorDto) {
+    public ColorResponse crearColor(@RequestBody @Valid ColorCreateRequest colorDto) {
         return colorService.crearColor(colorDto);
     }
 
@@ -42,7 +43,7 @@ public class ColorController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK) 
-    public List<Color> obtenerTodosLosColores() {
+    public List<ColorResponse> obtenerTodosLosColores() {
         return colorService.obtenerTodosLosColores();
     }
 }

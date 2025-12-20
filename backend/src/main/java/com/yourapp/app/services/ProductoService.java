@@ -51,7 +51,7 @@ public class ProductoService {
 
         if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
 
-        Proveedor proveedor = (productoDto.getProveedorId() != null) ? proveedorService.obtenerProveedor(productoDto.getProveedorId()) : null;
+        Proveedor proveedor = (productoDto.getProveedorId() != null) ? proveedorService.obtenerEntidad(productoDto.getProveedorId()) : null;
 
         Producto producto = ProductoMapper.toEntity(productoDto, subcategoria, proveedor);
 
@@ -64,8 +64,8 @@ public class ProductoService {
         Producto producto = obtenerProducto(productoId);
 
         // --------- OBTENER TALLE Y COLOR SI VIENEN EN EL DTO ----------
-        Talle talle = (detalleDto.getTalleId() != null) ? talleService.obtenerTalle(detalleDto.getTalleId()) : null;
-        Color color = (detalleDto.getColorId() != null) ? colorService.obtenerColor(detalleDto.getColorId()) : null;
+        Talle talle = (detalleDto.getTalleId() != null) ? talleService.obtenerEntidad(detalleDto.getTalleId()) : null;
+        Color color = (detalleDto.getColorId() != null) ? colorService.obtenerEntidad(detalleDto.getColorId()) : null;
 
         // --------- GENERACION DEL CODIGO UNICO ----------
         String codigoGenerado = String.format("%d-%d-%d", 
@@ -122,7 +122,7 @@ public class ProductoService {
             if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede asignar una categoria inactiva");
             producto.setSubcategoria(subcategoria);
         }
-        if (productoDto.getProveedorId() != null) producto.setProveedor(proveedorService.obtenerProveedor(productoDto.getProveedorId()));
+        if (productoDto.getProveedorId() != null) producto.setProveedor(proveedorService.obtenerEntidad(productoDto.getProveedorId()));
         if (productoDto.getPrecio() != null) producto.setPrecio(productoDto.getPrecio());
 
         return productoRepository.save(producto);
