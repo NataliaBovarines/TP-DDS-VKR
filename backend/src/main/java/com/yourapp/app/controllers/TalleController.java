@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.TalleCreateRequest;
 import com.yourapp.app.models.dto.TalleResponse;
-import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.services.TalleService;
 
 import jakarta.validation.Valid;

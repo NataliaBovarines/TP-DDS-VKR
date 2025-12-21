@@ -14,10 +14,10 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.exceptions.UnauthorizedException;
 import com.yourapp.app.models.dto.TokenResponseDto;
-import com.yourapp.app.models.dto.UsuarioContraseniaDto;
-import com.yourapp.app.models.dto.UsuarioContraseniaRecuperarDto;
-import com.yourapp.app.models.dto.UsuarioContraseniaResetearDto;
-import com.yourapp.app.models.dto.UsuarioLoginDto;
+import com.yourapp.app.models.dto.usuario.ContraseniaRecuperarRequest;
+import com.yourapp.app.models.dto.usuario.ContraseniaResetearRequest;
+import com.yourapp.app.models.dto.usuario.ContraseniaUpdateRequest;
+import com.yourapp.app.models.dto.usuario.UsuarioLoginRequest;
 import com.yourapp.app.models.entities.Usuario;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     // ============================ LOGIN ============================
-    public TokenResponseDto login(UsuarioLoginDto usuarioDto) {
+    public TokenResponseDto login(UsuarioLoginRequest usuarioDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usuarioDto.getNombreDeUsuario(), usuarioDto.getContrasenia()));
         } catch (BadCredentialsException e) {
@@ -45,7 +45,7 @@ public class AuthService {
     }
 
     // ============================ CAMBIAR CONTRASEÑA (CON CONTRASEÑA ANTERIOR) ============================
-    public TokenResponseDto cambiarContrasenia(UsuarioContraseniaDto usuarioDto) {
+    public TokenResponseDto cambiarContrasenia(ContraseniaUpdateRequest usuarioDto) {
         Usuario usuario = obtenerUsuarioLogueado();
 
         Usuario usuarioActualizado = usuarioService.actualizarContraseniaUsuario(usuario, usuarioDto);
@@ -56,7 +56,7 @@ public class AuthService {
     }
 
     // ============================ PEDIR RECUPERACION DE CONTRASEÑA ============================
-    public void recuperarContrasenia(UsuarioContraseniaRecuperarDto usuarioDto) {
+    public void recuperarContrasenia(ContraseniaRecuperarRequest usuarioDto) {
         try {
             Usuario usuario = usuarioService.obtenerUsuarioByMail(usuarioDto.getMail());
             String token = UUID.randomUUID().toString();
@@ -65,7 +65,7 @@ public class AuthService {
     }
 
     // ============================ CAMBIAR CONTRASEÑA (CON TOKEN) ============================
-    public void resetearContrasenia(UsuarioContraseniaResetearDto usuarioDto) {
+    public void resetearContrasenia(ContraseniaResetearRequest usuarioDto) {
         Usuario usuario = usuarioService.obtenerUsuarioByToken(usuarioDto.getToken());
 
         if (usuario.getResetTokenExpiracion() == null || usuario.getResetTokenExpiracion().isBefore(LocalDateTime.now())) throw new ConflictException("Token inválido o expirado");

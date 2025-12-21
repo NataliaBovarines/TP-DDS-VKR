@@ -1,26 +1,18 @@
 package com.yourapp.app.services;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.exceptions.UnauthorizedException;
 import com.yourapp.app.mappers.UsuarioMapper;
-import com.yourapp.app.models.dto.UsuarioRolDto;
-import com.yourapp.app.models.dto.EmpleadoDto;
-import com.yourapp.app.models.dto.UsuarioContraseniaDto;
-import com.yourapp.app.models.dto.UsuarioFiltroDto;
-import com.yourapp.app.models.dto.UsuarioResponseDto;
+import com.yourapp.app.models.dto.empleado.EmpleadoCreateRequest;
+import com.yourapp.app.models.dto.usuario.ContraseniaUpdateRequest;
+import com.yourapp.app.models.dto.usuario.UsuarioResponse;
+import com.yourapp.app.models.dto.usuario.UsuarioUpdateRequest;
 import com.yourapp.app.models.entities.Usuario;
 import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.repositories.UsuarioRepository;
@@ -34,16 +26,18 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolService rolService;
     private final PasswordEncoder passwordEncoder;
+    private final UsuarioMapper usuarioMapper;
 
     // ============================ CREAR UN USUARIO ============================
     @Transactional
-    public Usuario crearUsuario(EmpleadoDto empleadoDto) {
-        Rol rol = rolService.obtenerRol(empleadoDto.getRolId());
+    public Usuario crearUsuario(EmpleadoCreateRequest empleadoDto) {
+        Rol rol = rolService.obtenerEntidad(empleadoDto.getRolId());
 
         String nombreDeUsuario = generarNombreDeUsuario(empleadoDto.getNombre(), empleadoDto.getApellido()).toLowerCase();
 
-        Usuario usuario = UsuarioMapper.toEntity(nombreDeUsuario, rol);
-
+        Usuario usuario = new Usuario();
+        usuario.setNombreDeUsuario(nombreDeUsuario);
+        usuario.setRol(rol);
         usuario.setContrasenia(passwordEncoder.encode(empleadoDto.getDni()));
         
         return usuarioRepository.save(usuario);
@@ -80,19 +74,12 @@ public class UsuarioService {
     }
     
     // ============================ OBTENER USUARIO ============================
-    public Usuario obtenerUsuarioCompleto(Long id) {
+    public Usuario obtenerEntidad(Long id) {
         Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         if (usuario.getFueEliminado()) throw new NotFoundException("Usuario eliminado");
 
         return usuario;
-    }
-
-    // ============================ OBTENER USUARIO RESPONSE ============================
-    public UsuarioResponseDto obtenerUsuario(Long id) {
-        Usuario usuarioGuardado = obtenerUsuarioCompleto(id);
-
-        return UsuarioMapper.fromEntity(usuarioGuardado);
     }
 
     // ============================ OBTENER USUARIO POR SU NOMBRE DE USUARIO ============================
@@ -127,24 +114,22 @@ public class UsuarioService {
 
     // ============================ ACTUALIZAR ROL DE UN USUARIO ============================
     @Transactional
-    public UsuarioResponseDto actualizarRolUsuario(Long id, UsuarioRolDto usuarioDto) {
-        Usuario usuario = obtenerUsuarioCompleto(id);
+    public UsuarioResponse actualizarRolUsuario(Long id, UsuarioUpdateRequest usuarioDto) {
+        Usuario usuario = obtenerEntidad(id);
 
-        Rol rol = rolService.obtenerRol(usuarioDto.getRolId());
-
+        Rol rol = rolService.obtenerEntidad(usuarioDto.getRolId());
+        
         usuario.setRol(rol);
 
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
-
-        return UsuarioMapper.fromEntity(usuarioGuardado);
+        return usuarioMapper.toResponse(usuarioRepository.save(usuario));
     }
 
     // ============================ CAMBIAR CONTRASEÑA DE UN USUARIO (CON CONTRASEÑA ANTERIOR) ============================
     @Transactional
-    public Usuario actualizarContraseniaUsuario(Usuario usuario, UsuarioContraseniaDto usuarioDto) {
-        if (!passwordEncoder.matches(usuarioDto.getContraseniaActual(), usuario.getContrasenia())) throw new UnauthorizedException("La contraseña actual es incorrecta");
+    public Usuario actualizarContraseniaUsuario(Usuario usuario, ContraseniaUpdateRequest contraseniaDto) {
+        if (!passwordEncoder.matches(contraseniaDto.getContraseniaActual(), usuario.getContrasenia())) throw new UnauthorizedException("La contraseña actual es incorrecta");
         
-        usuario.setContrasenia(passwordEncoder.encode(usuarioDto.getContraseniaNueva()));
+        usuario.setContrasenia(passwordEncoder.encode(contraseniaDto.getContraseniaNueva()));
         usuario.setPrimerLogin(false);
 
         return usuarioRepository.save(usuario);
@@ -176,53 +161,4 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
     }
-
-    // // ============================ OBTENER USUARIOS CON FILTROS ============================
-    // public Page<UsuarioResponseDto> obtenerUsuariosFiltrados(UsuarioFiltroDto filtros) {
-    //     // --------- ORDENAMIENTO ----------
-    //     Sort sort = Sort.unsorted();
-
-    //     if (filtros.getOrden() != null) {
-    //         List<String> camposPermitidos = List.of("nombreDeUsuario");
-
-    //         String campo = filtros.getOrden().toLowerCase();
-
-    //         if (camposPermitidos.contains(campo)) {
-    //             Sort.Direction direccion = Sort.Direction.ASC;
-    //             if ("desc".equalsIgnoreCase(filtros.getDireccion())) {
-    //                 direccion = Sort.Direction.DESC;
-    //             }
-    //             sort = Sort.by(direccion, campo);
-    //         } else {
-    //             throw new BadRequestException("No se puede ordenar por el campo: " + campo);
-    //         }
-    //     }
-
-    //     // --------- ESPECIFICACION ----------
-    //     Specification<Usuario> spec = (root, query, cb) -> cb.conjunction();
-
-    //     // Filtrar por nombre de usuario
-    //     if (filtros.getNombreDeUsuario() != null && !filtros.getNombreDeUsuario().isBlank()) {
-    //         spec = spec.and((root, query, cb) ->
-    //             cb.like(cb.lower(root.get("nombreDeUsuario")), "%" + filtros.getNombreDeUsuario().toLowerCase() + "%")
-    //         );
-    //     }
-
-    //     // Filtrar por rol
-    //     if (filtros.getRolId() != null) {
-    //         spec = spec.and((root, query, cb) ->
-    //             cb.equal(root.get("rol").get("id"), filtros.getRolId())
-    //         );
-    //     }
-
-    //     // --------- PAGINACION ----------
-    //     int pagina = (filtros.getPagina() != null && filtros.getPagina() >= 0) ? filtros.getPagina() : 0;
-    //     int tamanio = 10;
-    //     Pageable pageable = PageRequest.of(pagina, tamanio, sort);
-
-    //     // --------- CONSULTA ----------
-    //     Page<Usuario> usuarios = usuarioRepository.findAll(spec, pageable);
-
-    //     return usuarios.map(UsuarioMapper::fromEntity);
-    // }
 }

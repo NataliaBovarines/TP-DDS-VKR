@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.ProveedorCreateRequest;
 import com.yourapp.app.models.dto.ProveedorResponse;
-import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.services.ProveedorService;
 
 import jakarta.validation.Valid;

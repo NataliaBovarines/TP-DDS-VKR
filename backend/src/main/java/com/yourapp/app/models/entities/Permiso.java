@@ -25,6 +25,9 @@ public enum Permiso {
     EMPLEADO_MODIFICAR("Modificar un empleado"),
     EMPLEADO_ELIMINAR("Eliminar un empleado"),
 
+    // --------- PERMISO ----------
+    PERMISO_VER("Ver todos los permisos"),
+
     // --------- PRODUCTO ----------
     PRODUCTO_CREAR("Crear un producto o un detalle de producto"),
     PRODUCTO_VER("Ver todos los productos"),
@@ -50,7 +53,6 @@ public enum Permiso {
     TALLE_ELIMINAR("Eliminar un talle"),
 
     // --------- USUARIO ----------
-    USUARIO_VER("Ver todos los usuarios"),
     USUARIO_MODIFICAR("Modificar el rol de un usuario"),
 
     // --------- VENTA ----------
@@ -74,9 +76,3 @@ public enum Permiso {
         return descripcion;
     }
 }
-
-
-// ----------------- ENVIAR AL FRONT ASI
-// List<Map<String, String>> permisos = Arrays.stream(Permiso.values())
-//     .map(p -> Map.of("codigo", p.name(), "descripcion", p.getDescripcion()))
-//     .collect(Collectors.toList());

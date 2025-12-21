@@ -1,6 +1,6 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.ProductoDto;
+import com.yourapp.app.models.dto.producto.ProductoDto;
 import com.yourapp.app.models.entities.Producto;
 import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.models.entities.Subcategoria;

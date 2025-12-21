@@ -8,8 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.RolMapper;
-import com.yourapp.app.models.dto.RolUpdateDto;
-import com.yourapp.app.models.dto.RolDto;
+import com.yourapp.app.models.dto.rol.RolCreateRequest;
+import com.yourapp.app.models.dto.rol.RolResponse;
+import com.yourapp.app.models.dto.rol.RolUpdateRequest;
 import com.yourapp.app.models.entities.Rol;
 import com.yourapp.app.repositories.RolRepository;
 
@@ -19,44 +20,45 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RolService {
     private final RolRepository rolRepository;
+    private final RolMapper rolMapper;
 
     // ============================ CREAR UN ROL ============================
     @Transactional
-    public Rol crearRol(RolDto rolDto) {
+    public RolResponse crearRol(RolCreateRequest rolDto) {
         if (rolRepository.existsByNombreAndFueEliminadoFalse(rolDto.getNombre())) throw new ConflictException("El nombre del rol ya está en uso");
-        Rol rol = RolMapper.toEntity(rolDto);
-        return rolRepository.save(rol);
+        Rol rol = rolMapper.toEntity(rolDto);
+        return rolMapper.toResponse(rolRepository.save(rol));
     }
 
     // ============================ ACTUALIZAR LOS PERMISOS DE UN ROL ============================
-    // El front debe enviar la lista completa de los permisos que quedaron seleccionados finalmente
     @Transactional
-    public Rol actualizarPermisos(Long rolId, RolUpdateDto rolDto) {
-        Rol rol = obtenerRol(rolId);
+    public RolResponse actualizarPermisos(Long rolId, RolUpdateRequest rolDto) {
+        Rol rol = obtenerEntidad(rolId);
 
         rol.getPermisos().clear();
         if (rolDto.getPermisos() != null) rol.getPermisos().addAll(rolDto.getPermisos());
         
-        return rolRepository.save(rol);
+        return rolMapper.toResponse(rolRepository.save(rol));
     }
     
     // ============================ ELIMINAR UN ROL ============================
     @Transactional
     public void eliminarRol(Long id) {
-        Rol rol = obtenerRol(id);
+        Rol rol = obtenerEntidad(id);
         rol.softDelete();
         rolRepository.save(rol);
     }
 
-    // ============================ OBTENER UN ROL ============================
-    public Rol obtenerRol(Long rolId) {
+    // ============================ OBTENER ROL (ENTIDAD) ============================
+    public Rol obtenerEntidad(Long rolId) {
         Rol rol = rolRepository.findById(rolId).orElseThrow(() -> new NotFoundException("Rol no encontrado"));
         if (rol.getFueEliminado()) throw new NotFoundException("Rol eliminado");
         return rol;
     }
 
     // ============================ OBTENER TODOS LOS ROLES ============================
-    public List<Rol> obtenerTodosLosRoles() {
-        return rolRepository.findByFueEliminadoFalse();
+    public List<RolResponse> obtenerTodosLosRoles() {
+        List<Rol> roles = rolRepository.findByFueEliminadoFalse();
+        return rolMapper.toResponseList(roles);
     }
 }

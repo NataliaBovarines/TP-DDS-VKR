@@ -13,10 +13,10 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ClienteMapper;
-import com.yourapp.app.models.dto.ClienteUpdateRequest;
-import com.yourapp.app.models.dto.ClienteCreateRequest;
-import com.yourapp.app.models.dto.ClienteQuery;
-import com.yourapp.app.models.dto.ClienteResponse;
+import com.yourapp.app.models.dto.cliente.ClienteCreateRequest;
+import com.yourapp.app.models.dto.cliente.ClienteQuery;
+import com.yourapp.app.models.dto.cliente.ClienteResponse;
+import com.yourapp.app.models.dto.cliente.ClienteUpdateRequest;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.repositories.ClienteRepository;
 

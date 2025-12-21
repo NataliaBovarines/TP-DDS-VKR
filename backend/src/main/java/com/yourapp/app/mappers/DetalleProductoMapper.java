@@ -1,6 +1,6 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.DetalleProductoDto;
+import com.yourapp.app.models.dto.producto.DetalleProductoDto;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;

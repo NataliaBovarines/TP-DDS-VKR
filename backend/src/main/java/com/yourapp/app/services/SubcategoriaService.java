@@ -28,7 +28,8 @@ public class SubcategoriaService {
     public SubcategoriaResponse crearSubcategoria(SubcategoriaCreateRequest subcategoriaDto) {
         if (subcategoriaRepository.existsByDescripcionAndFueEliminadoFalse(subcategoriaDto.getDescripcion())) throw new ConflictException("La descripción de la subcategoría ya está en uso");
         Categoria categoria = categoriaService.obtenerEntidad(subcategoriaDto.getCategoriaId());
-        Subcategoria subcategoria = subcategoriaMapper.toEntity(subcategoriaDto, categoria);
+        Subcategoria subcategoria = subcategoriaMapper.toEntity(subcategoriaDto);
+        subcategoria.setCategoria(categoria);
         return subcategoriaMapper.toResponse(subcategoriaRepository.save(subcategoria));
     }
 

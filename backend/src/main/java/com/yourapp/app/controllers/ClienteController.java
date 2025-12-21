@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ClienteUpdateRequest;
-import com.yourapp.app.models.dto.ClienteCreateRequest;
-import com.yourapp.app.models.dto.ClienteQuery;
-import com.yourapp.app.models.dto.ClienteResponse;
-import com.yourapp.app.models.entities.Cliente;
+import com.yourapp.app.models.dto.cliente.ClienteCreateRequest;
+import com.yourapp.app.models.dto.cliente.ClienteQuery;
+import com.yourapp.app.models.dto.cliente.ClienteResponse;
+import com.yourapp.app.models.dto.cliente.ClienteUpdateRequest;
 import com.yourapp.app.services.ClienteService;
 
 import jakarta.validation.Valid;

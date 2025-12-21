@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.EmpleadoUpdateDto;
-import com.yourapp.app.models.dto.EmpleadoDto;
-import com.yourapp.app.models.dto.EmpleadoFiltroDto;
-import com.yourapp.app.models.dto.EmpleadoResponseDto;
+import com.yourapp.app.models.dto.empleado.EmpleadoCreateRequest;
+import com.yourapp.app.models.dto.empleado.EmpleadoQuery;
+import com.yourapp.app.models.dto.empleado.EmpleadoResponse;
+import com.yourapp.app.models.dto.empleado.EmpleadoUpdateRequest;
 import com.yourapp.app.services.EmpleadoService;
 
 import jakarta.validation.Valid;
@@ -31,21 +31,21 @@ public class EmpleadoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('EMPLEADO_CREAR')")
-    public EmpleadoResponseDto crearEmpleado(@RequestBody @Valid EmpleadoDto empleadoDto) {
+    public EmpleadoResponse crearEmpleado(@RequestBody @Valid EmpleadoCreateRequest empleadoDto) {
         return empleadoService.crearEmpleado(empleadoDto);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('EMPLEADO_VER') or #id == authentication.principal.id")
-    public EmpleadoResponseDto obtenerEmpleado(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('EMPLEADO_VER') or #id == authentication.principal.empleado.id")
+    public EmpleadoResponse obtenerEmpleado(@PathVariable Long id) {
         return empleadoService.obtenerEmpleado(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('EMPLEADO_MODIFICAR') or #id == authentication.principal.id")
-    public EmpleadoResponseDto actualizarEmpleado(@PathVariable Long id, @RequestBody @Valid EmpleadoUpdateDto empleadoDto) {
+    @PreAuthorize("hasAuthority('EMPLEADO_MODIFICAR') or #id == authentication.principal.empleado.id")
+    public EmpleadoResponse actualizarEmpleado(@PathVariable Long id, @RequestBody @Valid EmpleadoUpdateRequest empleadoDto) {
         return empleadoService.actualizarEmpleado(id, empleadoDto);
     }
 
@@ -59,7 +59,7 @@ public class EmpleadoController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('EMPLEADO_VER')")
-    public Page<EmpleadoResponseDto> obtenerTodosLosEmpleados(@Valid @ModelAttribute EmpleadoFiltroDto filtros) {
+    public Page<EmpleadoResponse> obtenerTodosLosEmpleados(@Valid @ModelAttribute EmpleadoQuery filtros) {
         return empleadoService.obtenerEmpleadosFiltrados(filtros);
     }
 }

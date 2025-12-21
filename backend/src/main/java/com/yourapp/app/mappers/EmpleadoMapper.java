@@ -1,33 +1,33 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.EmpleadoDto;
-import com.yourapp.app.models.dto.EmpleadoResponseDto;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.empleado.EmpleadoCreateRequest;
+import com.yourapp.app.models.dto.empleado.EmpleadoResponse;
+import com.yourapp.app.models.dto.empleado.EmpleadoUpdateRequest;
 import com.yourapp.app.models.entities.Empleado;
-import com.yourapp.app.models.entities.Usuario;
 
-public class EmpleadoMapper {
-    public static Empleado toEntity(EmpleadoDto empleadoDto, Usuario usuario) {
-        Empleado empleado = new Empleado();
-        empleado.setNombre(empleadoDto.getNombre());
-        empleado.setApellido(empleadoDto.getApellido());
-        empleado.setDni(empleadoDto.getDni());
-        empleado.setDireccion(empleadoDto.getDireccion());
-        empleado.setMail(empleadoDto.getMail());
-        empleado.setTelefono(empleadoDto.getTelefono());
-        empleado.setUsuario(usuario);
-        return empleado;
-    }
+@Mapper(
+    componentModel = "spring", 
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    uses = { UsuarioMapper.class }
+)
+public interface EmpleadoMapper {
+    // --- ENTRADA ---
+    Empleado toEntity(EmpleadoCreateRequest dto);
+    
+    void updateEntity(EmpleadoUpdateRequest dto, @MappingTarget Empleado entity);
 
-    public static EmpleadoResponseDto fromEntity(Empleado empleado) {
-        EmpleadoResponseDto empleadoDto = new EmpleadoResponseDto();
-        empleadoDto.setId(empleado.getId());
-        empleadoDto.setNombre(empleado.getNombre());
-        empleadoDto.setApellido(empleado.getApellido());
-        empleadoDto.setDni(empleado.getDni());
-        empleadoDto.setDireccion(empleado.getDireccion());
-        empleadoDto.setMail(empleado.getMail());
-        empleadoDto.setTelefono(empleado.getTelefono());
-        empleadoDto.setUsuario(UsuarioMapper.fromEntity(empleado.getUsuario()));
-        return empleadoDto;
-    }
+    // --- SALIDA ---
+    EmpleadoResponse toResponse(Empleado entity);
+
+    List<EmpleadoResponse> toResponseList(List<Empleado> entities);
+
+
 }

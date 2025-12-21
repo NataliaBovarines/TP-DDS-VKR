@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.DetalleProductoUpdateDto;
-import com.yourapp.app.models.dto.DetalleProductoDto;
-import com.yourapp.app.models.dto.ProductoDto;
-import com.yourapp.app.models.dto.ProductoFiltroDto;
-import com.yourapp.app.models.dto.ProductoUpdateDto;
+import com.yourapp.app.models.dto.producto.DetalleProductoDto;
+import com.yourapp.app.models.dto.producto.DetalleProductoUpdateDto;
+import com.yourapp.app.models.dto.producto.ProductoDto;
+import com.yourapp.app.models.dto.producto.ProductoFiltroDto;
+import com.yourapp.app.models.dto.producto.ProductoUpdateDto;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
 import com.yourapp.app.services.ProductoService;

@@ -6,9 +6,9 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
-import com.yourapp.app.models.dto.ClienteCreateRequest;
-import com.yourapp.app.models.dto.ClienteResponse;
-import com.yourapp.app.models.dto.ClienteUpdateRequest;
+import com.yourapp.app.models.dto.cliente.ClienteCreateRequest;
+import com.yourapp.app.models.dto.cliente.ClienteResponse;
+import com.yourapp.app.models.dto.cliente.ClienteUpdateRequest;
 import com.yourapp.app.models.entities.Cliente;
 
 @Mapper(

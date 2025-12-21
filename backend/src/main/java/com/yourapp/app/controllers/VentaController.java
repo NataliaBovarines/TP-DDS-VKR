@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.VentaCambioDto;
-import com.yourapp.app.models.dto.VentaMotivoDto;
-import com.yourapp.app.models.dto.VentaDto;
-import com.yourapp.app.models.dto.VentaFiltroDto;
-import com.yourapp.app.models.dto.VentaPagoDto;
-import com.yourapp.app.models.dto.VentaReservaDto;
+import com.yourapp.app.models.dto.venta.VentaCambioDto;
+import com.yourapp.app.models.dto.venta.VentaDto;
+import com.yourapp.app.models.dto.venta.VentaFiltroDto;
+import com.yourapp.app.models.dto.venta.VentaMotivoDto;
+import com.yourapp.app.models.dto.venta.VentaPagoDto;
+import com.yourapp.app.models.dto.venta.VentaReservaDto;
 import com.yourapp.app.models.entities.Venta;
 import com.yourapp.app.services.VentaService;
 

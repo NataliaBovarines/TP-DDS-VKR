@@ -1,13 +1,25 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.RolDto;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.rol.RolCreateRequest;
+import com.yourapp.app.models.dto.rol.RolResponse;
 import com.yourapp.app.models.entities.Rol;
 
-public class RolMapper {
-    public static Rol toEntity(RolDto rolDto) {
-        Rol rol = new Rol();
-        rol.setNombre(rolDto.getNombre());
-        rol.setPermisos(rolDto.getPermisos());
-        return rol;
-    }
+@Mapper(
+    componentModel = "spring", 
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    uses = { PermisoMapper.class }
+)
+public interface RolMapper {
+    // --- ENTRADA ---
+    Rol toEntity(RolCreateRequest dto);
+
+    // --- SALIDA ---
+    RolResponse toResponse(Rol entity);
+    
+    List<RolResponse> toResponseList(List<Rol> entities);
 }

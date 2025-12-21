@@ -14,10 +14,10 @@ import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.EmpleadoMapper;
-import com.yourapp.app.models.dto.EmpleadoUpdateDto;
-import com.yourapp.app.models.dto.EmpleadoDto;
-import com.yourapp.app.models.dto.EmpleadoFiltroDto;
-import com.yourapp.app.models.dto.EmpleadoResponseDto;
+import com.yourapp.app.models.dto.empleado.EmpleadoCreateRequest;
+import com.yourapp.app.models.dto.empleado.EmpleadoQuery;
+import com.yourapp.app.models.dto.empleado.EmpleadoResponse;
+import com.yourapp.app.models.dto.empleado.EmpleadoUpdateRequest;
 import com.yourapp.app.models.entities.Empleado;
 import com.yourapp.app.models.entities.Usuario;
 import com.yourapp.app.repositories.EmpleadoRepository;
@@ -29,31 +29,30 @@ import lombok.RequiredArgsConstructor;
 public class EmpleadoService {
     private final EmpleadoRepository empleadoRepository;
     private final UsuarioService usuarioService;
+    private final EmpleadoMapper empleadoMapper;
 
     // ============================ CREAR EMPLEADO (CREANDOLE ADEMAS SU USUARIO) ============================
     @Transactional
-    public EmpleadoResponseDto crearEmpleado(EmpleadoDto empleadoDto) {
+    public EmpleadoResponse crearEmpleado(EmpleadoCreateRequest empleadoDto) {
         if (empleadoRepository.existsByDniAndFueEliminadoFalse(empleadoDto.getDni())) throw new ConflictException("Ya existe un empleado con el DNI proporcionado");
 
         Usuario usuario = usuarioService.crearUsuario(empleadoDto);
 
-        Empleado empleado = EmpleadoMapper.toEntity(empleadoDto, usuario);
+        Empleado empleado = empleadoMapper.toEntity(empleadoDto);
 
+        empleado.setUsuario(usuario);
         usuario.setEmpleado(empleado);
 
-        Empleado empleadoGuardado = empleadoRepository.save(empleado);
-
-        return EmpleadoMapper.fromEntity(empleadoGuardado);
-    }
-
-    // ============================ OBTENER UN EMPLEADO RESPONSE ============================
-    public EmpleadoResponseDto obtenerEmpleado(Long id) {
-        Empleado empleadoGuardado = obtenerEmpleadoCompleto(id);
-        return EmpleadoMapper.fromEntity(empleadoGuardado);
+        return empleadoMapper.toResponse(empleadoRepository.save(empleado));
     }
 
     // ============================ OBTENER UN EMPLEADO ============================
-    public Empleado obtenerEmpleadoCompleto(Long id) {
+    public EmpleadoResponse obtenerEmpleado(Long id) {
+        return empleadoMapper.toResponse(obtenerEntidad(id));
+    }
+
+    // ============================ OBTENER EMPLEADO (ENTIDAD) ============================
+    public Empleado obtenerEntidad(Long id) {
         Empleado empleado = empleadoRepository.findById(id).orElseThrow(() -> new NotFoundException("Empleado no encontrado"));
         if (empleado.getFueEliminado()) throw new NotFoundException("Empleado eliminado");
         return empleado;
@@ -61,22 +60,18 @@ public class EmpleadoService {
 
     // ============================ ACTUALIZAR UN EMPLEADO ============================
     @Transactional
-    public EmpleadoResponseDto actualizarEmpleado(Long id, EmpleadoUpdateDto empleadoDto) {
-        Empleado empleado = obtenerEmpleadoCompleto(id);
+    public EmpleadoResponse actualizarEmpleado(Long id, EmpleadoUpdateRequest empleadoDto) {
+        Empleado empleado = obtenerEntidad(id);
 
-        if (empleadoDto.getDireccion() != null && !empleadoDto.getDireccion().isBlank()) empleado.setDireccion(empleadoDto.getDireccion());
-        if (empleadoDto.getMail() != null) empleado.setMail(empleadoDto.getMail());
-        if (empleadoDto.getTelefono() != null) empleado.setTelefono(empleadoDto.getTelefono());
+        empleadoMapper.updateEntity(empleadoDto, empleado);
 
-        Empleado empleadoGuardado = empleadoRepository.save(empleado);  
-
-        return EmpleadoMapper.fromEntity(empleadoGuardado);
+        return empleadoMapper.toResponse(empleadoRepository.save(empleado));
     }
 
     // ============================ ELIMINAR UN EMPLEADO + SU USUARIO ============================
     @Transactional
     public void eliminarEmpleado(Long id) {
-        Empleado empleado = obtenerEmpleadoCompleto(id);
+        Empleado empleado = obtenerEntidad(id);
 
         empleado.softDelete();
         
@@ -84,7 +79,7 @@ public class EmpleadoService {
     }
 
     // ============================ OBTENER EMPLEADOS CON FILTROS ============================
-    public Page<EmpleadoResponseDto> obtenerEmpleadosFiltrados(EmpleadoFiltroDto filtros) {
+    public Page<EmpleadoResponse> obtenerEmpleadosFiltrados(EmpleadoQuery filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
 
@@ -151,6 +146,6 @@ public class EmpleadoService {
         // --------- CONSULTA ----------
         Page<Empleado> empleados = empleadoRepository.findAll(spec, pageable);
 
-        return empleados.map(EmpleadoMapper::fromEntity);
+        return empleados.map(empleadoMapper::toResponse);
     }
 }

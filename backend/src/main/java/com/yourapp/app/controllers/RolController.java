@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.RolUpdateDto;
-import com.yourapp.app.models.dto.RolDto;
-import com.yourapp.app.models.entities.Rol;
+import com.yourapp.app.models.dto.rol.RolCreateRequest;
+import com.yourapp.app.models.dto.rol.RolResponse;
+import com.yourapp.app.models.dto.rol.RolUpdateRequest;
 import com.yourapp.app.services.RolService;
 
 import jakarta.validation.Valid;
@@ -30,14 +30,14 @@ public class RolController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ROL_CREAR')")
-    public Rol crearRol(@RequestBody @Valid RolDto rolDto) {
+    public RolResponse crearRol(@RequestBody @Valid RolCreateRequest rolDto) {
         return rolService.crearRol(rolDto);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ROL_ACTUALIZAR')")
-    public Rol actualizarPermisos(@PathVariable Long id, @RequestBody @Valid RolUpdateDto rolDto) {
+    public RolResponse actualizarPermisos(@PathVariable Long id, @RequestBody @Valid RolUpdateRequest rolDto) {
         return rolService.actualizarPermisos(id, rolDto);
     }
 
@@ -51,7 +51,7 @@ public class RolController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK) 
     @PreAuthorize("hasAuthority('ROL_VER')")
-    public List<Rol> obtenerTodosLosRoles() {
+    public List<RolResponse> obtenerTodosLosRoles() {
         return rolService.obtenerTodosLosRoles();
     }
 }
