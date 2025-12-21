@@ -1,7 +1,7 @@
 export default function FormNewProducto({ onClose }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Fondo desenfocado transparente */}
+      {/* Fondo desenfocado */}
       <div
         className="absolute inset-0 bg-white/20 backdrop-blur-md"
         onClick={onClose}
@@ -15,6 +15,7 @@ export default function FormNewProducto({ onClose }) {
         </p>
 
         <form className="grid grid-cols-1 gap-3">
+          {/* Nombre */}
           <div>
             <label className="text-sm font-medium">Nombre del Producto</label>
             <input
@@ -24,6 +25,7 @@ export default function FormNewProducto({ onClose }) {
             />
           </div>
 
+          {/* Descripción */}
           <div>
             <label className="text-sm font-medium">Descripción</label>
             <textarea
@@ -32,6 +34,7 @@ export default function FormNewProducto({ onClose }) {
             />
           </div>
 
+          {/* Precio y Stock */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Precio ($)</label>
@@ -50,21 +53,33 @@ export default function FormNewProducto({ onClose }) {
             </div>
           </div>
 
+          {/* Categoría */}
           <div>
             <label className="text-sm font-medium">Categoría</label>
             <select className="mt-1 w-full px-3 py-2 border rounded-lg">
               <option>Seleccionar categoría</option>
               <option>Camisas</option>
               <option>Pantalones</option>
-              <option>Zapatos</option>
+              <option>Vestidos</option>
               <option>Accesorios</option>
             </select>
           </div>
 
+          {/* Subcategoría */}
+          <div>
+            <label className="text-sm font-medium">Subcategoría</label>
+            <input
+              type="text"
+              className="mt-1 w-full px-3 py-2 border rounded-lg"
+              placeholder="Ej. Manga larga, Casual, Deportivo"
+            />
+          </div>
+
+          {/* Variantes opcionales */}
           <div className="grid grid-cols-2 gap-3">
             <input
               className="w-full px-3 py-2 border rounded-lg"
-              placeholder="Talla (opcional)"
+              placeholder="Talle (opcional)"
             />
             <input
               className="w-full px-3 py-2 border rounded-lg"
