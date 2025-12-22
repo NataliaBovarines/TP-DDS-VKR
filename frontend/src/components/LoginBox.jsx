@@ -12,7 +12,6 @@ export default function LoginBox({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("¡Formulario enviado!", { usuario, password });
 
     try {
       await AuthService.login({ 

@@ -20,10 +20,6 @@ export default function Productos() {
     pagina: 0,
   });
 
-  useEffect(() => {
-    cargarProductos();
-  }, [cargarProductos]);
-
   const cargarProductos = useCallback(async () => {
     try {
       setLoading(true);
@@ -33,13 +29,17 @@ export default function Productos() {
         tipoId: filtros.tipoId || undefined,
         proveedorId: filtros.proveedorId || undefined,
       });
-      setProductos(page?.content ?? []);
+      setProductos(page?.content || []);
     } catch {
       setProductos([]);
     } finally {
       setLoading(false);
     }
   }, [filtros]);
+
+  useEffect(() => {
+    cargarProductos();
+  }, [cargarProductos]);
 
   return (
     <div className="min-h-screen bg-gray-50">

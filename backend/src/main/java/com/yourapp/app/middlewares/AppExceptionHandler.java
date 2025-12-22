@@ -41,6 +41,17 @@ public class AppExceptionHandler {
         return ResponseEntity.status(status).body(errorDto);
     }
 
+    @ExceptionHandler(org.springframework.security.authentication.InternalAuthenticationServiceException.class)
+    public ResponseEntity<ErrorResponse> handleInternalAuth(org.springframework.security.authentication.InternalAuthenticationServiceException ex, HttpServletRequest req) {
+        String mensaje = (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage();
+        return crearErrorDto(mensaje, HttpStatus.UNAUTHORIZED, req);
+    }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthException(org.springframework.security.core.AuthenticationException ex, HttpServletRequest req) {
+        return crearErrorDto("Credenciales inválidas", HttpStatus.UNAUTHORIZED, req);
+    }
+
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleApp(AppException ex, HttpServletRequest req) {
         return crearErrorDto(ex.getMessage(), ex.getStatus(), req);

@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TokenResponse {
-    @JsonProperty("access_token")
-    String accessToken;
+    @JsonProperty("token")
+    String token;
 }
