@@ -135,7 +135,7 @@ public class Venta extends Persistible {
 
     public Double getProgresoPago() {
         if (total == 0) return 0.0;
-        return montoPagado / total;
+        return Math.floor((montoPagado / total) * 100);
     }
 
     public Double getPagoMinimoParaCredito() {

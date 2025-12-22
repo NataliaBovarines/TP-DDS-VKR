@@ -110,7 +110,7 @@ public class ProductoService {
     public DetalleProducto obtenerDetalleEntidad(Long detalleId) {
         DetalleProducto detalleProducto = detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
         
-        if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto o producto eliminado");
+        if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto eliminado");
         
         return detalleProducto;
     }
@@ -119,7 +119,7 @@ public class ProductoService {
     public DetalleProducto obtenerDetalleByCodigo(String detalleCodigo) {
         DetalleProducto detalleProducto = detalleProductoRepository.findByCodigo(detalleCodigo).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
 
-        if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto o producto eliminado");
+        if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto eliminado" + " [" + detalleCodigo + "]");
     
         return detalleProducto;
     }
