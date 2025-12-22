@@ -1,8 +1,5 @@
 import { useState } from "react";
-import {
-  actualizarDetalleProducto,
-  eliminarProducto,
-} from "../services/productoService";
+import ProductoService from "../services/productoService";
 
 export default function DetalleProducto({ producto, onClose, onUpdate }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -12,11 +9,11 @@ export default function DetalleProducto({ producto, onClose, onUpdate }) {
   async function handleActualizarDetalle(detalleId, cambios) {
     try {
       setLoading(true);
-      await actualizarDetalleProducto(producto.id, detalleId, cambios);
+      await ProductoService.actualizarDetalleProducto(producto.id, detalleId, cambios);
       await onUpdate(); // recarga productos desde back
     } catch (e) {
       console.error(e);
-      alert("Error actualizando stock");
+      // alert("Error actualizando stock");
     } finally {
       setLoading(false);
     }
@@ -24,12 +21,14 @@ export default function DetalleProducto({ producto, onClose, onUpdate }) {
 
   async function handleEliminarProducto() {
     try {
-      await eliminarProducto(producto.id);
+      await ProductoService.eliminarProducto(producto.id);
       onClose();
       onUpdate();
     } catch (e) {
       console.error(e);
-      alert("Error eliminando producto");
+      // alert("Error eliminando producto");
+    } finally {
+      setLoading(false);
     }
   }
 

@@ -2,26 +2,29 @@ import { useState } from "react";
 import InputField from "./InputField";
 import Button from "./Button";
 import logo from "../assets/logo.png";
+import AuthService from "../services/authService";
 
-export default function LoginBox({ onLogin, onRegister }) {
+export default function LoginBox({ onLogin }) {
   const [usuario, setUsuario] = useState("");
-  const [error, setError] = useState("");
+  const [password, setPassword] = useState("");
+  // const [error, setError] = useState("");
   const [hasError, setHasError] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("¡Formulario enviado!", { usuario, password });
 
-    const loginValido = usuario.trim().toLowerCase() === "andrea";
+    try {
+      await AuthService.login({ 
+        nombreDeUsuario: usuario, 
+        contrasenia: password 
+      });
 
-    if (!loginValido) {
-      setError("Usuario y/o contraseña incorrectos");
+      setHasError(false);
+      onLogin?.();
+    } catch {
       setHasError(true);
-      return;
     }
-
-    setError("");
-    setHasError(false);
-    onLogin?.();
   };
 
   return (
@@ -36,11 +39,11 @@ export default function LoginBox({ onLogin, onRegister }) {
         </p>
       </div>
 
-      {error && (
+      {/* {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md py-2 mb-4">
           {error}
         </p>
-      )}
+      )} */}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <InputField
@@ -55,10 +58,17 @@ export default function LoginBox({ onLogin, onRegister }) {
           label="Contraseña"
           type="password"
           placeholder="Ingresa tu contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           error={hasError}
         />
 
-        <Button text="Acceder al Sistema" variant="primary" className="ring-0" />
+        <Button 
+          text="Acceder al Sistema" 
+          variant="primary" 
+          type="submit"
+          className="ring-0" 
+        />
 
 
 {/*

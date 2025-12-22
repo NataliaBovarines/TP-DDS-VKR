@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import DetalleProducto from "../components/DetalleProducto";
-import { getProductos } from "../services/productoService";
+import ProductoService from "../services/productoService";
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
@@ -22,27 +22,24 @@ export default function Productos() {
 
   useEffect(() => {
     cargarProductos();
-  }, [filtros]);
+  }, [cargarProductos]);
 
-  async function cargarProductos() {
+  const cargarProductos = useCallback(async () => {
     try {
       setLoading(true);
-
-      const page = await getProductos({
+      const page = await ProductoService.getProductos({
         ...filtros,
         categoriaId: filtros.categoriaId || undefined,
         tipoId: filtros.tipoId || undefined,
         proveedorId: filtros.proveedorId || undefined,
       });
-
       setProductos(page?.content ?? []);
-    } catch (error) {
-      console.error("Error cargando productos:", error);
+    } catch {
       setProductos([]);
     } finally {
       setLoading(false);
     }
-  }
+  }, [filtros]);
 
   return (
     <div className="min-h-screen bg-gray-50">
