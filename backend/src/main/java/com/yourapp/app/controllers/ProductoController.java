@@ -54,14 +54,14 @@ public class ProductoController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('PRODUCTO_ACTUALIZAR')")
+    @PreAuthorize("hasAuthority('PRODUCTO_MODIFICAR')")
     public ProductoResponse actualizarProducto(@PathVariable Long id, @RequestBody @Valid ProductoUpdateRequest productoDto) {
         return productoService.actualizarProducto(id, productoDto);
     }
 
     @PatchMapping("/{id}/detalles/{detalleId}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('PRODUCTO_ACTUALIZAR')")
+    @PreAuthorize("hasAuthority('PRODUCTO_MODIFICAR')")
     public DetalleProductoResponse actualizarDetalleProducto(@PathVariable Long id, @PathVariable Long detalleId, @RequestBody @Valid DetalleProductoUpdateRequest detalleDto) {
         return productoService.actualizarDetalleProducto(id, detalleId, detalleDto);
     }

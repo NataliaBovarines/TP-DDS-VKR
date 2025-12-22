@@ -2,21 +2,17 @@ import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import DetalleProducto from "../components/DetalleProducto";
 import ProductoService from "../services/productoService";
+import { Package, DollarSign, Search, AlertTriangle, Eye } from "lucide-react";
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // Filtros reales del backend (ProductoFiltroDto)
   const [filtros, setFiltros] = useState({
     nombre: "",
     categoriaId: "",
     tipoId: "",
-    proveedorId: "",
     stockBajo: false,
-    orden: "nombre",
-    direccion: "asc",
     pagina: 0,
   });
 
@@ -27,7 +23,6 @@ export default function Productos() {
         ...filtros,
         categoriaId: filtros.categoriaId || undefined,
         tipoId: filtros.tipoId || undefined,
-        proveedorId: filtros.proveedorId || undefined,
       });
       setProductos(page?.content || []);
     } catch {
@@ -42,125 +37,107 @@ export default function Productos() {
   }, [cargarProductos]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 font-sans">
       <Navbar />
 
       <main className="p-6 space-y-6">
-
         {/* HEADER */}
-        <div className="bg-white border rounded-xl p-5 shadow">
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Gestión de productos
-          </h1>
-          <p className="text-sm text-gray-600">
-            Controlá inventario y stock mínimo por variante
+        <div className="bg-white border rounded-xl shadow p-5">
+          <h1 className="text-2xl font-semibold text-gray-800">Gestión de productos</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Controlá tu inventario real desde el sistema VKR.
           </p>
         </div>
 
-        {/* FILTROS */}
-        <div className="flex flex-wrap gap-3 items-center">
-          <input
-            placeholder="Buscar por nombre..."
-            className="input-base input-normal w-64"
-            value={filtros.nombre}
-            onChange={(e) =>
-              setFiltros({ ...filtros, nombre: e.target.value, pagina: 0 })
-            }
-          />
+        {/* CARDS DE RESUMEN */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white border rounded-xl shadow p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Package size={20} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Total en lista</p>
+              <p className="text-2xl font-semibold">{productos.length}</p>
+            </div>
+          </div>
+          <div className="bg-white border rounded-xl shadow p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Filtro Stock Bajo</p>
+              <p className="text-2xl font-semibold">{filtros.stockBajo ? "Activado" : "Desactivado"}</p>
+            </div>
+          </div>
+        </div>
 
-          <select
-            className="input-base input-normal w-56"
-            value={filtros.categoriaId}
-            onChange={(e) =>
-              setFiltros({ ...filtros, categoriaId: e.target.value, pagina: 0 })
-            }
-          >
-            <option value="">Todas las categorías</option>
-            {/* Se cargan desde back cuando lo conecten */}
-          </select>
-
-          <select
-            className="input-base input-normal w-56"
-            value={filtros.tipoId}
-            onChange={(e) =>
-              setFiltros({ ...filtros, tipoId: e.target.value, pagina: 0 })
-            }
-          >
-            <option value="">Todas las subcategorías</option>
-          </select>
+        {/* FILTROS DINÁMICOS */}
+        <div className="bg-white border rounded-xl shadow p-4 flex flex-wrap gap-3 items-center">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            <input
+              placeholder="Buscar por nombre..."
+              className="pl-10 input-base input-normal w-64"
+              value={filtros.nombre}
+              onChange={(e) => setFiltros({ ...filtros, nombre: e.target.value, pagina: 0 })}
+            />
+          </div>
 
           <button
-            onClick={() =>
-              setFiltros({
-                ...filtros,
-                stockBajo: !filtros.stockBajo,
-                pagina: 0,
-              })
-            }
-            className="input-base w-auto px-4 flex items-center gap-2 hover:bg-gray-100"
+            onClick={() => setFiltros({ ...filtros, stockBajo: !filtros.stockBajo, pagina: 0 })}
+            className={`btn w-auto px-4 flex items-center gap-2 transition ${
+              filtros.stockBajo ? "bg-red-50 text-danger border-red-200" : "bg-white border-gray-200 text-gray-600"
+            }`}
           >
-            <span className="text-danger text-sm">⚠</span>
-            <span className="text-sm">Stock bajo</span>
+            <AlertTriangle size={16} />
+            <span className="text-sm">Solo Stock Bajo</span>
           </button>
         </div>
 
-        {/* TABLA */}
-        <div className="bg-white border rounded-xl shadow p-4 overflow-x-auto">
+        {/* TABLA DE RESULTADOS */}
+        <div className="bg-white border rounded-xl shadow overflow-hidden">
           {loading ? (
-            <p className="text-center text-gray-500 py-6">
-              Cargando productos...
-            </p>
+            <div className="p-20 text-center text-gray-500">Cargando productos de VKR...</div>
           ) : productos.length === 0 ? (
-            <p className="text-center text-gray-500 py-6">
-              No se encontraron productos
-            </p>
+            <div className="p-20 text-center text-gray-500">No se encontraron productos con estos filtros.</div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="border-b">
+              <thead className="bg-gray-50 border-b text-gray-700">
                 <tr>
-                  <th className="text-left py-2">Producto</th>
-                  <th>Categoría</th>
-                  <th>Subcategoría</th>
+                  <th className="py-3 px-4 text-left">Producto</th>
+                  <th className="text-left">Categoría / Subcategoría</th>
                   <th className="text-center">Precio</th>
-                  <th className="text-center">Estado</th>
+                  <th className="text-center">Estado Stock</th>
                   <th className="text-center">Acciones</th>
                 </tr>
               </thead>
-
               <tbody>
                 {productos.map((p) => {
-                  const stockBajo = p.detalles?.some(
-                    (d) => d.stockActual < d.stockMinimo
-                  );
-
+                  const tieneStockBajo = p.detalles?.some(d => d.stockActual < d.stockMinimo);
                   return (
-                    <tr key={p.id} className="border-b">
-                      <td className="py-3">
-                        {p.nombre}
-                        <p className="text-xs text-gray-500">
-                          {p.descripcion}
-                        </p>
+                    <tr key={p.id} className="border-b hover:bg-gray-50 transition">
+                      <td className="py-3 px-4">
+                        <span className="font-medium text-gray-900">{p.nombre}</span>
+                        <p className="text-xs text-gray-500">{p.descripcion}</p>
                       </td>
-
-                      <td>{p.categoria?.descripcion ?? "-"}</td>
-                      <td>{p.tipoDePrenda?.descripcion ?? "-"}</td>
-
-                      <td className="text-center">${p.precio}</td>
-
-                      <td
-                        className={`text-center font-semibold ${
-                          stockBajo ? "text-danger" : "text-green-600"
-                        }`}
-                      >
-                        {stockBajo ? "⚠ Bajo stock" : "OK"}
+                      <td>
+                        <span className="text-gray-700">{p.subcategoria?.categoriaDescripcion ?? "-"}</span>
+                        <p className="text-xs text-gray-400">{p.subcategoria?.descripcion ?? "-"}</p>
                       </td>
-
+                      <td className="text-center font-medium">${p.precio}</td>
+                      <td className="text-center">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          tieneStockBajo ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+                        }`}>
+                          {tieneStockBajo ? "⚠ REVISAR" : "✓ OK"}
+                        </span>
+                      </td>
                       <td className="text-center">
                         <button
                           onClick={() => setProductoDetalle(p)}
-                          className="px-3 py-1 border rounded hover:bg-gray-100"
+                          className="btn-outline w-auto py-1 px-3 inline-flex items-center gap-2"
                         >
-                          Detalle
+                          <Eye size={14} /> Detalle
                         </button>
                       </td>
                     </tr>

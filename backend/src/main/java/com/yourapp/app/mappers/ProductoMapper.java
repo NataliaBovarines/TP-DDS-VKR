@@ -17,6 +17,7 @@ import com.yourapp.app.models.entities.Producto;
     componentModel = "spring", 
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    imports = { java.util.stream.Collectors.class },
     uses = { DetalleProductoMapper.class, SubcategoriaMapper.class, ProveedorMapper.class }
 )
 public interface ProductoMapper {

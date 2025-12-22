@@ -22,6 +22,7 @@ import com.yourapp.app.models.dto.producto.ProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.ProductoQuery;
 import com.yourapp.app.models.dto.producto.ProductoResponse;
 import com.yourapp.app.models.dto.producto.ProductoUpdateRequest;
+import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
@@ -204,16 +205,9 @@ public class ProductoService {
         }
 
         // --------- ESPECIFICACION ----------        
-        Specification<Producto> spec = (root, query, cb) -> {
-            query.distinct(true);
-            
-            Predicate productoNoEliminado = cb.equal(root.get("fueEliminado"), false);
-            
-            Join<Producto, DetalleProducto> detalles = root.join("detallesProductos", JoinType.LEFT);
-            Predicate detallesNoEliminados = cb.equal(detalles.get("fueEliminado"), false);
-            
-            return cb.and(productoNoEliminado, detallesNoEliminados);
-        };
+        Specification<Producto> spec = (root, query, cb) -> cb.conjunction();
+
+        spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
         
         // Filtrar por nombre
         if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {
@@ -277,6 +271,8 @@ public class ProductoService {
 
         // --------- CONSULTA ----------
         Page<Producto> productos = productoRepository.findAll(spec, pageable);
+
+        productos.forEach(producto -> { producto.getDetallesProductos().removeIf(detalle -> detalle.getFueEliminado()); });
     
         return productos.map(productoMapper::toResponse);
     }
