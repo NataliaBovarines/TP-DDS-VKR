@@ -1,19 +1,26 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.producto.DetalleProductoDto;
-import com.yourapp.app.models.entities.Color;
-import com.yourapp.app.models.entities.DetalleProducto;
-import com.yourapp.app.models.entities.Producto;
-import com.yourapp.app.models.entities.Talle;
+import java.util.List;
 
-public class DetalleProductoMapper {
-    public static DetalleProducto toEntity(DetalleProductoDto detalleDto, Producto producto, Talle talle, Color color) {
-        DetalleProducto detalle = new DetalleProducto();
-        detalle.setProducto(producto);
-        detalle.setTalle(talle);
-        detalle.setColor(color);
-        detalle.setStockActual(detalleDto.getStockActual());
-        detalle.setStockMinimo(detalleDto.getStockMinimo());
-        return detalle;
-    }
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.producto.DetalleProductoCreateRequest;
+import com.yourapp.app.models.dto.producto.DetalleProductoResponse;
+import com.yourapp.app.models.dto.producto.DetalleProductoUpdateRequest;
+import com.yourapp.app.models.entities.DetalleProducto;
+
+@Mapper(
+    componentModel = "spring", 
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    uses = { TalleMapper.class, ColorMapper.class }
+)
+public interface DetalleProductoMapper {
+    // --- ENTRADA ---
+    DetalleProducto toEntity(DetalleProductoCreateRequest dto);
+
+    // --- SALIDA ---
+    DetalleProductoResponse toResponse(DetalleProducto entity);
+
+    List<DetalleProductoResponse> toResponseList(List<DetalleProducto> entities);
 }

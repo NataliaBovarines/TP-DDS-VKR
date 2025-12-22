@@ -15,11 +15,13 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleProductoMapper;
 import com.yourapp.app.mappers.ProductoMapper;
-import com.yourapp.app.models.dto.producto.DetalleProductoDto;
-import com.yourapp.app.models.dto.producto.DetalleProductoUpdateDto;
-import com.yourapp.app.models.dto.producto.ProductoDto;
-import com.yourapp.app.models.dto.producto.ProductoFiltroDto;
-import com.yourapp.app.models.dto.producto.ProductoUpdateDto;
+import com.yourapp.app.models.dto.producto.DetalleProductoCreateRequest;
+import com.yourapp.app.models.dto.producto.DetalleProductoResponse;
+import com.yourapp.app.models.dto.producto.DetalleProductoUpdateRequest;
+import com.yourapp.app.models.dto.producto.ProductoCreateRequest;
+import com.yourapp.app.models.dto.producto.ProductoQuery;
+import com.yourapp.app.models.dto.producto.ProductoResponse;
+import com.yourapp.app.models.dto.producto.ProductoUpdateRequest;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
@@ -43,25 +45,29 @@ public class ProductoService {
     private final TalleService talleService;
     private final ColorService colorService;
     private final ProveedorService proveedorService;
+    private final ProductoMapper productoMapper;
+    private final DetalleProductoMapper detalleProductoMapper;
 
     // ============================ CREAR UN PRODUCTO ============================
     @Transactional
-    public Producto crearProducto(ProductoDto productoDto) {
+    public ProductoResponse crearProducto(ProductoCreateRequest productoDto) {
         Subcategoria subcategoria = subcategoriaService.obtenerEntidad(productoDto.getSubcategoriaId());
 
         if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede crear un producto con una categoria inactiva");
 
         Proveedor proveedor = (productoDto.getProveedorId() != null) ? proveedorService.obtenerEntidad(productoDto.getProveedorId()) : null;
 
-        Producto producto = ProductoMapper.toEntity(productoDto, subcategoria, proveedor);
+        Producto producto = productoMapper.toEntity(productoDto);
+        producto.setSubcategoria(subcategoria);
+        producto.setProveedor(proveedor);
 
-        return productoRepository.save(producto);
+        return productoMapper.toResponse(productoRepository.save(producto));
     }
 
     // ============================ CREAR UN DETALLE PRODUCTO ============================
     @Transactional
-    public DetalleProducto crearDetalleProducto(Long productoId, DetalleProductoDto detalleDto) {
-        Producto producto = obtenerProducto(productoId);
+    public DetalleProductoResponse crearDetalleProducto(Long productoId, DetalleProductoCreateRequest detalleDto) {
+        Producto producto = obtenerEntidad(productoId);
 
         // --------- OBTENER TALLE Y COLOR SI VIENEN EN EL DTO ----------
         Talle talle = (detalleDto.getTalleId() != null) ? talleService.obtenerEntidad(detalleDto.getTalleId()) : null;
@@ -74,17 +80,25 @@ public class ProductoService {
             (color != null) ? color.getId() : 0
         );
 
+        if (detalleProductoRepository.existsByCodigoAndFueEliminadoFalse(codigoGenerado)) throw new ConflictException("Ya existe este producto con estas características");
+
         // --------- PERSISTIR DETALLE DE PRODUCTO ----------
-        DetalleProducto detalle = DetalleProductoMapper.toEntity(detalleDto, producto, talle, color);
+        DetalleProducto detalle = detalleProductoMapper.toEntity(detalleDto);
+        detalle.setProducto(producto);
+        detalle.setColor(color);
+        detalle.setTalle(talle);
         detalle.setCodigo(codigoGenerado);
         
-        if (detalleProductoRepository.existsByCodigoAndFueEliminadoFalse(codigoGenerado)) throw new ConflictException("Ya existe este producto con estas características (Talle/Color/Unico)");
-
-        return detalleProductoRepository.save(detalle);
+        return detalleProductoMapper.toResponse(detalleProductoRepository.save(detalle));
     }
 
     // ============================ OBTENER UN PRODUCTO POR ID ============================
-    public Producto obtenerProducto(Long productoId) {
+    public ProductoResponse obtenerProducto(Long productoId) {
+        return productoMapper.toResponse(obtenerEntidad(productoId));
+    }
+
+    // ============================ OBTENER PRODUCTO (ENTIDAD) ============================
+    public Producto obtenerEntidad(Long productoId) {
         Producto producto = productoRepository.findById(productoId).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
         
         if (producto.getFueEliminado()) throw new NotFoundException("Producto eliminado");
@@ -92,8 +106,8 @@ public class ProductoService {
         return producto;
     }
 
-    // ============================ OBTENER UN DETALLE PRODUCTO POR ID ============================
-    public DetalleProducto obtenerDetalleProducto(Long detalleId) {
+    // ============================ OBTENER DETALLE PRODUCTO (ENTIDAD) ============================
+    public DetalleProducto obtenerDetalleEntidad(Long detalleId) {
         DetalleProducto detalleProducto = detalleProductoRepository.findById(detalleId).orElseThrow(() -> new NotFoundException("Detalle de producto no encontrado"));
         
         if (detalleProducto.getFueEliminado() || detalleProducto.getProducto().getFueEliminado()) throw new NotFoundException("Detalle de producto o producto eliminado");
@@ -112,40 +126,43 @@ public class ProductoService {
 
     // ============================ ACTUALIZAR UN PRODUCTO ============================
     @Transactional
-    public Producto actualizarProducto(Long id, ProductoUpdateDto productoDto) {
-        Producto producto = obtenerProducto(id);
+    public ProductoResponse actualizarProducto(Long id, ProductoUpdateRequest productoDto) {
+        Producto producto = obtenerEntidad(id);
 
-        if (productoDto.getNombre() != null) producto.setNombre(productoDto.getNombre());
-        if (productoDto.getDescripcion() != null) producto.setDescripcion(productoDto.getDescripcion());
+        productoMapper.updateEntity(productoDto, producto);
+
         if (productoDto.getSubcategoriaId() != null) {
-            Subcategoria subcategoria = subcategoriaService.obtenerEntidad(productoDto.getSubcategoriaId());
-            if (!subcategoria.getCategoria().getEstaActiva()) throw new ConflictException("No se puede asignar una categoria inactiva");
-            producto.setSubcategoria(subcategoria);
+            Subcategoria nuevaSub = subcategoriaService.obtenerEntidad(productoDto.getSubcategoriaId());
+            if (!nuevaSub.getCategoria().getEstaActiva()) throw new ConflictException("No puedes mover el producto a una categoría inactiva");
+            producto.setSubcategoria(nuevaSub);
         }
-        if (productoDto.getProveedorId() != null) producto.setProveedor(proveedorService.obtenerEntidad(productoDto.getProveedorId()));
-        if (productoDto.getPrecio() != null) producto.setPrecio(productoDto.getPrecio());
 
-        return productoRepository.save(producto);
+        if (productoDto.getProveedorId() != null) {
+            Proveedor nuevoProv = proveedorService.obtenerEntidad(productoDto.getProveedorId());
+            producto.setProveedor(nuevoProv);
+        }
+
+        return productoMapper.toResponse(productoRepository.save(producto));
     }
 
     // ============================ ACTUALIZAR UN DETALLE PRODUCTO ============================
     @Transactional
-    public DetalleProducto actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoUpdateDto detalleDto) {
-        DetalleProducto detalle = obtenerDetalleProducto(detalleId);
+    public DetalleProductoResponse actualizarDetalleProducto(Long id, Long detalleId, DetalleProductoUpdateRequest detalleDto) {
+        DetalleProducto detalle = obtenerDetalleEntidad(detalleId);
 
         if (!detalle.getProducto().getId().equals(id)) throw new BadRequestException("El detalle no pertenece al producto especificado");
         
         if (detalleDto.getStockAumento() != null) detalle.setStockActual(detalle.getStockActual() + detalleDto.getStockAumento());
-
+    
         if (detalleDto.getStockMinimo() != null) detalle.setStockMinimo(detalleDto.getStockMinimo());
-
-        return detalleProductoRepository.save(detalle);
+        
+        return detalleProductoMapper.toResponse(detalleProductoRepository.save(detalle));
     }
 
     // ============================ ELIMINAR UN PRODUCTO + DETALLES DEL PRODUCTO ============================
     @Transactional
     public void eliminarProducto(Long id) {
-        Producto producto = obtenerProducto(id);
+        Producto producto = obtenerEntidad(id);
 
         producto.softDelete();
 
@@ -155,9 +172,9 @@ public class ProductoService {
     // ============================ ELIMINAR UN DETALLE PRODUCTO ============================
     @Transactional
     public void eliminarDetalleProducto(Long id, Long detalleId) {
-        Producto producto = obtenerProducto(id);
+        Producto producto = obtenerEntidad(id);
 
-        DetalleProducto detalle = obtenerDetalleProducto(detalleId);
+        DetalleProducto detalle = obtenerDetalleEntidad(detalleId);
 
         if (!detalle.getProducto().getId().equals(producto.getId())) throw new BadRequestException("El detalle no pertenece a este producto");
 
@@ -166,7 +183,7 @@ public class ProductoService {
         detalleProductoRepository.save(detalle);
     }
 
-    public Page<Producto> obtenerProductosFiltrados(ProductoFiltroDto filtros) {
+    public Page<ProductoResponse> obtenerProductosFiltrados(ProductoQuery filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
 
@@ -259,6 +276,8 @@ public class ProductoService {
         Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 
         // --------- CONSULTA CON ESPECIFICACION, ORDENAMIENTO Y PAGINACION ----------
-        return productoRepository.findAll(spec, pageable);
+        Page<Producto> productos = productoRepository.findAll(spec, pageable);
+    
+        return productos.map(productoMapper::toResponse);
     }
 }

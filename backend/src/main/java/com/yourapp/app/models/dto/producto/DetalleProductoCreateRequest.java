@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class DetalleProductoDto {
+public class DetalleProductoCreateRequest {
     @Positive(message = "El ID de talle debe ser un valor válido")
     private Long talleId;
 

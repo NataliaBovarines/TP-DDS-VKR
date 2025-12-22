@@ -7,15 +7,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ProductoUpdateDto {
+public class ProductoUpdateRequest {
     @Size(max = 100, message = "El nombre no puede superar 100 caracteres")
     private String nombre;
 
     @Size(max = 500, message = "La descripción no puede superar los 500 caracteres")
     private String descripcion;
-
-    @Positive(message = "El ID de categoría debe ser un valor válido")
-    private Long categoriaId;
 
     @Positive(message = "El ID de subcategoría debe ser un valor válido")
     private Long subcategoriaId;

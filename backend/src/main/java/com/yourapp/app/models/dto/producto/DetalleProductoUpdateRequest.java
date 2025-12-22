@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class DetalleProductoUpdateDto {
+public class DetalleProductoUpdateRequest {
     @PositiveOrZero(message = "El stock a aumentar no puede ser un valor negativo")
     private Integer stockAumento;
 

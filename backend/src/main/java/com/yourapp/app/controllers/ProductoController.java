@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.producto.DetalleProductoDto;
-import com.yourapp.app.models.dto.producto.DetalleProductoUpdateDto;
-import com.yourapp.app.models.dto.producto.ProductoDto;
-import com.yourapp.app.models.dto.producto.ProductoFiltroDto;
-import com.yourapp.app.models.dto.producto.ProductoUpdateDto;
-import com.yourapp.app.models.entities.DetalleProducto;
-import com.yourapp.app.models.entities.Producto;
+import com.yourapp.app.models.dto.producto.DetalleProductoCreateRequest;
+import com.yourapp.app.models.dto.producto.DetalleProductoResponse;
+import com.yourapp.app.models.dto.producto.DetalleProductoUpdateRequest;
+import com.yourapp.app.models.dto.producto.ProductoCreateRequest;
+import com.yourapp.app.models.dto.producto.ProductoQuery;
+import com.yourapp.app.models.dto.producto.ProductoResponse;
+import com.yourapp.app.models.dto.producto.ProductoUpdateRequest;
 import com.yourapp.app.services.ProductoService;
 
 import jakarta.validation.Valid;
@@ -34,42 +34,42 @@ public class ProductoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('PRODUCTO_CREAR')")
-    public Producto crearProducto(@RequestBody @Valid ProductoDto productoDto) {
+    public ProductoResponse crearProducto(@RequestBody @Valid ProductoCreateRequest productoDto) {
         return productoService.crearProducto(productoDto);
     }
 
     @PostMapping("/{id}/detalles")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('PRODUCTO_CREAR')")
-    public DetalleProducto crearDetalleProducto(@PathVariable Long id, @RequestBody @Valid DetalleProductoDto detalleDto) {
+    public DetalleProductoResponse crearDetalleProducto(@PathVariable Long id, @RequestBody @Valid DetalleProductoCreateRequest detalleDto) {
         return productoService.crearDetalleProducto(id, detalleDto);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('PRODUCTO_VER')")
-    public Producto obtenerProducto(@PathVariable Long id) {
+    public ProductoResponse obtenerProducto(@PathVariable Long id) {
         return productoService.obtenerProducto(id);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('PRODUCTO_ACTUALIZAR')")
-    public Producto actualizarProducto(@PathVariable Long id, @RequestBody @Valid ProductoUpdateDto productoDto) {
+    public ProductoResponse actualizarProducto(@PathVariable Long id, @RequestBody @Valid ProductoUpdateRequest productoDto) {
         return productoService.actualizarProducto(id, productoDto);
     }
 
     @PatchMapping("/{id}/detalles/{detalleId}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('PRODUCTO_ACTUALIZAR')")
-    public DetalleProducto actualizarDetalleProducto(@PathVariable Long id, @PathVariable Long detalleId, @RequestBody @Valid DetalleProductoUpdateDto detalleDto) {
+    public DetalleProductoResponse actualizarDetalleProducto(@PathVariable Long id, @PathVariable Long detalleId, @RequestBody @Valid DetalleProductoUpdateRequest detalleDto) {
         return productoService.actualizarDetalleProducto(id, detalleId, detalleDto);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('PRODUCTO_VER')")
-    public Page<Producto> obtenerProductosFiltrados(@Valid @ModelAttribute ProductoFiltroDto filtros) {
+    public Page<ProductoResponse> obtenerProductosFiltrados(@Valid @ModelAttribute ProductoQuery filtros) {
         return productoService.obtenerProductosFiltrados(filtros);
     } 
 
