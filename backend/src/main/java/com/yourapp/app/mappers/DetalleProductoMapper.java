@@ -3,11 +3,12 @@ package com.yourapp.app.mappers;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 import com.yourapp.app.models.dto.producto.DetalleProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.DetalleProductoResponse;
-import com.yourapp.app.models.dto.producto.DetalleProductoUpdateRequest;
+import com.yourapp.app.models.dto.producto.DetalleProductoVentaResponse;
 import com.yourapp.app.models.entities.DetalleProducto;
 
 @Mapper(
@@ -21,6 +22,11 @@ public interface DetalleProductoMapper {
 
     // --- SALIDA ---
     DetalleProductoResponse toResponse(DetalleProducto entity);
+
+    @Mapping(target = "productoNombre", source = "producto.nombre")
+    @Mapping(target = "talleNombre", source = "talle.descripcion")
+    @Mapping(target = "colorNombre", source = "color.descripcion")
+    DetalleProductoVentaResponse toDetalleResponse(DetalleProducto entity);
 
     List<DetalleProductoResponse> toResponseList(List<DetalleProducto> entities);
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class VentaFiltroDto {
+public class VentaQuery {
     private Long empleadoId;
     private Long clienteId;
     private MetodoPago metodoPago;

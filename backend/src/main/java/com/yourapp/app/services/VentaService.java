@@ -5,13 +5,14 @@ import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.DetalleVentaMapper;
 import com.yourapp.app.mappers.VentaMapper;
-import com.yourapp.app.models.dto.venta.DetalleVentaDto;
-import com.yourapp.app.models.dto.venta.VentaCambioDto;
-import com.yourapp.app.models.dto.venta.VentaDto;
-import com.yourapp.app.models.dto.venta.VentaFiltroDto;
-import com.yourapp.app.models.dto.venta.VentaMotivoDto;
-import com.yourapp.app.models.dto.venta.VentaPagoDto;
-import com.yourapp.app.models.dto.venta.VentaReservaDto;
+import com.yourapp.app.models.dto.venta.DetalleVentaCreateRequest;
+import com.yourapp.app.models.dto.venta.VentaUpdateRequest;
+import com.yourapp.app.models.dto.venta.VentaCreateRequest;
+import com.yourapp.app.models.dto.venta.VentaQuery;
+import com.yourapp.app.models.dto.venta.VentaMotivoRequest;
+import com.yourapp.app.models.dto.venta.VentaPagoRequest;
+import com.yourapp.app.models.dto.venta.VentaReservaRequest;
+import com.yourapp.app.models.dto.venta.VentaResponse;
 import com.yourapp.app.models.entities.*;
 import com.yourapp.app.models.entities.Cliente.CategoriaCliente;
 import com.yourapp.app.models.entities.Venta.MetodoPago;
@@ -38,32 +39,49 @@ public class VentaService {
     private final ProductoService productoService;
     private final ClienteService clienteService;
     private final AuthService authService;
+    private final VentaMapper ventaMapper;
 
     // ============================ CREAR UNA VENTA ============================
+    public VentaResponse crearVenta(VentaCreateRequest ventaDto) {
+        return ventaMapper.toResponse(crearVentaEntidad(ventaDto));
+    }
+
+    // ============================ CREAR VENTA (ENTIDAD) ============================
     @Transactional
-    public Venta crearVenta(VentaDto ventaDto) {
+    public Venta crearVentaEntidad(VentaCreateRequest ventaDto) {
         if (ventaDto.getDetalles() == null || ventaDto.getDetalles().isEmpty()) throw new BadRequestException("No se puede crear una venta sin productos");
 
         // ---------- VALIDACION PARA EVITAR PRODUCTOS REPETIDOS ----------
-        long codigosUnicos = ventaDto.getDetalles().stream().map(DetalleVentaDto::getCodigo).distinct().count();
+        long codigosUnicos = ventaDto.getDetalles().stream().map(DetalleVentaCreateRequest::getCodigo).distinct().count();
         if (codigosUnicos < ventaDto.getDetalles().size()) throw new BadRequestException("La lista contiene códigos de producto duplicados. Agrupe las cantidades.");
 
         // ---------- CREAR LA VENTA BASE ----------
         Usuario usuario = authService.obtenerUsuarioLogueado();
         Empleado empleado = usuario.getEmpleado();
-        if (empleado == null) throw new NotFoundException("El usuario no tiene un empleado asociado");
         Cliente cliente = (ventaDto.getClienteId() != null) ? clienteService.obtenerEntidad(ventaDto.getClienteId()) : null;
 
-        Venta venta = VentaMapper.toEntity(empleado, cliente);
+        Venta venta = new Venta();
+        venta.setEmpleado(empleado);
+        venta.setCliente(cliente);
+
+        VentaIniciada estadoInicial = new VentaIniciada();
+        estadoInicial.setVenta(venta);
+        venta.setEstado(estadoInicial);
+        venta.setFecha(LocalDateTime.now());
 
         // ---------- CARGAR TODOS LOS PRODUCTOS ----------
-        for (DetalleVentaDto detalleDto : ventaDto.getDetalles()) {
+        for (DetalleVentaCreateRequest detalleDto : ventaDto.getDetalles()) {
             DetalleProducto detalleProducto = productoService.obtenerDetalleByCodigo(detalleDto.getCodigo());
 
             if (detalleProducto.getStockDisponible() < detalleDto.getCantidad()) throw new ConflictException("Stock insuficiente para: " + detalleProducto.getProducto().getNombre() + " [" + detalleDto.getCodigo() + "]");
 
-            DetalleVenta detalleVenta = DetalleVentaMapper.toEntity(detalleDto, detalleProducto, venta);
-            venta.getDetalles().add(detalleVenta);
+            DetalleVenta detalleVenta = new DetalleVenta();
+            detalleVenta.setDetalleProducto(detalleProducto);
+            detalleVenta.setCantidad(detalleDto.getCantidad());
+            detalleVenta.setPrecioUnitarioActual(detalleProducto.getProducto().getPrecio().doubleValue());
+            detalleVenta.calcularPrecioTotal();
+
+            venta.agregarDetalle(detalleVenta);
         }
 
         // ---------- CALCULAR EL TOTAL Y GUARDAR ----------
@@ -73,14 +91,23 @@ public class VentaService {
     }
 
     // ============================ OBTENER UNA VENTA POR ID ============================
-    public Venta obtenerVenta(Long ventaId) {
-        return ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
+    public VentaResponse obtenerVenta(Long ventaId) {
+        return ventaMapper.toResponse(obtenerEntidad(ventaId));
+    }
+
+    // ============================ OBTENER VENTA (ENTIDAD) ============================
+    public Venta obtenerEntidad(Long ventaId) {
+        Venta venta = ventaRepository.findById(ventaId).orElseThrow(() -> new NotFoundException("Venta no encontrada"));
+
+        if (venta.getFueEliminado()) throw new NotFoundException("Venta eliminada");
+
+        return venta;
     }
 
     // ============================ ELIMINAR UNA VENTA + DETALLES DE LA VENTA + PAGOS DE CREDITO ============================
     @Transactional
     public void eliminarVenta(Long id) {
-        Venta venta = obtenerVenta(id);
+        Venta venta = obtenerEntidad(id);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("No se puede eliminar una venta que ya ha sido procesada");
     
@@ -91,8 +118,8 @@ public class VentaService {
 
     // ============================ PAGAR POR COMPLETO UNA VENTA ============================
     @Transactional
-    public Venta pagarVentaCompleta(Long ventaId, VentaPagoDto ventaDto) {
-        Venta venta = obtenerVenta(ventaId);
+    public VentaResponse pagarVentaCompleta(Long ventaId, VentaPagoRequest ventaDto) {
+        Venta venta = obtenerEntidad(ventaId);
 
         if (!(venta.getEstado() instanceof VentaIniciada)) throw new ConflictException("Solo se pueden pagar ventas INICIADAS");
         
@@ -106,13 +133,13 @@ public class VentaService {
         venta.setMetodoPago(ventaDto.getMetodoPago());
         venta.setFecha(LocalDateTime.now());
 
-        return ventaRepository.save(venta);
+        return ventaMapper.toResponse(ventaRepository.save(venta));
     }
 
     // ============================ RESERVAR UNA VENTA CON SEÑA ============================
     @Transactional
-    public Venta reservarConCredito(Long ventaId, VentaReservaDto ventaDto) {
-        Venta venta = obtenerVenta(ventaId);
+    public VentaResponse reservarConCredito(Long ventaId, VentaReservaRequest ventaDto) {
+        Venta venta = obtenerEntidad(ventaId);
 
         if (venta.getCliente().getCategoriaCliente() == CategoriaCliente.NO_CONFIABLE) throw new ConflictException("Los clientes NO CONFIABLES no pueden realizar reservas"); 
 
@@ -125,13 +152,13 @@ public class VentaService {
         venta.setEstado(nuevoEstado);
         venta.setMetodoPago(MetodoPago.CREDITO);
 
-        return ventaRepository.save(venta);
+        return ventaMapper.toResponse(ventaRepository.save(venta));
     }
 
     // ============================ AGREGAR UN PAGO A UNA VENTA RESERVADA ============================
     @Transactional
-    public Venta agregarPagoParcialCredito(Long ventaId, VentaReservaDto ventaDto) {
-        Venta venta = obtenerVenta(ventaId);
+    public VentaResponse agregarPagoParcialCredito(Long ventaId, VentaReservaRequest ventaDto) {
+        Venta venta = obtenerEntidad(ventaId);
 
         if (!(venta.getEstado() instanceof VentaReservada)) throw new ConflictException("Solo se pueden agregar pagos a ventas RESERVADAS");
         
@@ -143,13 +170,13 @@ public class VentaService {
             venta.setEstado(nuevoEstado);
         }
 
-        return ventaRepository.save(venta);
+        return ventaMapper.toResponse(ventaRepository.save(venta));
     }
 
     // ============================ CANCELAR UNA VENTA ============================
     @Transactional
-    public Venta cancelarVenta(Long ventaId, VentaMotivoDto ventaDto) {
-        Venta venta = obtenerVenta(ventaId);
+    public VentaResponse cancelarVenta(Long ventaId, VentaMotivoRequest ventaDto) {
+        Venta venta = obtenerEntidad(ventaId);
 
         venta.getEstado().cancelar(ventaDto.getMotivo());
 
@@ -157,13 +184,13 @@ public class VentaService {
         nuevoEstado.setVenta(venta);
         venta.setEstado(nuevoEstado);
 
-        return ventaRepository.save(venta);
+        return ventaMapper.toResponse(ventaRepository.save(venta));
     }
 
     // ============================ RECHAZAR UNA VENTA ============================
     @Transactional
-    public Venta rechazarVenta(Long ventaId, VentaMotivoDto ventaDto) {
-        Venta venta = obtenerVenta(ventaId);
+    public VentaResponse rechazarVenta(Long ventaId, VentaMotivoRequest ventaDto) {
+        Venta venta = obtenerEntidad(ventaId);
 
         venta.getEstado().rechazar(ventaDto.getMotivo());
 
@@ -171,13 +198,13 @@ public class VentaService {
         nuevoEstado.setVenta(venta);
         venta.setEstado(nuevoEstado);
 
-        return ventaRepository.save(venta);
+        return ventaMapper.toResponse(ventaRepository.save(venta));
     }
 
     // ============================ CAMBIAR PRODUCTOS DE UNA VENTA (PAGADA O RESERVADA) ============================
     @Transactional
-    public Venta procesarCambioProducto(Long ventaOriginalId, VentaCambioDto ventaDto) {
-        Venta ventaOriginal = obtenerVenta(ventaOriginalId);
+    public VentaResponse procesarCambioProducto(Long ventaOriginalId, VentaUpdateRequest ventaDto) {
+        Venta ventaOriginal = obtenerEntidad(ventaOriginalId);
 
         if (ventaOriginal.getCliente() == null) throw new BadRequestException("No se puede realizar un cambio en una venta sin cliente asociado. Identifique al cliente primero.");
 
@@ -185,17 +212,17 @@ public class VentaService {
         Double montoPagadoOriginal = ventaOriginal.getMontoPagado();
 
         // ---------- CANCELAR VENTA ORIGINAL ----------
-        VentaMotivoDto ventaCancelacionDto = new VentaMotivoDto();
+        VentaMotivoRequest ventaCancelacionDto = new VentaMotivoRequest();
         ventaCancelacionDto.setMotivo(ventaDto.getMotivo());
 
         cancelarVenta(ventaOriginalId, ventaCancelacionDto);
 
         // ---------- CREAR NUEVA VENTA ----------
-        VentaDto nuevaVentaDto = new VentaDto();
+        VentaCreateRequest nuevaVentaDto = new VentaCreateRequest();
         nuevaVentaDto.setClienteId(ventaOriginal.getCliente().getId());
         nuevaVentaDto.setDetalles(ventaDto.getDetalles());
 
-        Venta nuevaVenta = crearVenta(nuevaVentaDto);
+        Venta nuevaVenta = crearVentaEntidad(nuevaVentaDto);
 
         Double totalNuevo = nuevaVenta.getTotal();
 
@@ -214,7 +241,7 @@ public class VentaService {
             nuevaVenta.setMetodoPago(ventaOriginal.getMetodoPago());
         }
 
-        return ventaRepository.save(nuevaVenta);
+        return ventaMapper.toResponse(ventaRepository.save(nuevaVenta));
     }
 
 
@@ -230,7 +257,7 @@ public class VentaService {
     }
 
     // ============================ OBTENER VENTAS CON FILTROS ============================
-    public Page<Venta> obtenerVentasFiltradas(VentaFiltroDto filtros) {
+    public Page<VentaResponse> obtenerVentasFiltradas(VentaQuery filtros) {
         // --------- ORDENAMIENTO ----------
         Sort sort = Sort.unsorted();
         if (filtros.getOrden() != null) {
@@ -284,6 +311,9 @@ public class VentaService {
         int tamanio = 10;
         Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 
-        return ventaRepository.findAll(spec, pageable);
+        // --------- CONSULTA ----------
+        Page<Venta> ventas = ventaRepository.findAll(spec, pageable);
+        
+        return ventas.map(ventaMapper::toResponse);
     }
 }

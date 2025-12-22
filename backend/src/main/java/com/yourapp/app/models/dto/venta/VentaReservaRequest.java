@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class VentaReservaDto {
+public class VentaReservaRequest {
     @NotNull(message = "El monto es obligatorio")
     @PositiveOrZero(message = "El monto no puede ser negativo")
     private Double monto;

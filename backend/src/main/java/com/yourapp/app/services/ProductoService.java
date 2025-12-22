@@ -275,7 +275,7 @@ public class ProductoService {
         int tamanio = 10;
         Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 
-        // --------- CONSULTA CON ESPECIFICACION, ORDENAMIENTO Y PAGINACION ----------
+        // --------- CONSULTA ----------
         Page<Producto> productos = productoRepository.findAll(spec, pageable);
     
         return productos.map(productoMapper::toResponse);

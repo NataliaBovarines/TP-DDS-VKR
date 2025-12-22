@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class VentaPagoDto {
+public class VentaPagoRequest {
     @NotNull(message = "El método de pago es obligatorio")
     private MetodoPago metodoPago;
 }

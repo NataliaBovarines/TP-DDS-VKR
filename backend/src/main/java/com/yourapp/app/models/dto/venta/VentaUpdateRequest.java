@@ -10,12 +10,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class VentaCambioDto {
+public class VentaUpdateRequest {
     @NotBlank(message = "El motivo del cambio es obligatorio")
     @Size(max = 500, message = "El motivo no puede superar los 500 caracteres")
     private String motivo;
 
     @NotEmpty(message = "Debe incluir al menos un producto para realizar el cambio")
     @Valid
-    private List<DetalleVentaDto> detalles;
+    private List<DetalleVentaCreateRequest> detalles;
 }

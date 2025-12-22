@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class DetalleVentaDto {
+public class DetalleVentaCreateRequest {
     @NotBlank(message = "El código del producto es obligatorio")
     @Pattern(regexp = "^\\d+-\\d+-\\d+$", message = "El formato del código es inválido")
     private String codigo; 

@@ -130,7 +130,7 @@ public class ClienteService {
         int tamanio = 10;
         Pageable pageable = PageRequest.of(pagina, tamanio, sort);
 
-        // --------- CONSULTA CON ESPECIFICACION, ORDENAMIENTO Y PAGINACION ----------
+        // --------- CONSULTA ----------
         Page<Cliente> clientes = clienteRepository.findAll(spec, pageable);
         return clientes.map(clienteMapper::toResponse);
     }

@@ -1,18 +1,21 @@
 package com.yourapp.app.mappers;
 
-import com.yourapp.app.models.dto.venta.DetalleVentaDto;
-import com.yourapp.app.models.entities.DetalleProducto;
-import com.yourapp.app.models.entities.DetalleVenta;
-import com.yourapp.app.models.entities.Venta;
+import java.util.List;
 
-public class DetalleVentaMapper {
-    public static DetalleVenta toEntity(DetalleVentaDto detalleVentaDto, DetalleProducto detalleProducto, Venta venta) {
-        DetalleVenta detalleVenta = new DetalleVenta();
-        detalleVenta.setDetalleProducto(detalleProducto);
-        detalleVenta.setCantidad(detalleVentaDto.getCantidad());
-        detalleVenta.setPrecioUnitarioActual(detalleProducto.getProducto().getPrecio().doubleValue());
-        detalleVenta.calcularPrecioTotal();
-        detalleVenta.setVenta(venta);
-        return detalleVenta;
-    }
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+
+import com.yourapp.app.models.dto.venta.DetalleVentaResponse;
+import com.yourapp.app.models.entities.DetalleVenta;
+
+@Mapper(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    uses = { DetalleProductoMapper.class }
+)
+public interface DetalleVentaMapper {
+    // --- SALIDA ---
+    DetalleVentaResponse toResponse(DetalleVenta detalle);
+
+    List<DetalleVentaResponse> toResponseList(List<DetalleVenta> entities);
 }

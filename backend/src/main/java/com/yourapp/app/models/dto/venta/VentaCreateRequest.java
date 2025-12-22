@@ -9,11 +9,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class VentaDto {    
+public class VentaCreateRequest {    
     @Positive(message = "El ID debe ser un valor válido")
     private Long clienteId;
     
     @NotEmpty(message = "La venta debe tener al menos un producto")
     @Valid
-    private List<DetalleVentaDto> detalles;
+    private List<DetalleVentaCreateRequest> detalles;
 }
