@@ -2,8 +2,6 @@ package com.yourapp.app.models.entities;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +17,6 @@ public class Usuario extends Persistible {
     private Rol rol;
 
     @OneToOne(mappedBy = "usuario")
-    @JsonIgnore
     private Empleado empleado;
 
     @Column(nullable = false)

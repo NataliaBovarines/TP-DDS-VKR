@@ -5,8 +5,8 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
-import com.yourapp.app.models.dto.CategoriaCreateRequest;
-import com.yourapp.app.models.dto.CategoriaResponse;
+import com.yourapp.app.models.dto.categoria.CategoriaCreateRequest;
+import com.yourapp.app.models.dto.categoria.CategoriaResponse;
 import com.yourapp.app.models.entities.Categoria;
 
 @Mapper(

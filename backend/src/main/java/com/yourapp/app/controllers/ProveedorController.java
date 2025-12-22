@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ProveedorCreateRequest;
-import com.yourapp.app.models.dto.ProveedorResponse;
+import com.yourapp.app.models.dto.proveedor.ProveedorCreateRequest;
+import com.yourapp.app.models.dto.proveedor.ProveedorResponse;
 import com.yourapp.app.services.ProveedorService;
 
 import jakarta.validation.Valid;

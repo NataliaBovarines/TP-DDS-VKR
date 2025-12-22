@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ColorCreateRequest;
-import com.yourapp.app.models.dto.ColorResponse;
+import com.yourapp.app.models.dto.color.ColorCreateRequest;
+import com.yourapp.app.models.dto.color.ColorResponse;
 import com.yourapp.app.services.ColorService;
 
 import jakarta.validation.Valid;

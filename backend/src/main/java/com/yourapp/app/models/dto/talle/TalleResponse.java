@@ -1,4 +1,4 @@
-package com.yourapp.app.models.dto;
+package com.yourapp.app.models.dto.talle;
 
 import lombok.Getter;
 import lombok.Setter;

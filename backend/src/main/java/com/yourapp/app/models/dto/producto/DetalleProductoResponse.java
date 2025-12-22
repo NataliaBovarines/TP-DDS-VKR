@@ -1,7 +1,7 @@
 package com.yourapp.app.models.dto.producto;
 
-import com.yourapp.app.models.dto.ColorResponse;
-import com.yourapp.app.models.dto.TalleResponse;
+import com.yourapp.app.models.dto.color.ColorResponse;
+import com.yourapp.app.models.dto.talle.TalleResponse;
 
 import lombok.Getter;
 import lombok.Setter;

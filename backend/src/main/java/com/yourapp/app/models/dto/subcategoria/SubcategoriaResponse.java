@@ -1,4 +1,4 @@
-package com.yourapp.app.models.dto;
+package com.yourapp.app.models.dto.subcategoria;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -2,8 +2,8 @@ package com.yourapp.app.models.dto.producto;
 
 import java.util.List;
 
-import com.yourapp.app.models.dto.ProveedorResponse;
-import com.yourapp.app.models.dto.SubcategoriaDetalleResponse;
+import com.yourapp.app.models.dto.proveedor.ProveedorResponse;
+import com.yourapp.app.models.dto.subcategoria.SubcategoriaDetalleResponse;
 
 import lombok.Getter;
 import lombok.Setter;

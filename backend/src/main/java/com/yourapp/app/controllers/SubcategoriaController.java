@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.SubcategoriaCreateRequest;
-import com.yourapp.app.models.dto.SubcategoriaResponse;
+import com.yourapp.app.models.dto.subcategoria.SubcategoriaCreateRequest;
+import com.yourapp.app.models.dto.subcategoria.SubcategoriaResponse;
 import com.yourapp.app.services.SubcategoriaService;
 
 import jakarta.validation.Valid;

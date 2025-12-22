@@ -5,8 +5,8 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
-import com.yourapp.app.models.dto.ColorCreateRequest;
-import com.yourapp.app.models.dto.ColorResponse;
+import com.yourapp.app.models.dto.color.ColorCreateRequest;
+import com.yourapp.app.models.dto.color.ColorResponse;
 import com.yourapp.app.models.entities.Color;
 
 @Mapper(

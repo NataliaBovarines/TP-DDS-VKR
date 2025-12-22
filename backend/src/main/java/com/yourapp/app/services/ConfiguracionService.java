@@ -2,7 +2,7 @@ package com.yourapp.app.services;
 
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ConfiguracionMapper;
-import com.yourapp.app.models.dto.ConfiguracionUpdateDto;
+import com.yourapp.app.models.dto.ConfiguracionUpdateRequest;
 import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.repositories.ConfiguracionTiendaRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class ConfiguracionService {
   }
 
   @Transactional
-  public ConfiguracionTienda actualizarConfiguracion(ConfiguracionUpdateDto dto) {
+  public ConfiguracionTienda actualizarConfiguracion(ConfiguracionUpdateRequest dto) {
     ConfiguracionTienda configActual = configuracionTiendaRepository.findFirstByOrderByIdAsc().orElseThrow(() -> new NotFoundException("No se encontró la configuración"));
     configuracionMapper.updateEntity(dto, configActual);
     ConfiguracionTienda guardada = configuracionTiendaRepository.save(configActual);

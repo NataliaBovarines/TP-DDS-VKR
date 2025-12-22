@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ProveedorMapper;
-import com.yourapp.app.models.dto.ProveedorCreateRequest;
-import com.yourapp.app.models.dto.ProveedorResponse;
+import com.yourapp.app.models.dto.proveedor.ProveedorCreateRequest;
+import com.yourapp.app.models.dto.proveedor.ProveedorResponse;
 import com.yourapp.app.models.entities.Proveedor;
 import com.yourapp.app.repositories.ProveedorRepository;
 

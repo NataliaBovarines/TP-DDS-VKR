@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLRestriction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yourapp.app.exceptions.BadRequestException;
 
 @Entity
@@ -21,12 +20,10 @@ public class PagoDeCredito extends Persistible {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id", nullable = false)
-    @JsonIgnore
     private Venta venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
-    @JsonIgnore
     private Cliente cliente;
 
     @Column(nullable = false)

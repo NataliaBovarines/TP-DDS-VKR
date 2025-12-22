@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.exceptions.UnauthorizedException;
-import com.yourapp.app.models.dto.TokenResponseDto;
+import com.yourapp.app.models.dto.TokenResponse;
 import com.yourapp.app.models.dto.usuario.ContraseniaRecuperarRequest;
 import com.yourapp.app.models.dto.usuario.ContraseniaResetearRequest;
 import com.yourapp.app.models.dto.usuario.ContraseniaUpdateRequest;
@@ -30,7 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     // ============================ LOGIN ============================
-    public TokenResponseDto login(UsuarioLoginRequest usuarioDto) {
+    public TokenResponse login(UsuarioLoginRequest usuarioDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usuarioDto.getNombreDeUsuario(), usuarioDto.getContrasenia()));
         } catch (BadCredentialsException e) {
@@ -41,18 +41,18 @@ public class AuthService {
 
         String jwtToken = jwtService.generateToken(usuario);
 
-        return new TokenResponseDto(jwtToken);
+        return new TokenResponse(jwtToken);
     }
 
     // ============================ CAMBIAR CONTRASEÑA (CON CONTRASEÑA ANTERIOR) ============================
-    public TokenResponseDto cambiarContrasenia(ContraseniaUpdateRequest usuarioDto) {
+    public TokenResponse cambiarContrasenia(ContraseniaUpdateRequest usuarioDto) {
         Usuario usuario = obtenerUsuarioLogueado();
 
         Usuario usuarioActualizado = usuarioService.actualizarContraseniaUsuario(usuario, usuarioDto);
 
         String jwtToken = jwtService.generateToken(usuarioActualizado);
 
-        return new TokenResponseDto(jwtToken);
+        return new TokenResponse(jwtToken);
     }
 
     // ============================ PEDIR RECUPERACION DE CONTRASEÑA ============================

@@ -1,4 +1,4 @@
-package com.yourapp.app.models.dto;
+package com.yourapp.app.models.dto.subcategoria;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

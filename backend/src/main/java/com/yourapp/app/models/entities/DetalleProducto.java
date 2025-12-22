@@ -1,6 +1,5 @@
 package com.yourapp.app.models.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 
@@ -12,7 +11,6 @@ import lombok.Setter;
 @Getter @Setter
 public class DetalleProducto extends Persistible {
     @ManyToOne
-    @JsonIgnore
     private Producto producto;
 
     @Column(nullable = false)

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ConfiguracionUpdateDto;
+import com.yourapp.app.models.dto.ConfiguracionUpdateRequest;
 import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.services.ConfiguracionService;
 
@@ -28,7 +28,7 @@ public class ConfiguracionController {
 
     @PatchMapping
     @PreAuthorize("hasAuthority('CONFIGURACION_EDITAR')")
-    public ConfiguracionTienda actualizarConfiguracion(@RequestBody @Valid ConfiguracionUpdateDto dto) {
+    public ConfiguracionTienda actualizarConfiguracion(@RequestBody @Valid ConfiguracionUpdateRequest dto) {
         return configuracionService.actualizarConfiguracion(dto);
     }
 }

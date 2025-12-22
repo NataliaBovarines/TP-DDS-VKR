@@ -6,9 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
-import com.yourapp.app.models.dto.SubcategoriaCreateRequest;
-import com.yourapp.app.models.dto.SubcategoriaDetalleResponse;
-import com.yourapp.app.models.dto.SubcategoriaResponse;
+import com.yourapp.app.models.dto.subcategoria.SubcategoriaCreateRequest;
+import com.yourapp.app.models.dto.subcategoria.SubcategoriaDetalleResponse;
+import com.yourapp.app.models.dto.subcategoria.SubcategoriaResponse;
 import com.yourapp.app.models.entities.Subcategoria;
 
 @Mapper(

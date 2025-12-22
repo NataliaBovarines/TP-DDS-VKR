@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class TokenResponseDto {
+public class TokenResponse {
     @JsonProperty("access_token")
     String accessToken;
 }

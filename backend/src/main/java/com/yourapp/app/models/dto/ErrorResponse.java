@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @AllArgsConstructor
-public class ErrorDto {
+public class ErrorResponse {
     private LocalDateTime timestamp;
     private int status;
     private String error;

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ConfiguracionUpdateDto {
+public class ConfiguracionUpdateRequest {
     @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
     private String nombreEmpresa;
     

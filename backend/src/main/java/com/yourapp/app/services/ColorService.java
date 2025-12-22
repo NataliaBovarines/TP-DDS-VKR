@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.ColorMapper;
-import com.yourapp.app.models.dto.ColorCreateRequest;
-import com.yourapp.app.models.dto.ColorResponse;
+import com.yourapp.app.models.dto.color.ColorCreateRequest;
+import com.yourapp.app.models.dto.color.ColorResponse;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.repositories.ColorRepository;
 

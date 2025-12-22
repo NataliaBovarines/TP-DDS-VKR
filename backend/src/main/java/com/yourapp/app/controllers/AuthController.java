@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.mappers.UsuarioMapper;
-import com.yourapp.app.models.dto.TokenResponseDto;
+import com.yourapp.app.models.dto.TokenResponse;
 import com.yourapp.app.models.dto.usuario.ContraseniaRecuperarRequest;
 import com.yourapp.app.models.dto.usuario.ContraseniaResetearRequest;
 import com.yourapp.app.models.dto.usuario.ContraseniaUpdateRequest;
@@ -28,13 +28,13 @@ public class AuthController {
     private final UsuarioMapper usuarioMapper;
 
     @PostMapping("/login")
-    public TokenResponseDto login(@RequestBody @Valid UsuarioLoginRequest usuarioDto) {
+    public TokenResponse login(@RequestBody @Valid UsuarioLoginRequest usuarioDto) {
         return authService.login(usuarioDto);
     }
 
     @PostMapping("/cambiar-contrasenia")
     @PreAuthorize("isAuthenticated()")
-    public TokenResponseDto cambiarContrasenia(@RequestBody @Valid ContraseniaUpdateRequest usuarioDto) {
+    public TokenResponse cambiarContrasenia(@RequestBody @Valid ContraseniaUpdateRequest usuarioDto) {
         return authService.cambiarContrasenia(usuarioDto);
     }
 

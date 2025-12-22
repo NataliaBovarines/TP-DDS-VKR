@@ -1,7 +1,5 @@
 package com.yourapp.app.models.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DetalleVenta extends Persistible {
     @ManyToOne
-    @JsonIgnore
     private Venta venta;
     @ManyToOne
     private DetalleProducto detalleProducto;

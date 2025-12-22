@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
 import com.yourapp.app.mappers.TalleMapper;
-import com.yourapp.app.models.dto.TalleCreateRequest;
-import com.yourapp.app.models.dto.TalleResponse;
+import com.yourapp.app.models.dto.talle.TalleCreateRequest;
+import com.yourapp.app.models.dto.talle.TalleResponse;
 import com.yourapp.app.models.entities.Talle;
 import com.yourapp.app.repositories.TalleRepository;
 

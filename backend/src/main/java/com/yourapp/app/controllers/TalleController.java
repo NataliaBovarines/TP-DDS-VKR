@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.TalleCreateRequest;
-import com.yourapp.app.models.dto.TalleResponse;
+import com.yourapp.app.models.dto.talle.TalleCreateRequest;
+import com.yourapp.app.models.dto.talle.TalleResponse;
 import com.yourapp.app.services.TalleService;
 
 import jakarta.validation.Valid;

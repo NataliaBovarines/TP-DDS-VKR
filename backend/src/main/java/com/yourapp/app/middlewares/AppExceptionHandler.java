@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.yourapp.app.exceptions.AppException;
-import com.yourapp.app.models.dto.ErrorDto;
+import com.yourapp.app.models.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -23,14 +23,14 @@ import jakarta.servlet.http.HttpServletRequest;
 public class AppExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
-    private ResponseEntity<ErrorDto> crearErrorDto(String message, HttpStatus status, HttpServletRequest req) {
+    private ResponseEntity<ErrorResponse> crearErrorDto(String message, HttpStatus status, HttpServletRequest req) {
         logger.error("============= EXCEPCIÓN DETECTADA =============");
         logger.error("Status: {}", status.value());
         logger.error("Path: {}", req.getRequestURI());
         logger.error("Message: {}", message);
         logger.error("===============================================");
 
-        ErrorDto errorDto = new ErrorDto(
+        ErrorResponse errorDto = new ErrorResponse(
             LocalDateTime.now(),
             status.value(),
             status.getReasonPhrase(),
@@ -42,38 +42,38 @@ public class AppExceptionHandler {
     }
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<ErrorDto> handleApp(AppException ex, HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handleApp(AppException ex, HttpServletRequest req) {
         return crearErrorDto(ex.getMessage(), ex.getStatus(), req);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDto> handleValid(MethodArgumentNotValidException ex, HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handleValid(MethodArgumentNotValidException ex, HttpServletRequest req) {
         String mensaje = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
 
         return crearErrorDto(mensaje, HttpStatus.BAD_REQUEST, req);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorDto> handleRoute(NoResourceFoundException ex, HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handleRoute(NoResourceFoundException ex, HttpServletRequest req) {
         return crearErrorDto("La ruta solicitada no existe", HttpStatus.NOT_FOUND, req);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-        public ResponseEntity<ErrorDto> handleMethod(HttpRequestMethodNotSupportedException ex, HttpServletRequest req) {
+        public ResponseEntity<ErrorResponse> handleMethod(HttpRequestMethodNotSupportedException ex, HttpServletRequest req) {
         String mensaje = String.format("El método %s no está permitido en esta ruta", ex.getMethod());
     
         return crearErrorDto(mensaje, HttpStatus.METHOD_NOT_ALLOWED, req);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorDto> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
         String mensaje = "Acceso denegado. No tiene los permisos necesarios.";
         
         return crearErrorDto(mensaje, HttpStatus.FORBIDDEN, req);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorDto> handleReadableException(HttpMessageNotReadableException ex, HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handleReadableException(HttpMessageNotReadableException ex, HttpServletRequest req) {
         String mensaje = "Error en el formato del JSON";
             
         if (ex.getMessage() != null && ex.getMessage().contains("not one of the values accepted for Enum class")) {
@@ -93,7 +93,7 @@ public class AppExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDto> handleGeneral(Exception ex, HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex, HttpServletRequest req) {
         return crearErrorDto("Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR, req);
     }
 }

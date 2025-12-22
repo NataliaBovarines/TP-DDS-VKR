@@ -5,8 +5,8 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
-import com.yourapp.app.models.dto.TalleCreateRequest;
-import com.yourapp.app.models.dto.TalleResponse;
+import com.yourapp.app.models.dto.talle.TalleCreateRequest;
+import com.yourapp.app.models.dto.talle.TalleResponse;
 import com.yourapp.app.models.entities.Talle;
 
 @Mapper(
