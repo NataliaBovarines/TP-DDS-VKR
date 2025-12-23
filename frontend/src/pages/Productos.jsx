@@ -109,7 +109,7 @@ export default function Productos() {
         {/* TABLA DE RESULTADOS */}
         <div className="bg-white border rounded-xl shadow overflow-hidden">
           {loading ? (
-            <div className="p-20 text-center text-gray-500">Cargando productos de VKR...</div>
+            <div className="p-20 text-center text-gray-500">Cargando productos...</div>
           ) : productos.length === 0 ? (
             <div className="p-20 text-center text-gray-500">No se encontraron productos con estos filtros.</div>
           ) : (
