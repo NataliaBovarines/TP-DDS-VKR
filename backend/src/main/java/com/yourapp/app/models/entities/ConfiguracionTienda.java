@@ -1,9 +1,11 @@
 package com.yourapp.app.models.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity @Data
+@Entity
+@Getter @Setter
 @Table(name = "configuracion_tienda")
 public class ConfiguracionTienda extends Persistible {
 
@@ -21,9 +23,6 @@ public class ConfiguracionTienda extends Persistible {
 
   @Column(name = "stock_minimo_global")
   private Integer stockMinimoGlobal = 5;
-
-  @Column(name = "limite_saldo_favor")
-  private Double limiteSaldoFavor = 10000.0; // Máximo saldo a favor
 
   @Column(name = "tiempo_maximo_cancelacion_meses")
   private Integer tiempoMaximoCancelacionMeses = 1;
@@ -47,9 +46,5 @@ public class ConfiguracionTienda extends Persistible {
 
   public boolean permiteReserva() {
     return Boolean.TRUE.equals(permiteReserva);
-  }
-
-  public boolean excedeLimiteSaldoFavor(Double saldo) {
-    return Math.abs(saldo) > limiteSaldoFavor;
   }
 }

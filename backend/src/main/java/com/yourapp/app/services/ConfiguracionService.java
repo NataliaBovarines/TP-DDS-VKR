@@ -1,5 +1,9 @@
 package com.yourapp.app.services;
 
+import com.yourapp.app.exceptions.NotFoundException;
+import com.yourapp.app.mappers.ConfiguracionMapper;
+import com.yourapp.app.models.dto.configuracion.ConfiguracionResponse;
+import com.yourapp.app.models.dto.configuracion.ConfiguracionUpdateRequest;
 import com.yourapp.app.models.entities.ConfiguracionTienda;
 import com.yourapp.app.repositories.ConfiguracionTiendaRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ConfiguracionService {
-
   private final ConfiguracionTiendaRepository configuracionTiendaRepository;
+  private final ConfiguracionMapper configuracionMapper;
 
   @EventListener(ApplicationReadyEvent.class)
   @Transactional
@@ -26,7 +30,6 @@ public class ConfiguracionService {
           nuevaConfig.setPorcentajeMinimoSena(0.10);
           nuevaConfig.setDiasValidezReserva(90);
           nuevaConfig.setStockMinimoGlobal(5);
-          nuevaConfig.setLimiteSaldoFavor(10000.0);
           nuevaConfig.setTiempoMaximoCancelacionMeses(1);
           return configuracionTiendaRepository.save(nuevaConfig);
         });
@@ -38,13 +41,16 @@ public class ConfiguracionService {
   }
 
   @Transactional
-  public ConfiguracionTienda actualizarConfiguracion(ConfiguracionTienda nuevaConfig) {
-    ConfiguracionTienda configGuardada = configuracionTiendaRepository.save(nuevaConfig);
-    ConfiguracionTienda.setInstance(configGuardada);
-    return configGuardada;
+  public ConfiguracionResponse actualizarConfiguracion(ConfiguracionUpdateRequest dto) {
+    ConfiguracionTienda configActual = configuracionTiendaRepository.findFirstByOrderByIdAsc().orElseThrow(() -> new NotFoundException("No se encontró la configuración"));
+    configuracionMapper.updateEntity(dto, configActual);
+    ConfiguracionTienda guardada = configuracionTiendaRepository.save(configActual);
+    ConfiguracionTienda.setInstance(guardada);
+    
+    return configuracionMapper.toResponse(guardada);
   }
 
-  public ConfiguracionTienda obtenerConfiguracionActual() {
-    return ConfiguracionTienda.getInstance();
+  public ConfiguracionResponse obtenerConfiguracionActual() {
+    return configuracionMapper.toResponse(ConfiguracionTienda.getInstance());
   }
 }

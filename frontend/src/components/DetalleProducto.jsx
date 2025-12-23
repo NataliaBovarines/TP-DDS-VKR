@@ -1,6 +1,6 @@
-import { useState } from "react";
-import ModalEditarStock from "./modals/ModalEditarStock";
-import ModalEditarStockMinimo from "./modals/ModalEditarStockMinimo";
+import { useState, useEffect } from "react";
+import ProductoService from "../services/productoService.js";
+import ModalEditarNumero from "./modals/ModalEditarNumero";
 import {
   IconEdit,
   IconClose,
@@ -8,15 +8,58 @@ import {
   IconDelete,
 } from "./icons";
 
-export default function DetalleProducto({ producto, onClose }) {
-  const [variantes, setVariantes] = useState(producto.variantes);
-  const [stockMinimo, setStockMinimo] = useState(producto.stockMinimo ?? 5);
-
+export default function DetalleProducto({ producto, onClose, onUpdate }) {
   const [varianteEditando, setVarianteEditando] = useState(null);
-  const [editStockMin, setEditStockMin] = useState(false);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [productoLocal, setProductoLocal] = useState(producto);
+
+  useEffect(() => {
+    setProductoLocal(producto);
+  }, [producto]);
+
+  async function handleActualizarDetalle(detalleId, cambios) {
+    try {
+      setLoading(true);
+
+      const detalleActualizado =
+        await ProductoService.actualizarDetalleProducto(
+          productoLocal.id,
+          detalleId,
+          cambios
+        );
+
+      setProductoLocal(prev => ({
+        ...prev,
+        detalles: prev.detalles.map(d =>
+          d.id === detalleId ? detalleActualizado : d
+        )
+      }));
+
+      await onUpdate(); // sigue estando bien
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEliminarProducto() {
+    try {
+      setLoading(true);
+      await ProductoService.eliminarProducto(producto.id);
+      onClose();
+      onUpdate();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -40,33 +83,20 @@ export default function DetalleProducto({ producto, onClose }) {
         <div className="grid grid-cols-2 gap-4 text-sm mb-6">
           <div>
             <span className="text-gray-500">Categoría</span>
-            <p className="font-medium">{producto.categoria}</p>
+            <p className="font-medium">{producto.subcategoria?.categoriaDescripcion}</p>
           </div>
 
           <div>
             <span className="text-gray-500">Subcategoría</span>
-            <p className="font-medium">{producto.subcategoria}</p>
+            <p className="font-medium">{producto.subcategoria?.descripcion}</p>
           </div>
           <div>
             <span className="text-gray-500">Proveedor</span>
-            <p className="font-medium">{producto.proveedor}</p>
+            <p className="font-medium">{producto.proveedor?.descripcion ?? "-"}</p>
           </div>
           <div>
             <span className="text-gray-500">Precio</span>
             <p className="font-medium">${producto.precio}</p>
-          </div>
-
-          {/* STOCK MINIMO */}
-          <div>
-            <span className="text-gray-500">Stock mínimo</span>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="font-medium">{stockMinimo}</p>
-              <IconEdit
-                size={14}
-                title="Editar stock mínimo"
-                onClick={() => setEditStockMin(true)}
-              />
-            </div>
           </div>
         </div>
 
@@ -82,32 +112,44 @@ export default function DetalleProducto({ producto, onClose }) {
                 <tr>
                   <th className="py-2 px-3 text-left">Color</th>
                   <th className="py-2 px-3 text-left">Talle</th>
-                  <th className="py-2 px-3 text-center">Stock</th>
+                  <th className="py-2 px-3 text-center">Stock total</th>
+                  <th className="py-2 px-3 text-center">Stock mínimo</th>
+                  <th className="py-2 px-3 text-center">Stock reservado</th>
                   <th className="py-2 px-3 text-center">Acción</th>
                 </tr>
               </thead>
 
               <tbody>
-                {variantes.map((v, idx) => (
+                {productoLocal.detalles.map((v, idx) => (
                   <tr key={idx} className="border-b last:border-0">
-                    <td className="py-2 px-3">{v.color}</td>
-                    <td className="py-2 px-3">{v.talle}</td>
+                    <td className="py-2 px-3">{v.color?.descripcion ?? "-"}</td>
+                    <td className="py-2 px-3">{v.talle?.descripcion ?? "-"}</td>
 
                     <td
-                      className={`py-2 px-3 text-center font-semibold ${
-                        v.stock < stockMinimo ? "text-danger" : ""
+                      className={`py-2 px-3 text-center ${
+                        v.stockActual < v.stockMinimo ? "text-danger" : ""
                       }`}
                     >
-                      {v.stock < stockMinimo && (
+                      {v.stockActual < v.stockMinimo && (
                         <IconWarning size={14} className="mr-1" />
                       )}
-                      {v.stock}
+                      {v.stockActual}
                     </td>
+
+                    <td className="py-2 px-3 text-center">{v.stockMinimo}</td>
+                    <td className="py-2 px-3 text-center">{v.stockReservado}</td>
 
                     <td className="py-2 px-3 text-center">
                       <IconEdit
                         title="Editar stock"
-                        onClick={() => setVarianteEditando({ ...v, idx })}
+                        size={14}
+                        onClick={() => !loading && setVarianteEditando({ ...v, idx })}
+                      />
+                      <IconEdit
+                        title="Editar stock mínimo"
+                        size={14}
+                        className="ml-2"
+                        onClick={() => !loading && setVarianteEditando({ ...v, idx, modo: "stockMinimo" })}
                       />
                     </td>
                   </tr>
@@ -149,10 +191,11 @@ export default function DetalleProducto({ producto, onClose }) {
 
                 <div className="flex gap-3 justify-end">
                   <button
-                    disabled={confirmText !== "ELIMINAR"}
+                    disabled={confirmText !== "ELIMINAR" || loading}
+                    onClick={handleEliminarProducto}
                     className="btn bg-danger text-white w-auto px-5 disabled:opacity-40"
                   >
-                    Confirmar eliminación
+                    {loading ? "Eliminando..." : "Confirmar eliminación"}
                   </button>
 
                   <button
@@ -172,26 +215,32 @@ export default function DetalleProducto({ producto, onClose }) {
       </div>
 
       {/* MODALES */}
-      {varianteEditando && (
-        <ModalEditarStock
-          variante={varianteEditando}
+      {varianteEditando && varianteEditando.modo !== "stockMinimo" && (
+        <ModalEditarNumero
+          titulo="Aumentar stock"
+          descripcion={`${varianteEditando.color?.descripcion ?? "-"} · ${varianteEditando.talle?.descripcion ?? "-"}`}
+          valorInicial={0}
           onClose={() => setVarianteEditando(null)}
-          onSave={(nuevoStock) => {
-            const copia = [...variantes];
-            copia[varianteEditando.idx].stock = nuevoStock;
-            setVariantes(copia);
+          onSave={async (valor) => {
+            await handleActualizarDetalle(varianteEditando.id, {
+              stockAumento: Number(valor),
+            });
             setVarianteEditando(null);
           }}
         />
       )}
 
-      {editStockMin && (
-        <ModalEditarStockMinimo
-          stockMinimo={stockMinimo}
-          onClose={() => setEditStockMin(false)}
-          onSave={(valor) => {
-            setStockMinimo(valor);
-            setEditStockMin(false);
+      {varianteEditando && varianteEditando.modo === "stockMinimo" && (
+        <ModalEditarNumero
+          titulo="Editar stock mínimo"
+          descripcion="Este valor se aplica a la variante"
+          valorInicial={varianteEditando.stockMinimo}
+          onClose={() => setVarianteEditando(null)}
+          onSave={async (valor) => {
+            await handleActualizarDetalle(varianteEditando.id, {
+              stockMinimo: Number(valor),
+            });
+            setVarianteEditando(null);
           }}
         />
       )}

@@ -1,20 +1,25 @@
 package com.yourapp.app.models.entities.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.models.entities.Persistible;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity @Data
+@Entity 
+@Getter @Setter
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_estado", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "estados_venta")
-@MappedSuperclass @NoArgsConstructor
+@NoArgsConstructor
 public abstract class VentaState extends Persistible {
 
-    @OneToOne
-    @JoinColumn(name = "venta_id", unique = true)
+    @ManyToOne
+    @JoinColumn(name = "venta_id")
+    @JsonIgnore
     private Venta venta;
 
 
@@ -42,6 +47,11 @@ public abstract class VentaState extends Persistible {
         throwUnsupportedError();
     }
 
+    public Venta procesarCambioProducto(Venta nuevaVenta, Double montoPagadoOriginal, Double totalNuevo) {
+        throwUnsupportedError();
+        return null;
+    }
+
     public void rechazar(String motivo) {
         throwUnsupportedError();
     }
@@ -55,6 +65,6 @@ public abstract class VentaState extends Persistible {
     }
 
     private void throwUnsupportedError() {
-        throw new UnsupportedOperationException("Operación no soportada en estado: " + this.getClass().getSimpleName());
+        throw new ConflictException("Operación no permitida en estado: " + this.getClass().getSimpleName());
     }
 }

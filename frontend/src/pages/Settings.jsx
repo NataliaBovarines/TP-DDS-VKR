@@ -98,7 +98,7 @@ export default function Settings() {
 }
 
 /* ---------- Tab ---------- */
-function Tab({ active, icon: Icon, children, onClick }) {
+function Tab({ active, children, onClick }) {
   return (
     <button
       onClick={onClick}

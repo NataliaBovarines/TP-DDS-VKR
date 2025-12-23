@@ -1,5 +1,8 @@
 package com.yourapp.app.models.entities;
 
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +20,6 @@ public class Cliente extends Persistible {
 
     private String telefono;
 
-    @Column(unique = true)
     private String dni;
 
     @Column(name = "credito_limite")
@@ -27,7 +29,7 @@ public class Cliente extends Persistible {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "categoria_cliente")
-    private CategoriaCliente categoriaCliente = CategoriaCliente.REGISTRADO;
+    private CategoriaCliente categoriaCliente;
 
     public enum CategoriaCliente {
         REGISTRADO, CONFIABLE, NO_CONFIABLE
@@ -45,51 +47,20 @@ public class Cliente extends Persistible {
     }
 
     public void aumentarDeuda(Double monto) {
-        if (monto <= 0) {
-            throw new IllegalArgumentException("Monto debe ser positivo");
-        }
-        if (deuda + monto > creditoLimite) {
-            throw new IllegalStateException("Supera límite de crédito");
-        }
+        if (monto <= 0) throw new BadRequestException("Monto debe ser positivo");
+        
+        if (deuda + monto > creditoLimite) throw new ConflictException("Supera límite de crédito");
+        
         this.deuda += monto;
     }
 
     public void disminuirDeuda(Double monto) {
-        if (monto <= 0) {
-            throw new IllegalArgumentException("Monto debe ser positivo");
-        }
+        if (monto <= 0) throw new BadRequestException("Monto debe ser positivo");
+        
         this.deuda -= monto;
     }
 
     public boolean esConfiable() {
         return categoriaCliente == CategoriaCliente.CONFIABLE;
-    }
-
-    public void ajustarSaldo(Double monto) {
-        ConfiguracionTienda config = ConfiguracionTienda.getInstance();
-        Double nuevaDeuda = deuda + monto;
-
-        if (nuevaDeuda < 0 && config != null) {
-            if (config.excedeLimiteSaldoFavor(nuevaDeuda)) {
-                throw new IllegalStateException(
-                    String.format("Saldo a favor excede el límite permitido. Límite: $%.2f",
-                        config.getLimiteSaldoFavor())
-                );
-            }
-        }
-
-        if (nuevaDeuda > creditoLimite) {
-            throw new IllegalStateException(
-                String.format("Supera límite de crédito. Límite: $%.2f, Nueva deuda: $%.2f",
-                    creditoLimite, nuevaDeuda)
-            );
-        }
-
-        this.deuda = nuevaDeuda;
-
-        if (deuda < 0) {
-            System.out.println(String.format("Cliente %s tiene saldo a favor: $%.2f",
-                nombre, Math.abs(deuda)));
-        }
     }
 }

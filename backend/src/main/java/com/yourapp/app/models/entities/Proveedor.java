@@ -6,9 +6,6 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Proveedor {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Proveedor extends Persistible {
     private String nombre;
 }

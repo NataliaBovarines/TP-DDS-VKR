@@ -9,12 +9,9 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
-public class Rol {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Rol extends Persistible {
     private String nombre;
-    @ElementCollection(targetClass = Permiso.class)
+    @ElementCollection(targetClass = Permiso.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private List<Permiso> permisos = new ArrayList<>();
 

@@ -1,6 +1,9 @@
 package com.yourapp.app.models.entities.state;
 
 import com.yourapp.app.models.entities.Venta;
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
+import com.yourapp.app.exceptions.ForbiddenException;
 import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.models.entities.PagoDeCredito;
 import jakarta.persistence.DiscriminatorValue;
@@ -16,37 +19,27 @@ public class VentaReservada extends VentaState {
         Venta venta = getVenta();
         Cliente cliente = venta.getCliente();
 
-        if (cliente == null) {
-            throw new IllegalStateException("Cliente no asignado a la reserva");
-        }
-
-        if (esReservaVencida()) {
-            throw new IllegalStateException("La reserva ha vencido");
-        }
-
-        if (monto <= 0) {
-            throw new IllegalArgumentException("Monto debe ser positivo");
-        }
-
+        if (cliente == null) throw new BadRequestException("Cliente no asignado a la reserva");
+        if (esReservaVencida()) throw new ConflictException("La reserva ha vencido");
+        if (monto <= 0) throw new BadRequestException("Monto debe ser positivo");
+        
         Double saldoPendiente = getSaldoPendiente();
-        if (monto > saldoPendiente) {
-            throw new IllegalArgumentException("Pago excede saldo pendiente");
-        }
-
-        if (!cliente.puedeReservar(monto)) {
-            throw new IllegalStateException("Crédito insuficiente");
-        }
-
+        
+        if (monto > saldoPendiente) throw new BadRequestException("Pago excede saldo pendiente");
+        if (!cliente.puedeReservar(monto)) throw new ForbiddenException("Crédito insuficiente");
+        
         PagoDeCredito pago = new PagoDeCredito();
         pago.setVenta(venta);
         pago.setCliente(cliente);
         pago.setMonto(monto);
         pago.setNumeroPago(venta.getPagosCredito().size() + 1);
+        pago.setFecha(LocalDateTime.now());
         pago.procesarPago();
+
         venta.agregarPagoCredito(pago);
 
         if (venta.estaCompletamentePagada()) {
-            venta.confirmarStockProductos();
+            venta.confirmarStockReservado();
             venta.setFecha(LocalDateTime.now());
         }
     }
@@ -54,16 +47,14 @@ public class VentaReservada extends VentaState {
     @Override
     public void cancelar(String motivo) {
         Venta venta = getVenta();
+        Cliente cliente = venta.getCliente();
 
-        if (motivo == null || motivo.trim().isEmpty()) {
-            throw new IllegalArgumentException("Motivo de cancelación requerido");
-        }
+        if (motivo == null || motivo.trim().isEmpty()) throw new BadRequestException("Motivo de cancelación requerido");
 
-        for (PagoDeCredito pago : venta.getPagosCredito()) {
-            pago.revertirPago();
-        }
+        cliente.disminuirDeuda(venta.getTotal() - venta.getMontoPagado());
 
         venta.liberarStockProductos();
+        venta.setMontoPagado(0.0);
         System.out.println("Reserva cancelada. Motivo: " + motivo);
     }
 

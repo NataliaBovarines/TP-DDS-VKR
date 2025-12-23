@@ -6,11 +6,16 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLRestriction;
+
+import com.yourapp.app.exceptions.BadRequestException;
+
 @Entity
 @Table(name = "pagos_credito")
 @Getter
 @Setter
 @NoArgsConstructor
+@SQLRestriction("fue_eliminado = false")
 public class PagoDeCredito extends Persistible {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,35 +39,31 @@ public class PagoDeCredito extends Persistible {
     private Boolean esPagoInicial = false;
 
     // Lógica de negocio
-    public void procesarPago() {
-        if (cliente == null || venta == null) {
-            throw new IllegalStateException("Pago incompleto: falta cliente o venta");
-        }
-
-        cliente.aumentarDeuda(monto);
-
+    public void procesarPagoInicial() {
+        if (cliente == null || venta == null) throw new BadRequestException("No se puede procesar pago: falta cliente o venta");
+        
         venta.setMontoPagado(venta.getMontoPagado() + monto);
 
+        cliente.aumentarDeuda(venta.getTotal() - venta.getMontoPagado());
+        
         System.out.println(String.format(
-            "Pago #%d registrado: $%.2f - Cliente: %s - Deuda actual: $%.2f",
-            numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
+            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f", numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
         ));
     }
 
-    public void revertirPago() {
-        if (cliente == null || venta == null) {
-            throw new IllegalStateException("No se puede revertir pago incompleto");
-        }
+    public void procesarPago() {
+        if (cliente == null || venta == null) throw new BadRequestException("No se puede procesar pago: falta cliente o venta");
+        
+        double saldoPendiente = venta.getTotal() - venta.getMontoPagado();
 
-        // Disminuir deuda del cliente
+        if (monto > saldoPendiente) throw new BadRequestException(String.format("El pago $%.2f excede el saldo pendiente $%.2f", monto, saldoPendiente));
+        
+        venta.setMontoPagado(venta.getMontoPagado() + monto);
+
         cliente.disminuirDeuda(monto);
-
-        // Actualizar monto pagado en venta
-        venta.setMontoPagado(venta.getMontoPagado() - monto);
-
+        
         System.out.println(String.format(
-            "Pago #%d revertido: $%.2f - Cliente: %s",
-            numeroPago, monto, cliente.getNombre()
+            "Pago #%d procesado: $%.2f - Cliente: %s - Deuda actual: $%.2f", numeroPago, monto, cliente.getNombre(), cliente.getDeuda()
         ));
     }
 }

@@ -1,106 +1,175 @@
-export default function FormNewProducto({ onClose }) {
+import { useState, useEffect } from "react";
+import ProductoService from "../services/productoService.js";
+import CategoriaService from "../services/categoriaService.js";
+import ProveedorService from "../services/proveedorService.js";
+
+export default function FormNewProducto({ onClose, onSuccess }) {
+  const [categorias, setCategorias] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    nombre: "",
+    descripcion: "",
+    subcategoriaId: "",
+    proveedorId: "",
+    precio: "",
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [cats, provs] = await Promise.all([
+          CategoriaService.getCategorias(),
+          ProveedorService.getProveedores(),
+        ]);
+        setCategorias(cats);
+        setProveedores(provs);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const payload = {
+      nombre: form.nombre.trim(),
+      descripcion: form.descripcion.trim() || null,
+      subcategoriaId: Number(form.subcategoriaId),
+      proveedorId: form.proveedorId ? Number(form.proveedorId) : null,
+      precio: parseInt(form.precio),
+    };
+
+    try {
+      await ProductoService.crearProducto(payload);
+      onSuccess(); 
+      onClose();
+    } catch (error) {
+      console.error("Error backend:", error.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Fondo desenfocado */}
-      <div
-        className="absolute inset-0 bg-white/20 backdrop-blur-md"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative bg-white p-6 rounded-xl shadow-lg w-full max-w-lg z-10">
-        <h2 className="text-lg font-semibold">Agregar Nuevo Producto</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Completá la información del producto para agregarlo al inventario.
-        </p>
-
-        <form className="grid grid-cols-1 gap-3">
+      <div className="relative bg-white p-6 rounded-xl shadow-xl w-full max-w-lg z-10">
+        <h2 className="text-xl font-bold text-gray-800">Agregar Nuevo Producto</h2>
+        
+        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {/* Nombre */}
           <div>
-            <label className="text-sm font-medium">Nombre del Producto</label>
+            <label className="label">Nombre del Producto *</label>
             <input
-              type="text"
-              className="mt-1 w-full px-3 py-2 border rounded-lg"
-              placeholder="Ej. Camisa a cuadros"
+              name="nombre"
+              required
+              maxLength={100}
+              value={form.nombre}
+              onChange={handleChange}
+              className="input-base input-normal"
+              placeholder="Ej. Remera Oversize"
             />
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="text-sm font-medium">Descripción</label>
+            <label className="label">Descripción</label>
             <textarea
-              className="mt-1 w-full px-3 py-2 border rounded-lg"
-              placeholder="Detalles del producto"
+              name="descripcion"
+              maxLength={500}
+              value={form.descripcion}
+              onChange={handleChange}
+              className="input-base input-normal h-24"
+              placeholder="Detalles del producto..."
             />
-          </div>
-
-          {/* Precio y Stock */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium">Precio ($)</label>
-              <input
-                type="number"
-                className="mt-1 w-full px-3 py-2 border rounded-lg"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Stock Disponible</label>
-              <input
-                type="number"
-                className="mt-1 w-full px-3 py-2 border rounded-lg"
-              />
-            </div>
-          </div>
-
-          {/* Categoría */}
-          <div>
-            <label className="text-sm font-medium">Categoría</label>
-            <select className="mt-1 w-full px-3 py-2 border rounded-lg">
-              <option>Seleccionar categoría</option>
-              <option>Camisas</option>
-              <option>Pantalones</option>
-              <option>Vestidos</option>
-              <option>Accesorios</option>
-            </select>
           </div>
 
           {/* Subcategoría */}
           <div>
-            <label className="text-sm font-medium">Subcategoría</label>
-            <input
-              type="text"
-              className="mt-1 w-full px-3 py-2 border rounded-lg"
-              placeholder="Ej. Manga larga, Casual, Deportivo"
-            />
+            <label className="label">Subcategoría *</label>
+            <select
+              name="subcategoriaId"
+              required
+              value={form.subcategoriaId}
+              onChange={handleChange}
+              className="input-base input-normal"
+            >
+              <option value="">Seleccione una subcategoría</option>
+              {categorias.map((cat) => (
+                <optgroup key={cat.id} label={cat.descripcion}>
+                  {cat.subcategorias?.map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.descripcion}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
           </div>
 
-          {/* Variantes opcionales */}
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="Talle (opcional)"
-            />
-            <input
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="Color (opcional)"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            {/* Precio */}
+            <div>
+              <label className="label">Precio ($) *</label>
+              <input
+                name="precio"
+                type="number"
+                min="0"
+                required
+                value={form.precio}
+                onChange={handleChange}
+                className="input-base input-normal"
+                placeholder="0"
+              />
+            </div>
+
+            {/* Proveedor */}
+            <div>
+              <label className="label">Proveedor</label>
+              <select
+                name="proveedorId"
+                value={form.proveedorId}
+                onChange={handleChange}
+                className="input-base input-normal"
+              >
+                <option value="">Sin proveedor</option>
+                {proveedores.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.descripcion}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="btn btn-outline w-auto px-6"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn btn-primary w-auto px-6"
+            >
+              {loading ? "Enviando..." : "Crear Producto"}
+            </button>
           </div>
         </form>
-
-        {/* Botones */}
-        <div className="flex justify-end mt-5 space-x-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-100"
-          >
-            Cancelar
-          </button>
-
-          <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900">
-            Agregar Producto
-          </button>
-        </div>
       </div>
     </div>
   );

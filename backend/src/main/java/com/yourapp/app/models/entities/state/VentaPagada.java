@@ -1,6 +1,9 @@
 package com.yourapp.app.models.entities.state;
 
+import com.yourapp.app.exceptions.BadRequestException;
+import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.models.entities.ConfiguracionTienda;
+import com.yourapp.app.models.entities.DetalleVenta;
 import com.yourapp.app.models.entities.Venta;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -16,23 +19,11 @@ public class VentaPagada extends VentaState {
     public void cancelar(String motivo) {
         Venta venta = getVenta();
 
-        if (!puedeCancelarse()) {
-            throw new IllegalStateException("Solo se pueden cancelar ventas pagadas dentro del mismo mes");
-        }
+        if (!puedeCancelarse()) throw new ConflictException("Solo se pueden cancelar ventas pagadas dentro del mismo mes");
+        if (motivo == null || motivo.trim().isEmpty()) throw new BadRequestException("Motivo de cancelación requerido");
 
-        if (motivo == null || motivo.trim().isEmpty()) {
-            throw new IllegalArgumentException("Motivo de cancelación requerido");
-        }
-
-        if (venta.getMetodoPago() == Venta.MetodoPago.CREDITO) {
-            for (com.yourapp.app.models.entities.PagoDeCredito pago : venta.getPagosCredito()) {
-                pago.revertirPago();
-            }
-        }
-
-        venta.getDetalles().forEach(detalle -> {
-            detalle.getProducto().aumentarStock(detalle.getCantidad());
-        });
+        venta.getDetalles().forEach(DetalleVenta::aumentarStock);
+        venta.setMontoPagado(0.0);
 
         System.out.println("Venta pagada cancelada. Motivo: " + motivo);
     }
