@@ -45,6 +45,10 @@ public class CategoriaService {
     public List<CategoriaResponse> obtenerTodasLasCategorias() {
         List<Categoria> categorias = categoriaRepository.findByFueEliminadoFalse();
 
+        categorias.forEach(categoria -> {
+            if (categoria.getSubcategorias() != null) categoria.getSubcategorias().removeIf(sub -> sub.getFueEliminado());
+        });
+
         return categoriaMapper.toResponseList(categorias);
     }
 

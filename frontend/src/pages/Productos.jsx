@@ -159,7 +159,12 @@ export default function Productos() {
             </table>
           )}
         </div>
-        {showForm && (<FormNewProducto onClose={() => setShowForm(false)} />)}
+        {showForm && (
+          <FormNewProducto 
+            onClose={() => setShowForm(false)} 
+            onSuccess={cargarProductos} 
+          />
+        )}
       </main>
 
       {productoDetalle && (

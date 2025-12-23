@@ -22,7 +22,6 @@ import com.yourapp.app.models.dto.producto.ProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.ProductoQuery;
 import com.yourapp.app.models.dto.producto.ProductoResponse;
 import com.yourapp.app.models.dto.producto.ProductoUpdateRequest;
-import com.yourapp.app.models.entities.Cliente;
 import com.yourapp.app.models.entities.Color;
 import com.yourapp.app.models.entities.DetalleProducto;
 import com.yourapp.app.models.entities.Producto;
@@ -34,7 +33,6 @@ import com.yourapp.app.repositories.ProductoRepository;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 
 @Service
