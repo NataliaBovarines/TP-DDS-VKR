@@ -1,13 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import DetalleProducto from "../components/DetalleProducto";
+import FormNewProducto from "../components/FormNewEmpleado";
 import ProductoService from "../services/productoService";
-import { Package, DollarSign, Search, AlertTriangle, Eye } from "lucide-react";
+import { Package, Search, AlertTriangle, Eye } from "lucide-react";
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [productoDetalle, setProductoDetalle] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [filtros, setFiltros] = useState({
     nombre: "",
     categoriaId: "",
@@ -69,6 +71,16 @@ export default function Productos() {
               <p className="text-2xl font-semibold">{filtros.stockBajo ? "Activado" : "Desactivado"}</p>
             </div>
           </div>
+        </div>
+
+        {/* BOTÓN AGREGAR PRODUCTO */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowForm(true)}
+            className="btn btn-primary w-auto px-6"
+          >
+            + Agregar Producto
+          </button>
         </div>
 
         {/* FILTROS DINÁMICOS */}
@@ -147,6 +159,7 @@ export default function Productos() {
             </table>
           )}
         </div>
+        {showForm && (<FormNewProducto onClose={() => setShowForm(false)} />)}
       </main>
 
       {productoDetalle && (

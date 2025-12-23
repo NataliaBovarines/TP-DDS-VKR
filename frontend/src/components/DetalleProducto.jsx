@@ -92,7 +92,7 @@ export default function DetalleProducto({ producto, onClose, onUpdate }) {
           </div>
           <div>
             <span className="text-gray-500">Proveedor</span>
-            <p className="font-medium">{producto.proveedor?.descripcion}</p>
+            <p className="font-medium">{producto.proveedor?.descripcion ?? "-"}</p>
           </div>
           <div>
             <span className="text-gray-500">Precio</span>
@@ -122,8 +122,8 @@ export default function DetalleProducto({ producto, onClose, onUpdate }) {
               <tbody>
                 {productoLocal.detalles.map((v, idx) => (
                   <tr key={idx} className="border-b last:border-0">
-                    <td className="py-2 px-3">{v.color.descripcion}</td>
-                    <td className="py-2 px-3">{v.talle.descripcion}</td>
+                    <td className="py-2 px-3">{v.color?.descripcion ?? "-"}</td>
+                    <td className="py-2 px-3">{v.talle?.descripcion ?? "-"}</td>
 
                     <td
                       className={`py-2 px-3 text-center ${
@@ -218,7 +218,7 @@ export default function DetalleProducto({ producto, onClose, onUpdate }) {
       {varianteEditando && varianteEditando.modo !== "stockMinimo" && (
         <ModalEditarNumero
           titulo="Aumentar stock"
-          descripcion={`${varianteEditando.color.descripcion} · ${varianteEditando.talle.descripcion}`}
+          descripcion={`${varianteEditando.color?.descripcion ?? "-"} · ${varianteEditando.talle?.descripcion ?? "-"}`}
           valorInicial={0}
           onClose={() => setVarianteEditando(null)}
           onSave={async (valor) => {
