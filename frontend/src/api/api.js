@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ENDPOINTS } from "./endpoints";
+import { ENDPOINTS } from "./endpoints.js";
 
 export const api = axios.create({
   baseURL: "http://localhost:8080",

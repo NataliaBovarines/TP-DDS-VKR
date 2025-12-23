@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import DetalleProducto from "../components/DetalleProducto";
-import FormNewProducto from "../components/FormNewEmpleado";
-import ProductoService from "../services/productoService";
+import FormNewProducto from "../components/FormNewProducto";
+import ProductoService from "../services/productoService.js";
 import { Package, Search, AlertTriangle, Eye } from "lucide-react";
 
 export default function Productos() {

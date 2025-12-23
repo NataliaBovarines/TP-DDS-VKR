@@ -1,5 +1,5 @@
-import { api } from "../api/api";
-import { ENDPOINTS } from "../api/endpoints";
+import { api } from "../api/api.js";
+import { ENDPOINTS } from "../api/endpoints.js";
 
 const ProductoService = {
   // =======================

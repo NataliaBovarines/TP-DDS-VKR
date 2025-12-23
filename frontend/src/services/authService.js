@@ -1,10 +1,11 @@
-import { api } from "../api/api";
-import { ENDPOINTS } from "../api/endpoints";
+import { api } from "../api/api.js";
+import { ENDPOINTS } from "../api/endpoints.js";
 
 const AuthService = {
   // =======================
   // POST /auth/login
   // =======================
+
   login: async (payload) => {
     const { data } = await api.post(ENDPOINTS.AUTH.LOGIN, payload);
     if (data.token) {
@@ -16,6 +17,7 @@ const AuthService = {
   // =======================
   // GET /auth/me (Obtener datos del usuario logueado)
   // =======================
+
   getMe: async () => {
     const { data } = await api.get(ENDPOINTS.AUTH.ME);
     return data;

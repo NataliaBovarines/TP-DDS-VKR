@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ProductoService from "../services/productoService";
+import ProductoService from "../services/productoService.js";
 import ModalEditarNumero from "./modals/ModalEditarNumero";
 import {
   IconEdit,

@@ -1,4 +1,40 @@
+import { useState } from "react";
+import ProductoService from "../services/productoService.js";
+
 export default function FormNewProducto({ onClose }) {
+  const [form, setForm] = useState({
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    stockActual: "",
+    categoria: "",
+    subcategoria: "",
+    talle: "",
+    color: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  // const handleSubmit = async () => {
+  //   try {
+  //     await ProductoService.crearProducto({
+  //       nombre: form.nombre,
+  //       descripcion: form.descripcion,
+  //       precio: Number(form.precio),
+  //       // adaptá esto a tu DTO real
+  //     });
+
+  //     onSuccess(); // recargar productos
+  //     onClose();   // cerrar modal
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Error al crear el producto");
+  //   }
+  // };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       {/* Fondo desenfocado */}
@@ -19,18 +55,21 @@ export default function FormNewProducto({ onClose }) {
           <div>
             <label className="text-sm font-medium">Nombre del Producto</label>
             <input
-              type="text"
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChange}
               className="mt-1 w-full px-3 py-2 border rounded-lg"
-              placeholder="Ej. Camisa a cuadros"
             />
           </div>
 
           {/* Descripción */}
           <div>
             <label className="text-sm font-medium">Descripción</label>
-            <textarea
+            <input
+              name="descripcion"
+              value={form.descripcion}
+              onChange={handleChange}
               className="mt-1 w-full px-3 py-2 border rounded-lg"
-              placeholder="Detalles del producto"
             />
           </div>
 
@@ -39,7 +78,9 @@ export default function FormNewProducto({ onClose }) {
             <div>
               <label className="text-sm font-medium">Precio ($)</label>
               <input
-                type="number"
+                name="precio"
+                value={form.precio}
+                onChange={handleChange}
                 className="mt-1 w-full px-3 py-2 border rounded-lg"
               />
             </div>
@@ -47,7 +88,9 @@ export default function FormNewProducto({ onClose }) {
             <div>
               <label className="text-sm font-medium">Stock Disponible</label>
               <input
-                type="number"
+                name="stockActual"
+                value={form.stockActual}
+                onChange={handleChange}
                 className="mt-1 w-full px-3 py-2 border rounded-lg"
               />
             </div>

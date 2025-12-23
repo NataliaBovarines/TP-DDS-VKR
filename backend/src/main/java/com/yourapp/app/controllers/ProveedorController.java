@@ -33,7 +33,7 @@ public class ProveedorController {
         return proveedorService.crearProveedor(proveedorDto);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/eliminacion")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('ROL_ELIMINAR')")
     public void eliminarProveedor(@PathVariable Long id) {
