@@ -5,6 +5,9 @@ const ColorService = {
   // =======================
   // POST /colores (Crear color)
   // =======================
+    // public class ColorCreateRequest {
+    //     private String descripcion;    
+    // }
   crearColor: async (payload) => {
     const { data } = await api.post(ENDPOINTS.COLORES.BASE, payload);
     return data;
@@ -13,6 +16,10 @@ const ColorService = {
   // =======================
   // GET /colores (Obtener todos los colores)
   // =======================
+    // public class ColorResponse {
+    //     private Long id;
+    //     private String descripcion;
+    // }
   getColores: async () => {
     const { data } = await api.get(ENDPOINTS.COLORES.BASE);
     return data;

@@ -5,6 +5,13 @@ const ProductoService = {
   // =======================
   // POST /productos (Crear producto base)
   // =======================
+    // public class ProductoCreateRequest {
+    //     private String nombre;
+    //     private String descripcion;
+    //     private Long subcategoriaId;
+    //     private Long proveedorId;
+    //     private Integer precio;
+    // }
   crearProducto: async (payload) => {
     const { data } = await api.post(ENDPOINTS.PRODUCTOS.BASE, payload);
     return data;
@@ -13,6 +20,18 @@ const ProductoService = {
   // =======================
   // GET /productos (con filtros)
   // =======================
+    // public class ProductoQuery {
+    //     private String nombre;
+    //     private Long categoriaId;
+    //     private Long subcategoriaId;
+    //     private Long talleId;
+    //     private Long colorId;
+    //     private Long proveedorId;
+    //     private Boolean stockBajo;
+    //     private String orden;
+    //     private String direccion;
+    //     private Integer pagina;
+    // }
   getProductos: async (filters = {}) => {
     const { data } = await api.get(ENDPOINTS.PRODUCTOS.BASE, {
       params: filters,
@@ -23,6 +42,22 @@ const ProductoService = {
   // =======================
   // GET /productos/{id}
   // =======================
+    // public class ProductoResponse {
+    //     private Long id;
+    //     private String nombre;
+    //     private String descripcion;
+    //     private SubcategoriaDetalleResponse subcategoria;
+    //     private ProveedorResponse proveedor;
+    //     private Integer precio;
+    //     private Integer stockTotal;
+    //     private List<DetalleProductoResponse> detalles;
+    // }
+    // public class SubcategoriaDetalleResponse {
+    //   private Long id;
+    //   private String descripcion;
+    //   private Long categoriaId;
+    //   private String categoriaDescripcion;
+    // }
   getProductoById: async (id) => {
     const { data } = await api.get(ENDPOINTS.PRODUCTOS.POR_ID(id));
     return data;
@@ -31,6 +66,13 @@ const ProductoService = {
   // =======================
   // PATCH /productos/{id}
   // =======================
+    // public class ProductoUpdateRequest {
+    //     private String nombre;
+    //     private String descripcion;
+    //     private Long subcategoriaId;
+    //     private Long proveedorId;
+    //     private Integer precio;
+    // }
   actualizarProducto: async (id, payload) => {
     const { data } = await api.patch(ENDPOINTS.PRODUCTOS.POR_ID(id), payload);
     return data;
@@ -46,6 +88,12 @@ const ProductoService = {
   // =======================
   // POST /productos/{id}/detalles (Crear variante)
   // =======================
+    // public class DetalleProductoCreateRequest {
+    //     private Long talleId;
+    //     private Long colorId;
+    //     private Integer stockActual;
+    //     private Integer stockMinimo;
+    // }
   crearDetalle: async (productoId, payload) => {
     const { data } = await api.post(
       ENDPOINTS.PRODUCTOS.DETALLES.CREAR(productoId), 
@@ -57,6 +105,10 @@ const ProductoService = {
   // =======================
   // PATCH /productos/{id}/detalles/{detalleId}
   // =======================
+    // public class DetalleProductoUpdateRequest {
+    //     private Integer stockAumento;
+    //     private Integer stockMinimo;
+    // }
   actualizarDetalleProducto: async (productoId, detalleId, payload) => {
     const { data } = await api.patch(
       ENDPOINTS.PRODUCTOS.DETALLES.ACTUALIZAR(productoId, detalleId),

@@ -5,6 +5,9 @@ const ProveedorService = {
   // =======================
   // POST /proveedores (Crear proveedor)
   // =======================
+    // public class ProveedorCreateRequest {
+    //     private String nombre;    
+    // }
   crearProveedor: async (payload) => {
     const { data } = await api.post(ENDPOINTS.PROVEEDORES.BASE, payload);
     return data;
@@ -13,6 +16,10 @@ const ProveedorService = {
   // =======================
   // GET /proveedores (Obtener todos los proveedores)
   // =======================
+    // public class ProveedorResponse {
+    //     private Long id;
+    //     private String nombre;
+    // }
   getProveedores: async () => {
     const { data } = await api.get(ENDPOINTS.PROVEEDORES.BASE);
     return data;

@@ -5,7 +5,10 @@ const AuthService = {
   // =======================
   // POST /auth/login
   // =======================
-
+    // public class UsuarioLoginRequest {
+    //     private String nombreDeUsuario;
+    //     private String contrasenia;
+    // }
   login: async (payload) => {
     const { data } = await api.post(ENDPOINTS.AUTH.LOGIN, payload);
     if (data.token) {
@@ -17,7 +20,11 @@ const AuthService = {
   // =======================
   // GET /auth/me (Obtener datos del usuario logueado)
   // =======================
-
+    // public class UsuarioResponse {
+    //     private Long id;
+    //     private String nombreDeUsuario;
+    //     private RolResponse rol;
+    // }
   getMe: async () => {
     const { data } = await api.get(ENDPOINTS.AUTH.ME);
     return data;
@@ -26,6 +33,10 @@ const AuthService = {
   // =======================
   // POST /auth/cambiar-contrasenia
   // =======================
+    // public class ContraseniaUpdateRequest {
+    //     private String contraseniaActual;
+    //     private String contraseniaNueva;
+    // }
   cambiarContrasenia: async (payload) => {
     const { data } = await api.post(ENDPOINTS.AUTH.CAMBIAR_CONTRASENIA, payload);
     return data;
@@ -34,6 +45,9 @@ const AuthService = {
   // =======================
   // POST /auth/recuperar-contrasenia
   // =======================
+    // public class ContraseniaRecuperarRequest {
+    //     private String mail;
+    // }
   recuperarContrasenia: async (payload) => {
     await api.post(ENDPOINTS.AUTH.RECUPERAR_CONTRASENIA, payload);
   },
@@ -41,6 +55,10 @@ const AuthService = {
   // =======================
   // POST /auth/resetear-contrasenia
   // =======================
+    // public class ContraseniaResetearRequest {
+    //     private String token;
+    //     private String contraseniaNueva;
+    // }
   resetearContrasenia: async (payload) => {
     await api.post(ENDPOINTS.AUTH.RESETEAR_CONTRASENIA, payload);
   },

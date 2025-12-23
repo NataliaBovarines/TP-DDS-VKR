@@ -1,4 +1,4 @@
-package com.yourapp.app.models.dto;
+package com.yourapp.app.models.dto.configuracion;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

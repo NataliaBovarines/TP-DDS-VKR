@@ -5,6 +5,10 @@ const SubcategoriaService = {
   // =======================
   // POST /subcategorias (Crear subcategoría)
   // =======================
+    // public class SubcategoriaCreateRequest {
+    //     private String descripcion;
+    //     private Long categoriaId;
+    // }
   crearSubcategoria: async (payload) => {
     const { data } = await api.post(ENDPOINTS.SUBCATEGORIAS.BASE, payload);
     return data;

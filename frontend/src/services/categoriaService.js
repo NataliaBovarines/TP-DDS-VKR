@@ -5,6 +5,9 @@ const CategoriaService = {
   // =======================
   // POST /categorias (Crear categoría)
   // =======================
+    // public class CategoriaCreateRequest {
+    //     private String descripcion;    
+    // }
   crearCategoria: async (payload) => {
     const { data } = await api.post(ENDPOINTS.CATEGORIAS.BASE, payload);
     return data;
@@ -13,6 +16,16 @@ const CategoriaService = {
   // =======================
   // GET /categorias (Obtener todas)
   // =======================
+    //   public class CategoriaResponse {
+    //     private Long id;
+    //     private String descripcion;
+    //     private Boolean estaActiva;
+    //     private List<SubcategoriaResponse> subcategorias; 
+    //   }
+    // public class SubcategoriaResponse {
+    //     private Long id;
+    //     private String descripcion;
+    // }
   getCategorias: async () => {
     const { data } = await api.get(ENDPOINTS.CATEGORIAS.BASE);
     return data;

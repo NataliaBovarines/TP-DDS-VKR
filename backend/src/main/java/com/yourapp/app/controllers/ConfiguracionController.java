@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yourapp.app.models.dto.ConfiguracionUpdateRequest;
-import com.yourapp.app.models.entities.ConfiguracionTienda;
+import com.yourapp.app.models.dto.configuracion.ConfiguracionResponse;
+import com.yourapp.app.models.dto.configuracion.ConfiguracionUpdateRequest;
 import com.yourapp.app.services.ConfiguracionService;
 
 import jakarta.validation.Valid;
@@ -22,13 +22,13 @@ public class ConfiguracionController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('CONFIGURACION_VER')")
-    public ConfiguracionTienda obtenerConfiguracion() {
+    public ConfiguracionResponse obtenerConfiguracion() {
         return configuracionService.obtenerConfiguracionActual();
     }
 
     @PatchMapping
     @PreAuthorize("hasAuthority('CONFIGURACION_EDITAR')")
-    public ConfiguracionTienda actualizarConfiguracion(@RequestBody @Valid ConfiguracionUpdateRequest dto) {
+    public ConfiguracionResponse actualizarConfiguracion(@RequestBody @Valid ConfiguracionUpdateRequest dto) {
         return configuracionService.actualizarConfiguracion(dto);
     }
 }
