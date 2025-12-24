@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Search, ShoppingCart, Trash2, CreditCard, DollarSign, 
   ScanLine, List, Eye, ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, 
-  Filter, Package, History, PlusCircle, X, Calendar, Hash
+  Package, History, PlusCircle, X, Calendar, Hash
 } from 'lucide-react';
 import { ProductoDetalle, Cliente, ClienteEstado, VentaEstado, DetalleVenta, Venta } from '../types.ts';
 
@@ -223,6 +223,21 @@ const Ventas: React.FC = () => {
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 1. Buscar por cliente */}
+          <div className="space-y-1 lg:col-span-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Buscar ventas</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
+              <input 
+                placeholder="Ingresa el nombre del cliente..." 
+                className="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* 2. Filtro de estado */}
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Estado</label>
             <select value={filters.estado} onChange={e => setFilters({...filters, estado: e.target.value})} className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none">
@@ -232,23 +247,26 @@ const Ventas: React.FC = () => {
               <option value="CANCELADA">Cancelada</option>
             </select>
           </div>
+
+          {/* Filtro de ordenar + Botón X */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Ordenar por Fecha</label>
-            <select value={filters.direccion} onChange={e => setFilters({...filters, direccion: e.target.value})} className="w-full px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none">
-              <option value="DESC">Más recientes primero</option>
-              <option value="ASC">Más antiguos primero</option>
-            </select>
-          </div>
-          <div className="space-y-1 lg:col-span-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Buscar Cliente</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
-              <input 
-                placeholder="Ingresa el nombre del cliente..." 
-                className="w-full pl-10 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20" 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Ordenar por fecha</label>
+            <div className="flex gap-2">
+              <select value={filters.direccion} onChange={e => setFilters({...filters, direccion: e.target.value})} className="flex-1 px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none">
+                <option value="DESC">Más recientes primero</option>
+                <option value="ASC">Más antiguos primero</option>
+              </select>
+              
+              <button 
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilters({ estado: '', direccion: 'DESC' });
+                }}
+                className="p-3.5 bg-white text-slate-300 hover:text-rose-500 border border-slate-200 rounded-xl transition-all flex items-center justify-center"
+                title="Limpiar filtros"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
