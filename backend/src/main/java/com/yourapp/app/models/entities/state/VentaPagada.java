@@ -40,10 +40,10 @@ public class VentaPagada extends VentaState {
         }
 
         ConfiguracionTienda config = ConfiguracionTienda.getInstance();
-        Integer mesesPermitidos = config.getTiempoMaximoCancelacionMeses();
+        Integer diasPermitidos = config.getDiasMaximoCancelacion();
 
         LocalDateTime ahora = LocalDateTime.now();
-        LocalDateTime fechaLimite = venta.getFecha().plusMonths(mesesPermitidos);
+        LocalDateTime fechaLimite = venta.getFecha().plusDays(diasPermitidos);
 
         return ahora.isBefore(fechaLimite);
     }

@@ -11,7 +11,7 @@ const ConfiguracionService = {
     //     private Double porcentajeMinimoSena;
     //     private Integer diasValidezReserva;
     //     private Integer stockMinimoGlobal;
-    //     private Integer tiempoMaximoCancelacionMeses;
+    //     private Integer diasMaximoCancelacion;
     // }
   getConfiguracion: async () => {
     const { data } = await api.get(ENDPOINTS.CONFIGURACION);
@@ -27,7 +27,7 @@ const ConfiguracionService = {
     //     private Double porcentajeMinimoSena;
     //     private Integer diasValidezReserva;
     //     private Integer stockMinimoGlobal;
-    //     private Integer tiempoMaximoCancelacionMeses;
+    //     private Integer diasMaximoCancelacion;
     // }
   actualizarConfiguracion: async (payload) => {
     const { data } = await api.patch(ENDPOINTS.CONFIGURACION, payload);
