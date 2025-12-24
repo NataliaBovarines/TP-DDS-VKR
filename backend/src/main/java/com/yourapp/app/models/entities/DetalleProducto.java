@@ -37,6 +37,10 @@ public class DetalleProducto extends Persistible {
         this.stockMinimo = (config != null) ? config.getStockMinimoGlobal() : 5;
     }
 
+    public void setStockMinimo(Integer stockMinimo) {
+        if (stockMinimo != null && stockMinimo > 0) this.stockMinimo = stockMinimo;
+    }
+
     // Métodos de negocio para manejo de stock
     public Integer getStockDisponible() {
         return Math.max(0, stockActual - stockReservado);
