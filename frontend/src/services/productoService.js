@@ -58,6 +58,16 @@ const ProductoService = {
     //   private Long categoriaId;
     //   private String categoriaDescripcion;
     // }
+    // public class DetalleProductoResponse {
+    //     private Long id;
+    //     private String codigo;
+    //     private TalleResponse talle;
+    //     private ColorResponse color;
+    //     private Integer stockActual;
+    //     private Integer stockReservado;
+    //     private Integer stockDisponible;
+    //     private Integer stockMinimo;
+    // }
   getProductoById: async (id) => {
     const { data } = await api.get(ENDPOINTS.PRODUCTOS.POR_ID(id));
     return data;
