@@ -11,26 +11,43 @@ import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Usuario from './pages/Usuario';
 import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/ventas" element={<Ventas />} />
-          <Route path="/reservas" element={<Reservas />} />
-          <Route path="/productos" element={<Productos />} />
-          <Route path="/empleados" element={<Empleados />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/configuracion" element={<Configuracion />} />
-          <Route path="/usuario" element={<Usuario />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        {/* Ruta pública */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Rutas privadas envueltas */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Routes>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/ventas" element={<Ventas />} />
+                  <Route path="/reservas" element={<Reservas />} />
+                  <Route path="/productos" element={<Productos />} />
+                  <Route path="/empleados" element={<Empleados />} />
+                  <Route path="/clientes" element={<Clientes />} />
+                  <Route path="/configuracion" element={<Configuracion />} />
+                  <Route path="/usuario" element={<Usuario />} />
+                  
+                  {/* Redirecciones automáticas dentro del sistema */}
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </Router>
   );
 };
 
 export default App;
+

@@ -15,6 +15,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import AuthService from '../services/authService.js';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -114,7 +115,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       <Settings className="w-5 h-5" /> Configuración
                     </NavLink>
                     <div className="h-px bg-slate-100 my-2"></div>
-                    <button onClick={() => navigate('/login')} className="w-full flex items-center gap-4 px-6 py-4 text-base font-bold text-rose-600 hover:bg-rose-50 transition-all text-left">
+                    <button onClick={() => AuthService.logout()} className="w-full flex items-center gap-4 px-6 py-4 text-base font-bold text-rose-600 hover:bg-rose-50 transition-all text-left">
                       <LogOut className="w-5 h-5" /> Cerrar Sesión
                     </button>
                   </div>

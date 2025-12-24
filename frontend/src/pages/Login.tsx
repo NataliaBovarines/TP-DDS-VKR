@@ -1,18 +1,30 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight, User } from 'lucide-react';
+import AuthService from '../services/authService.js';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [nombreDeUsuario, setNombreDeUsuario] = useState('');
+  const [contrasenia, setContrasenia] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await AuthService.login({
+        nombreDeUsuario: nombreDeUsuario,
+        contrasenia: contrasenia
+      });
       navigate('/dashboard');
-    }, 800);
+    } catch (error) {
+      console.error("Error en el componente login:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,13 +46,15 @@ const Login: React.FC = () => {
           <form onSubmit={handleLogin} className="p-8 space-y-6">
             <div className="space-y-4">
               <div className="relative">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Email Institucional</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Nombre de usuario</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
                   <input 
-                    type="email" 
+                    type="text"
                     required
-                    placeholder="ejemplo@vikiara.com"
+                    value={nombreDeUsuario}
+                    onChange={(e) => setNombreDeUsuario(e.target.value)}
+                    placeholder="Tu nombre de usuario"
                     className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm"
                   />
                 </div>
@@ -53,6 +67,8 @@ const Login: React.FC = () => {
                   <input 
                     type="password" 
                     required
+                    value={contrasenia}
+                    onChange={(e) => setContrasenia(e.target.value)}
                     placeholder="••••••••"
                     className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm"
                   />

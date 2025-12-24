@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { UserCircle, Key, LogOut, Mail, ChevronRight, Save, ShieldCheck } from 'lucide-react';
+import AuthService from '../services/authService.js';
 
 const Usuario: React.FC = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -40,7 +41,7 @@ const Usuario: React.FC = () => {
             <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
           </button>
           
-          <button className="w-full p-10 flex items-center justify-center gap-3 text-rose-600 font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-50 transition-all">
+          <button onClick={() => AuthService.logout()} className="w-full p-10 flex items-center justify-center gap-3 text-rose-600 font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-50 transition-all">
             <LogOut className="w-5 h-5" /> Cerrar Sesión Segura
           </button>
         </div>
