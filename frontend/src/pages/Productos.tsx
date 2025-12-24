@@ -129,6 +129,8 @@ const Productos: React.FC = () => {
   // =======================
   // ACTUALIZAR PRODUCTOS
   // =======================
+  const [selectedCategoryInForm, setSelectedCategoryInForm] = useState('');
+
   useEffect(() => {
     if (activeModal === 'EDIT_PRODUCT' && itemToAction) {
       const productToEdit = productos.find(p => p.id === itemToAction);
@@ -140,9 +142,11 @@ const Productos: React.FC = () => {
           proveedorId: productToEdit.proveedor?.id.toString() || '',
           precio: productToEdit.precio.toString() || ''
         });
+        // CARGAMOS LA CATEGORÍA PADRE AQUÍ:
+        setSelectedCategoryInForm(productToEdit.subcategoria?.categoriaId?.toString() || '');
       }
     }
-  }, [activeModal, itemToAction, productos]);  
+  }, [activeModal, itemToAction, productos]);
 
   const handleUpdateProduct = async () => {
     if (!itemToAction) return;
@@ -244,10 +248,7 @@ const Productos: React.FC = () => {
     }
   };
 
-
-  // =======================
-  // RETURN
-  // =======================
+  // ===================================================================================================================
 
   return (
     <div className="space-y-8 animate-in">
@@ -263,7 +264,6 @@ const Productos: React.FC = () => {
 
       {/* --- BARRA DE FILTROS --- */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        
         {/* Buscar producto */}
         <div className="space-y-1 lg:col-span-2">
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Buscar productos</label>
@@ -278,7 +278,6 @@ const Productos: React.FC = () => {
             />
           </div>
         </div>
-
         {/* 2. Categoría */}
         <div className="space-y-1">
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Categoría</label>
@@ -291,7 +290,6 @@ const Productos: React.FC = () => {
             {categorias.map(cat => <option key={cat.id} value={cat.id}>{cat.descripcion}</option>)}
           </select>
         </div>
-
         {/* 3. Subcategoría */}
         <div className="space-y-1">
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Subcategoría</label>
@@ -307,7 +305,6 @@ const Productos: React.FC = () => {
             ))}
           </select>
         </div>
-
         {/* 4. Botones de Acción (Stock Bajo y X) */}
         <div className="space-y-1">
           {/* Este label invisible asegura que el espacio de arriba sea el mismo que los otros 4 bloques */}
@@ -323,9 +320,10 @@ const Productos: React.FC = () => {
             >
               <AlertCircle className="w-3.5 h-3.5" /> Stock bajo
             </button>
-            
             <button 
-              onClick={() => { setSearchTerm(''); setFilterCategoria(''); setFilterSubcategoria(''); setShowLowStock(false); setCurrentPage(0); }}
+              onClick={() => { 
+                setSearchTerm(''); setFilterCategoria(''); setFilterSubcategoria(''); setShowLowStock(false); setCurrentPage(0); 
+              }}
               className="w-[46px] h-[46px] flex items-center justify-center bg-white text-slate-300 hover:text-rose-500 border border-slate-200 rounded-xl transition-all"
               title="Limpiar filtros"
             >
@@ -467,26 +465,62 @@ const Productos: React.FC = () => {
               <button 
                 onClick={() => { 
                   setActiveModal(null); 
+                  setSelectedCategoryInForm('');
                   setVariantFormData({ talleId: '', colorId: '', stockActual: '', stockMinimo: '' });
                   setFormData({ nombre: '', descripcion: '', subcategoriaId: '', proveedorId: '', precio: '' });
                 }}
                 className="p-2 text-slate-300 hover:text-slate-500 transition-all"><X className="w-6 h-6" /></button>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-6 px-2 pb-6">
+            <div className="max-h-[60vh] pr-2 space-y-6 px-2 pb-6">
               {(activeModal === 'ADD_PRODUCT' || activeModal === 'EDIT_PRODUCT') && (
-                <>
+                <div className="space-y-6"> 
+                  {/* Nombre */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Nombre del producto</label>
+                    <input 
+                      value={formData.nombre}
+                      required
+                      onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                      placeholder="Ej: Remera Básica Escote V Algodón Premium" 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                    />
+                  </div>
+                  {/* Categoría y Subcategoría */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Nombre del producto</label>
-                      <input 
-                        value={formData.nombre}
+                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Categoría</label>
+                      <select 
+                        value={selectedCategoryInForm}
                         required
-                        onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                        placeholder="Ej: Remera Básica Escote V" 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
-                      />
+                        onChange={(e) => {
+                          setSelectedCategoryInForm(e.target.value);
+                          setFormData({...formData, subcategoriaId: ''});
+                        }}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                      >
+                        <option value="">Seleccionar categoría</option>
+                        {categorias.map(cat => <option key={cat.id} value={cat.id}>{cat.descripcion}</option>)}
+                      </select>
                     </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Subcategoría</label>
+                      <select 
+                        disabled={!selectedCategoryInForm}
+                        value={formData.subcategoriaId}
+                        required
+                        onChange={(e) => setFormData({...formData, subcategoriaId: e.target.value})}
+                        className={`w-full border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none ${!selectedCategoryInForm ? 'bg-slate-100 opacity-60' : 'bg-slate-50'}`}
+                      >
+                        <option value="">Seleccionar subcategoría</option>
+                        {categorias.find(c => c.id.toString() === selectedCategoryInForm)?.subcategorias.map((sub: any) => (
+                          <option key={sub.id} value={sub.id}>{sub.descripcion}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  {/* Precio y Proveedor */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Proveedor</label>
                       <select 
@@ -498,26 +532,6 @@ const Productos: React.FC = () => {
                         {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                       </select>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Subcategoría</label>
-                      <select 
-                        value={formData.subcategoriaId}
-                        required
-                        onChange={(e) => setFormData({...formData, subcategoriaId: e.target.value})}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
-                      >
-                        <option value="">Seleccionar subcategoría</option>
-                        {categorias.map(cat => (
-                          <optgroup key={cat.id} label={cat.descripcion}>
-                            {cat.subcategorias.map((sub: any) => (
-                              <option key={sub.id} value={sub.id}>{sub.descripcion}</option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                    </div>
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Precio ($)</label>
                       <input 
@@ -525,11 +539,12 @@ const Productos: React.FC = () => {
                         value={formData.precio}
                         required
                         onChange={(e) => setFormData({...formData, precio: e.target.value})}
-                        placeholder="0"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                        placeholder="0.00"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
                       />
                     </div>
                   </div>
+                  {/* Descripción */}
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Descripción</label>
                     <textarea 
@@ -540,7 +555,7 @@ const Productos: React.FC = () => {
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none resize-none"
                     ></textarea>
                   </div>
-                </>
+                </div>
               )}
 
               {(activeModal === 'ADD_VARIANT' || activeModal === 'EDIT_VARIANT') && (
@@ -618,6 +633,7 @@ const Productos: React.FC = () => {
                 onClick={() => { 
                   setActiveModal(null); 
                   setTypeToDelete(null); 
+                  setSelectedCategoryInForm('');
                   setVariantFormData({ talleId: '', colorId: '', stockActual: '', stockMinimo: '' });
                   setFormData({ nombre: '', descripcion: '', subcategoriaId: '', proveedorId: '', precio: '' });
                 }} 
