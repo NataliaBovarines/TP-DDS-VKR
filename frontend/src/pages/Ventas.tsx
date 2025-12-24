@@ -250,7 +250,7 @@ const Ventas: React.FC = () => {
 
           {/* Filtro de ordenar + Botón X */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Ordenar por fecha</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide ml-1">Ordenar por</label>
             <div className="flex gap-2">
               <select value={filters.direccion} onChange={e => setFilters({...filters, direccion: e.target.value})} className="flex-1 px-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none">
                 <option value="DESC">Más recientes primero</option>

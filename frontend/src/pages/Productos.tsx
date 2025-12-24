@@ -297,7 +297,7 @@ const Productos: React.FC = () => {
             disabled={!filterCategoria}
             value={filterSubcategoria} 
             onChange={e => { setFilterSubcategoria(e.target.value); setCurrentPage(0); }} 
-            className={`w-full px-4 py-3.5 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none ${!filterCategoria ? 'bg-slate-100 opacity-50 cursor-not-allowed' : 'bg-slate-50'}`}
+            className={`w-full px-4 py-3.5 border border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 outline-none ${!filterCategoria ? 'bg-slate-100 opacity-50' : 'bg-slate-50'}`}
           >
             <option value="">Todas</option>
             {categorias.find(c => c.id.toString() === filterCategoria)?.subcategorias.map((sub: any) => (
