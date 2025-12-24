@@ -81,7 +81,7 @@ public class VentaIniciada extends VentaState {
         }
 
         venta.reservarStockProductos();
-        Integer mesesVencimiento = config != null ? config.getTiempoMaximoCancelacionMeses() : 3; 
+        Integer mesesVencimiento = config != null ? config.getDiasMaximoCancelacion() : 3; 
         venta.setFechaVencimientoReserva(LocalDateTime.now().plusMonths(mesesVencimiento));
     }
 

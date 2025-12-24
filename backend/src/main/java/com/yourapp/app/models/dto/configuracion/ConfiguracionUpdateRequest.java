@@ -10,6 +10,9 @@ import lombok.Setter;
 public class ConfiguracionUpdateRequest {
     @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")
     private String nombreEmpresa;
+
+    @Size(max = 100, message = "El eslogan no puede superar los 100 caracteres")
+    private String eslogan;
     
     private Boolean permiteReserva;
     
@@ -24,5 +27,5 @@ public class ConfiguracionUpdateRequest {
     private Integer stockMinimoGlobal;
     
     @Min(value = 0, message = "El tiempo máximo de cancelación no puede ser negativo")
-    private Integer tiempoMaximoCancelacionMeses;
+    private Integer diasMaximoCancelacion;
 }

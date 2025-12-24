@@ -11,6 +11,9 @@ public class ConfiguracionTienda extends Persistible {
 
   @Column(name = "nombre_empresa")
   private String nombreEmpresa = "Mi Tienda";
+  
+  @Column(name = "eslogan")
+  private String eslogan;
 
   @Column(name = "permite_reserva")
   private Boolean permiteReserva = true;
@@ -24,8 +27,8 @@ public class ConfiguracionTienda extends Persistible {
   @Column(name = "stock_minimo_global")
   private Integer stockMinimoGlobal = 5;
 
-  @Column(name = "tiempo_maximo_cancelacion_meses")
-  private Integer tiempoMaximoCancelacionMeses = 1;
+  @Column(name = "dias_maximo_cancelacion")
+  private Integer diasMaximoCancelacion = 60; // 2 meses
 
   // Patrón Singleton a nivel de aplicación (cache)
   @Transient
