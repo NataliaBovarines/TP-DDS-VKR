@@ -337,7 +337,7 @@ const Productos: React.FC = () => {
         {loading ? (
           <div className="p-20 text-center flex flex-col items-center justify-center gap-4">
             <div className="w-10 h-10 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Cargando catálogo...</p>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Cargando productos...</p>
           </div>
         ) : productos.length === 0 ? (
           <div className="p-20 text-center">

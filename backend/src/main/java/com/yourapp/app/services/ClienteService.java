@@ -97,28 +97,20 @@ public class ClienteService {
 
         spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
 
-        // Filtrar por nombre
+        // FILTRO GLOBAL (Nombre OR Apellido OR DNI)
         if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("nombre")), "%" + filtros.getNombre().toLowerCase() + "%")
+            String valorBusqueda = "%" + filtros.getNombre().toLowerCase() + "%";
+            
+            spec = spec.and((root, query, cb) -> 
+                cb.or(
+                    cb.like(cb.lower(root.get("nombre")), valorBusqueda),
+                    cb.like(cb.lower(root.get("apellido")), valorBusqueda),
+                    cb.like(root.get("dni"), valorBusqueda) // Usamos like por si mandan DNI parcial
+                )
             );
         }
 
-        // Filtrar por apellido
-        if (filtros.getApellido() != null && !filtros.getApellido().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("apellido")), "%" + filtros.getApellido().toLowerCase() + "%")
-            );
-        }
-
-        // Filtrar por DNI exacto
-        if (filtros.getDni() != null && !filtros.getDni().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("dni"), filtros.getDni())
-            );
-        }
-
-        // Filtrar por categoría
+        // Filtrar por categoría (Este se mantiene afuera con AND porque es un filtro extra)
         if (filtros.getCategoria() != null) {
             spec = spec.and((root, query, cb) ->
                 cb.equal(root.get("categoriaCliente"), filtros.getCategoria())
