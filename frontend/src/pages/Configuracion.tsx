@@ -51,23 +51,28 @@ const Configuracion: React.FC = () => {
   };
 
   const confirmDelete = async () => {
-    if (!itemParaEliminar) return;
-    try {
-      const id = itemParaEliminar.id;
-      switch (selectedSubCatalog) {
-        case 'CATEGORIAS': await CategoriaService.eliminarCategoria(id); break;
-        case 'COLORES': await ColorService.eliminarColor(id); break;
-        case 'TALLES': await TalleService.eliminarTalle(id); break;
-        case 'PROVEEDORES': await ProveedorService.eliminarProveedor(id); break;
-        case 'ROLES': await RolService.eliminarRol(id); break;
-        case 'SUBCATEGORIAS': await SubcategoriaService.eliminarSubcategoria(id); break;
+      if (!itemParaEliminar) return;
+      try {
+          const id = itemParaEliminar.id;
+          if (itemParaEliminar.categoriaId) {
+              await SubcategoriaService.eliminarSubcategoria(id);
+          } else {
+              switch (selectedSubCatalog) {
+                  case 'CATEGORIAS': await CategoriaService.eliminarCategoria(id); break;
+                  case 'COLORES': await ColorService.eliminarColor(id); break;
+                  case 'TALLES': await TalleService.eliminarTalle(id); break;
+                  case 'PROVEEDORES': await ProveedorService.eliminarProveedor(id); break;
+                  case 'ROLES': await RolService.eliminarRol(id); break;
+              }
+          }
+          fetchMasterData();
+          setShowDeleteModal(false);
+          setItemParaEliminar(null);
+          setSuccessMessage("Registro eliminado correctamente.");
+          setShowSuccessModal(true);
+      } catch (error) {
+          console.error("Error eliminando:", error);
       }
-      fetchMasterData();
-      setShowDeleteModal(false);
-      setItemParaEliminar(null);
-    } catch (error) {
-      console.error("Error eliminando:", error);
-    }
   };
 
   // =======================
@@ -125,6 +130,7 @@ const Configuracion: React.FC = () => {
   const [masterData, setMasterData] = useState<any[]>([]);
   const [loadingMaster, setLoadingMaster] = useState(false);
   const [allPermisos, setAllPermisos] = useState<any[]>([]);
+  const [expandedCategoryId, setExpandedCategoryId] = useState<number | null>(null);
 
   const fetchMasterData = useCallback(async () => {
     setLoadingMaster(true);
@@ -157,6 +163,10 @@ const Configuracion: React.FC = () => {
       if (activeCatalog === 'CATALOGOS') fetchMasterData();
   }, [fetchMasterData, activeCatalog]);
 
+  useEffect(() => {
+    setExpandedCategoryId(null);
+  }, [selectedSubCatalog]);
+
   // =======================
   // CREAR ITEMS
   // =======================  
@@ -165,21 +175,27 @@ const Configuracion: React.FC = () => {
 
   const handleCreateItem = async () => {
     try {
-      switch (selectedSubCatalog) {
-        case 'CATEGORIAS': await CategoriaService.crearCategoria({ descripcion: newItemName }); break;
-        case 'COLORES': await ColorService.crearColor({ descripcion: newItemName }); break;
-        case 'TALLES': await TalleService.crearTalle({ descripcion: newItemName }); break;
-        case 'PROVEEDORES': await ProveedorService.crearProveedor({ nombre: newItemName }); break;
-        case 'ROLES': 
-          await RolService.crearRol({ nombre: newItemName, permisos: [] }); 
-          break;
-        case 'SUBCATEGORIAS': 
-          await SubcategoriaService.crearSubcategoria({ descripcion: newItemName, categoriaId: Number(parentCategoryId) }); 
-          break;
+      if (parentCategoryId) {
+        await SubcategoriaService.crearSubcategoria({ 
+          descripcion: newItemName, 
+          categoriaId: Number(parentCategoryId) 
+        });
+        setSuccessMessage("Subcategoría creada con éxito.");
+      } else {
+        switch (selectedSubCatalog) {
+          case 'CATEGORIAS': await CategoriaService.crearCategoria({ descripcion: newItemName }); break;
+          case 'COLORES': await ColorService.crearColor({ descripcion: newItemName }); break;
+          case 'TALLES': await TalleService.crearTalle({ descripcion: newItemName }); break;
+          case 'PROVEEDORES': await ProveedorService.crearProveedor({ nombre: newItemName }); break;
+          case 'ROLES': await RolService.crearRol({ nombre: newItemName, permisos: [] }); break;
+        }
+        setSuccessMessage(`${getSingularName(selectedSubCatalog)} creado con éxito.`);
       }
       setNewItemName('');
+      setParentCategoryId('');
       setShowAddModal(false);
       fetchMasterData();
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Error al crear item");
     }
@@ -418,7 +434,6 @@ const Configuracion: React.FC = () => {
           <div className="lg:col-span-3 space-y-3">
             {[
               { id: 'CATEGORIAS', icon: Layers, label: 'Categorías' },
-              { id: 'SUBCATEGORIAS', icon: Tag, label: 'Subcategorías' },
               { id: 'COLORES', icon: Palette, label: 'Colores' },
               { id: 'TALLES', icon: Ruler, label: 'Talles' },
               { id: 'PROVEEDORES', icon: Truck, label: 'Proveedores' },
@@ -451,65 +466,120 @@ const Configuracion: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 space-y-3">
-              {loadingMaster ? (
-                <div className="text-center py-10">Cargando datos...</div>
-              ) : masterData.length === 0 ? (
-                <div className="text-center py-10 text-slate-400">No hay registros en este catálogo.</div>
-              ) : masterData.map(item => (
-                <div key={item.id} className="group flex flex-col p-6 bg-slate-50 rounded-[30px] border border-transparent hover:border-indigo-100 transition-all space-y-4">
-                  <div className="flex items-center justify-between">
-                    
-                    {/* LADO IZQUIERDO: NOMBRE, BADGE Y SUBTÍTULO */}
-                    <div className="flex flex-col gap-1.5">
-                      {/* Fila superior: Nombre + Badge */}
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-slate-800 text-lg leading-none tracking-tight">
-                          {item.descripcion || item.nombre}
-                        </span>
-
-                        {/* BADGE (Solo para ROLES) */}
-                        {selectedSubCatalog === 'ROLES' && (
-                          <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100 shadow-sm">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                            <span className="text-[10px] font-black uppercase tracking-wider">
-                              {[...new Set(item.permisos?.map((p: any) => p.codigo))].length} Permisos activos
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Fila inferior: Categoría Padre (si existe) */}
-                      {item.parentName && (
-                        <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">
-                          Cat: {item.parentName}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* LADO DERECHO: ACCIONES SUPERIORES */}
-                    <div className="flex gap-2">
-                      {selectedSubCatalog === 'ROLES' && (
-                        <button 
-                          onClick={() => handleOpenEditPermissions(item)}
-                          className="p-3 bg-white text-slate-300 hover:text-indigo-600 rounded-xl transition-all border border-slate-100 shadow-sm active:scale-90"
-                        >
-                          <Pencil className="w-5 h-5" />
-                        </button>
-                      )}
-
-                      <button 
-                        onClick={() => preHandleDelete(item)}
-                        className="p-3 bg-white text-slate-300 hover:text-rose-600 rounded-xl transition-all border border-slate-100 shadow-sm active:scale-90"
-                        title="Eliminar registro"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+<div className="flex-1 space-y-3">
+  {loadingMaster ? (
+    <div className="text-center py-10">Cargando datos...</div>
+  ) : masterData.length === 0 ? (
+    <div className="text-center py-10 text-slate-400">No hay registros.</div>
+  ) : masterData.map(item => (
+    <div key={item.id} className="group flex flex-col bg-slate-50 rounded-[30px] border border-transparent hover:border-indigo-100 transition-all overflow-hidden">
+      
+      {/* CABECERA DE LA TARJETA */}
+      <div className="p-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {/* Botón para expandir (Solo si es CATEGORIAS) */}
+          {selectedSubCatalog === 'CATEGORIAS' && (
+            <button 
+              onClick={() => setExpandedCategoryId(expandedCategoryId === item.id ? null : item.id)}
+              className={`p-2 rounded-xl transition-all ${expandedCategoryId === item.id ? 'bg-indigo-600 text-white rotate-90' : 'bg-white text-slate-400'}`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
+          
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-3">
+              <span className="font-bold text-slate-800 text-lg leading-none tracking-tight">
+                {item.descripcion || item.nombre}
+              </span>
+              {selectedSubCatalog === 'ROLES' && (
+                <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100 shadow-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span className="text-[10px] font-black uppercase tracking-wider">
+                    {[...new Set(item.permisos?.map((p: any) => p.codigo))].length} Permisos activos
+                  </span>
                 </div>
-              ))}
+              )}
             </div>
+          </div>
+        </div>
+
+        {/* ACCIONES */}
+        <div className="flex gap-2">
+          {selectedSubCatalog === 'ROLES' && (
+            <button onClick={() => handleOpenEditPermissions(item)} className="p-3 bg-white text-slate-300 hover:text-indigo-600 rounded-xl border border-slate-100 shadow-sm transition-all">
+              <Pencil className="w-5 h-5" />
+            </button>
+          )}
+          <button onClick={() => preHandleDelete(item)} className="p-3 bg-white text-slate-300 hover:text-rose-600 rounded-xl border border-slate-100 shadow-sm transition-all">
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* DESPLEGABLE DE SUBCATEGORIAS (Solo para CATEGORIAS) */}
+{/* DESPLEGABLE DE SUBCATEGORIAS (Ocupando toda la fila) */}
+{selectedSubCatalog === 'CATEGORIAS' && expandedCategoryId === item.id && (
+  <div className="px-6 pb-6 animate-in slide-in-from-top-2 duration-300">
+    <div className="bg-white rounded-[24px] border border-slate-100 p-5 space-y-4 shadow-inner">
+      
+      {/* Encabezado del área de subcategorías */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <Tag className="w-3 h-3 text-indigo-400" />
+          <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Subcategorías
+          </h5>
+        </div>
+        <button 
+          onClick={() => { 
+            setParentCategoryId(item.id);
+            setShowAddModal(true); 
+          }}
+          className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 bg-indigo-50 px-4 py-1.5 rounded-full transition-all active:scale-95"
+        >
+          <Plus className="w-3 h-3" /> Añadir subcategoría
+        </button>
+      </div>
+      
+      {/* Lista de subcategorías en una sola columna */}
+      <div className="space-y-2">
+        {item.subcategorias?.length > 0 ? (
+          item.subcategorias.map((sub: any) => (
+            <div 
+              key={sub.id} 
+              className="flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 px-5 py-3.5 rounded-[18px] group/sub transition-colors border border-transparent hover:border-slate-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover/sub:bg-indigo-400 transition-colors"></div>
+                <span className="text-sm font-bold text-slate-600">{sub.descripcion}</span>
+              </div>
+              
+              <button 
+                onClick={() => { 
+                  setItemParaEliminar(sub);
+                  setShowDeleteModal(true);
+                }}
+                className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="py-8 text-center bg-slate-50/50 rounded-[20px] border border-dashed border-slate-200">
+            <p className="text-[11px] text-slate-400 font-medium italic">
+              Aún no hay subcategorías vinculadas a este rubro.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+    </div>
+  ))}
+</div>
 
           </div>
         </div>
@@ -521,7 +591,7 @@ const Configuracion: React.FC = () => {
             <div className="text-center">
               <h4 className="text-sm font-bold text-slate-400 tracking-tight mb-2">Acción de catálogo</h4>
               <h3 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">
-                Agregar {getSingularName(selectedSubCatalog)}
+                Agregar {parentCategoryId ? 'subcategoría' : getSingularName(selectedSubCatalog)}
               </h3>
             </div>
             
@@ -649,12 +719,10 @@ const Configuracion: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <h4 className="text-xl font-bold text-slate-900 tracking-tight">
-                  ¿Eliminar {getSingularName(selectedSubCatalog)}?
+                  ¿Eliminar "{itemParaEliminar.descripcion || itemParaEliminar.nombre}"?
                 </h4>
                 <p className="text-slate-500 text-sm">
-                  Estás por eliminar <span className="font-bold text-slate-700">
-                    "{itemParaEliminar.descripcion || itemParaEliminar.nombre}"
-                  </span>. <br /> Esta acción no se puede deshacer.
+                  Esta acción no se puede deshacer.
                 </p>
               </div>
             </div>
