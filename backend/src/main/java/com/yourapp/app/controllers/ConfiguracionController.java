@@ -21,7 +21,6 @@ public class ConfiguracionController {
     private final ConfiguracionService configuracionService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CONFIGURACION_VER')")
     public ConfiguracionResponse obtenerConfiguracion() {
         return configuracionService.obtenerConfiguracionActual();
     }

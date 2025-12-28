@@ -16,9 +16,11 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import ConfiguracionService from '../services/configuracionService.js';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, tienePermiso, logout } = useAuth();
+  const [config, setConfig] = useState<any>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,6 +43,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   if (location.pathname === '/login') return <>{children}</>;
 
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const data = await ConfiguracionService.getConfiguracion();
+        setConfig(data);
+      } catch (error) {
+        console.error("Error al obtener datos de la empresa", error);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <header className="bg-slate-900 text-white sticky top-0 z-50 shadow-md border-b border-slate-800">
@@ -55,8 +69,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
 
             <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
-              <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-2xl transition-transform group-hover:scale-105">V</div>
-              <span className="text-2xl font-black tracking-tight hidden sm:block">Vikiara</span>
+              <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-2xl transition-transform group-hover:scale-105">{config?.nombreEmpresa?.charAt(0)}</div>
+              <span className="text-2xl font-black tracking-tight hidden sm:block">{config?.nombreEmpresa || 'Cargando...'}</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -196,13 +210,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       <footer className="bg-white border-t border-slate-200 py-6 px-6 sm:px-10 text-xs sm:text-sm font-bold text-slate-400 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-6">
-          <span className="uppercase tracking-widest">VKR System v3.1</span>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="text-emerald-600">Servidor Activo</span>
           </div>
         </div>
-        <span className="text-center">Vikiara Indumentaria &copy; 2024 • Todos los derechos reservados</span>
+        <span className="text-center">
+          {config?.nombreEmpresa || 'Empresa'} &copy; {new Date().getFullYear()} • {'Todos los derechos reservados'}
+        </span>
       </footer>
     </div>
   );

@@ -45,7 +45,7 @@ const Configuracion: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!tienePermiso('CONFIGURACION_VER')) {
+    if (!tienePermiso('CONFIGURACION_EDITAR')) {
       setActiveCatalog('CATALOGOS');
     }
     setLoading(false);
@@ -99,7 +99,7 @@ const Configuracion: React.FC = () => {
   });
 
   const fetchConfig = useCallback(async () => {
-    if (!tienePermiso('CONFIGURACION_VER')) return;
+    if (!tienePermiso('CONFIGURACION_EDITAR')) return;
     
     setLoading(true);
     try {
@@ -272,7 +272,7 @@ return (
           <p className="text-slate-500 font-medium mt-1">Personaliza el motor de negocio y maestros</p>
         </div>
         <div className="bg-white p-1.5 rounded-[24px] border border-slate-200 shadow-sm flex items-center">
-          {tienePermiso('CONFIGURACION_VER') && (
+          {tienePermiso('CONFIGURACION_EDITAR') && (
             <button 
               onClick={() => setActiveCatalog('GENERAL')} 
               className={`px-8 py-3 rounded-[18px] text-sm font-bold transition-all ${activeCatalog === 'GENERAL' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:text-slate-600'}`}

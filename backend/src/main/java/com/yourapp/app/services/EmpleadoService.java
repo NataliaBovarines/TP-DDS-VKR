@@ -104,24 +104,15 @@ public class EmpleadoService {
 
         spec = spec.and((root, query, cb) -> cb.isFalse(root.get("fueEliminado")));
 
-        // Filtrar por nombre
         if (filtros.getNombre() != null && !filtros.getNombre().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("nombre")), "%" + filtros.getNombre().toLowerCase() + "%")
-            );
-        }
-
-        // Filtrar por apellido
-        if (filtros.getApellido() != null && !filtros.getApellido().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("apellido")), "%" + filtros.getApellido().toLowerCase() + "%")
-            );
-        }
-
-        // Filtrar por DNI exacto
-        if (filtros.getDni() != null && !filtros.getDni().isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("dni"), filtros.getDni())
+            String valorBusqueda = "%" + filtros.getNombre().toLowerCase() + "%";
+            
+            spec = spec.and((root, query, cb) -> 
+                cb.or(
+                    cb.like(cb.lower(root.get("nombre")), valorBusqueda),
+                    cb.like(cb.lower(root.get("apellido")), valorBusqueda),
+                    cb.like(root.get("dni"), valorBusqueda) 
+                )
             );
         }
 
