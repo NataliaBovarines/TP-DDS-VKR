@@ -501,24 +501,28 @@ return (
                             <Tag className="w-3 h-3 text-indigo-400" />
                             <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subcategorías</h5>
                           </div>
+                          {tienePermiso(PERMISOS_MAP["SUBCATEGORIAS"].crear) && (
                           <button 
                             onClick={() => { setParentCategoryId(item.id); setShowAddModal(true); }}
                             className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 bg-indigo-50 px-4 py-1.5 rounded-full transition-all"
                           >
-                            <Plus className="w-3 h-3" /> Añadir
+                            <Plus className="w-3 h-3" /> Añadir registro
                           </button>
+                          )}
                         </div>
                         <div className="space-y-2">
                           {item.subcategorias?.length > 0 ? (
                             item.subcategorias.map((sub: any) => (
                               <div key={sub.id} className="flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 px-5 py-3.5 rounded-[18px] group/sub transition-colors border border-transparent hover:border-slate-200">
                                 <span className="text-sm font-bold text-slate-600">{sub.descripcion}</span>
+                                {tienePermiso(PERMISOS_MAP['SUBCATEGORIAS'].eliminar) && (
                                 <button 
                                   onClick={() => { setItemParaEliminar(sub); setShowDeleteModal(true); }}
                                   className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
+                                )}
                               </div>
                             ))
                           ) : (

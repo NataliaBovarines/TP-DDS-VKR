@@ -7,6 +7,7 @@ interface AuthContextType {
   loading: boolean;
   tienePermiso: (codigo: string) => boolean;
   recargarSesion: () => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,8 +49,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return permisos.includes(codigo);
   };
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setPermisos([]);
+    setLoading(false);
+    window.location.href = "/#/login";
+    };
+
   return (
-    <AuthContext.Provider value={{ user, permisos, loading, tienePermiso, recargarSesion: cargarDatos }}>
+    <AuthContext.Provider value={{ user, permisos, loading, tienePermiso, recargarSesion: cargarDatos, logout }}>
       {children}
     </AuthContext.Provider>
   );

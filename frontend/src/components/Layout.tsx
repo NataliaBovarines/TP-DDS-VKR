@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext.js';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -15,9 +16,10 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import AuthService from '../services/authService.js';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, tienePermiso, logout } = useAuth();
+
   const location = useLocation();
   const navigate = useNavigate();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -25,11 +27,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Ventas', path: '/ventas', icon: ShoppingCart },
-    { name: 'Reservas', path: '/reservas', icon: CalendarCheck },
-    { name: 'Productos', path: '/productos', icon: Package },
-    { name: 'Clientes', path: '/clientes', icon: UserSquare },
-    { name: 'Empleados', path: '/empleados', icon: Users },
+    { name: 'Ventas', path: '/ventas', icon: ShoppingCart, permiso: 'VENTA_VER' },
+    { name: 'Reservas', path: '/reservas', icon: CalendarCheck, permiso: 'VENTA_VER' },
+    { name: 'Productos', path: '/productos', icon: Package, permiso: 'PRODUCTO_VER' },
+    { name: 'Clientes', path: '/clientes', icon: UserSquare, permiso: 'CLIENTE_VER' },
+    { name: 'Empleados', path: '/empleados', icon: Users, permiso: 'EMPLEADO_VER' },
   ];
 
   // Cerrar menú móvil al cambiar de ruta
@@ -59,7 +61,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-2">
-              {menuItems.map((item) => (
+              {menuItems
+              .filter(item => tienePermiso(item.permiso))
+              .map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
@@ -76,14 +80,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
 
           <div className="flex items-center gap-4 sm:gap-8">
-            <button 
-              onClick={() => navigate('/ventas', { state: { view: 'POS' } })}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 sm:px-7 py-3 rounded-xl text-base font-bold flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95"
-            >
-              <PlusCircle className="w-5 h-5" />
-              <span>Nueva Venta</span>
-            </button>
-
+            {tienePermiso("VENTA_CREAR") && (
+              <button 
+                onClick={() => navigate('/ventas', { state: { view: 'POS' } })}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 sm:px-7 py-3 rounded-xl text-base font-bold flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95"
+              >
+                <PlusCircle className="w-5 h-5" />
+                <span>Nueva Venta</span>
+              </button>
+            )}
             <div className="flex items-center gap-3 sm:gap-5">
               <NavLink to="/configuracion" className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all hidden sm:block">
                 <Settings className="w-7 h-7" />
@@ -95,19 +100,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   className="flex items-center gap-3 sm:gap-5 pl-3 sm:pl-6 border-l border-slate-700 group"
                 >
                   <div className="text-right hidden md:block">
-                    <p className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">Admin</p>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Dueño</p>
+                    {/* DESMOCKEADO: Nombre de usuario y nombre del Rol */}
+                    <p className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">
+                      {user?.nombreDeUsuario || 'Usuario'}
+                    </p>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                      {user?.rol?.nombre || 'Sin Rol'}
+                    </p>
                   </div>
-                  <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 group-hover:border-indigo-500 transition-all">
-                    <UserCircle className="w-7 h-7" />
+                  <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:bg-indigo-500 group-hover:scale-105 transition-all border border-indigo-400/20">
+                    <span className="font-black text-sm">
+                      {user?.nombreDeUsuario?.charAt(0).toUpperCase()}
+                    </span>
                   </div>
                 </button>
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-4 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 py-3 z-50 animate-in fade-in slide-in-from-top-3">
-                    <div className="px-6 py-4 border-b border-slate-50 mb-2">
-                      <p className="text-base font-black text-slate-900 tracking-tight">Administrador VKR</p>
-                    </div>
                     <NavLink to="/usuario" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-4 px-6 py-4 text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all">
                       <UserCircle className="w-5 h-5" /> Mi Perfil
                     </NavLink>
@@ -115,7 +124,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       <Settings className="w-5 h-5" /> Configuración
                     </NavLink>
                     <div className="h-px bg-slate-100 my-2"></div>
-                    <button onClick={() => AuthService.logout()} className="w-full flex items-center gap-4 px-6 py-4 text-base font-bold text-rose-600 hover:bg-rose-50 transition-all text-left">
+                    <button onClick={logout} className="w-full flex items-center gap-4 px-6 py-4 text-base font-bold text-rose-600 hover:bg-rose-50 transition-all text-left">
                       <LogOut className="w-5 h-5" /> Cerrar Sesión
                     </button>
                   </div>
@@ -151,7 +160,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
 
             <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
-              {menuItems.map((item) => (
+              {menuItems
+              .filter(item => tienePermiso(item.permiso))
+              .map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}

@@ -6,7 +6,7 @@ import AuthService from '../services/authService.js';
 import EmpleadoService from '../services/empleadoService.js';
 
 const Usuario: React.FC = () => {
-    const { user, recargarSesion, loading: authLoading } = useAuth();
+    const { user, recargarSesion, loading: authLoading, logout } = useAuth();
 
     // Manejo de modales unificado
     const [activeModal, setActiveModal] = useState<'EDIT_PROFILE' | 'CHANGE_PASSWORD' | 'NOTIFICATIONS' | null>(null);
@@ -84,7 +84,7 @@ const Usuario: React.FC = () => {
             setActiveModal(null);
             setSuccessMessage("Tu contraseña ha sido actualizada con éxito.");
             setShowSuccessModal(true);
-            AuthService.logout();
+            logout;
         } catch (error: any) {
             setFormError(error.response?.data?.message || "La contraseña actual es incorrecta");
         }
@@ -162,7 +162,7 @@ const Usuario: React.FC = () => {
                         <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 transition-all" />
                     </button>
                     
-                    <button onClick={() => AuthService.logout()} className="w-full p-10 flex items-center justify-center gap-3 text-rose-600 font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-50 transition-all">
+                    <button onClick={logout} className="w-full p-10 flex items-center justify-center gap-3 text-rose-600 font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-50 transition-all">
                         <LogOut className="w-5 h-5" /> Cerrar sesión
                     </button>
                 </div>

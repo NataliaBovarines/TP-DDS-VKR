@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
 import { Lock, ArrowRight, User } from 'lucide-react';
 import AuthService from '../services/authService.js';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { recargarSesion } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const [nombreDeUsuario, setNombreDeUsuario] = useState('');
@@ -19,6 +21,7 @@ const Login: React.FC = () => {
         nombreDeUsuario: nombreDeUsuario,
         contrasenia: contrasenia
       });
+      await recargarSesion();
       navigate('/dashboard');
     } catch (error) {
       console.error("Error en el componente login:", error);
