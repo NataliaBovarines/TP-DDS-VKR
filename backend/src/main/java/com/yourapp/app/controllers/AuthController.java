@@ -13,7 +13,7 @@ import com.yourapp.app.models.dto.usuario.ContraseniaRecuperarRequest;
 import com.yourapp.app.models.dto.usuario.ContraseniaResetearRequest;
 import com.yourapp.app.models.dto.usuario.ContraseniaUpdateRequest;
 import com.yourapp.app.models.dto.usuario.UsuarioLoginRequest;
-import com.yourapp.app.models.dto.usuario.UsuarioResponse;
+import com.yourapp.app.models.dto.usuario.UsuarioMeResponse;
 import com.yourapp.app.models.entities.Usuario;
 import com.yourapp.app.services.AuthService;
 
@@ -50,8 +50,8 @@ public class AuthController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public UsuarioResponse me() {
+    public UsuarioMeResponse me() {
         Usuario usuarioLogueado = authService.obtenerUsuarioLogueado();
-        return usuarioMapper.toResponse(usuarioLogueado);
+        return usuarioMapper.toMeResponse(usuarioLogueado);
     } 
 }

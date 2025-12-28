@@ -40,7 +40,7 @@ api.interceptors.response.use(
       // Solo redirigimos si el error NO viene del intento de login
       if (!urlOriginal.includes(ENDPOINTS.AUTH.LOGIN)) {
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        window.location.href = "/#/login";
         return Promise.reject(error);
       }
     }
