@@ -1,25 +1,79 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Venta, VentaEstado } from '../types.ts';
-import { DollarSign, XCircle, Eye, ArrowLeft, History, Package, Calendar, TrendingUp, Hash, ChevronLeft, ChevronRight } from 'lucide-react';
-
-const MOCK_RESERVAS: Venta[] = [
-  { id: 'R-001', clienteId: 'c1', clienteNombre: 'Juan Perez', fecha: '2023-11-01', estado: VentaEstado.RESERVADA, detalles: [{ sku: 'REM-B', nombre: 'Remera Basic Blanca', cantidad: 2, precioUnitario: 1500 }], total: 3000, pagos: [{ id: 'p1', monto: 500, fecha: '2023-11-01', numeroSecuencial: 1 }], fechaVencimientoReserva: '2024-05-20' },
-  { id: 'R-002', clienteId: 'c2', clienteNombre: 'Maria Rodriguez', fecha: '2023-12-05', estado: VentaEstado.RESERVADA, detalles: [{ sku: 'JEAN-D', nombre: 'Jeans Blue Denim', cantidad: 1, precioUnitario: 4500 }], total: 4500, pagos: [{ id: 'p2', monto: 1500, fecha: '2023-12-05', numeroSecuencial: 1 }], fechaVencimientoReserva: '2024-03-05' },
-];
+import { 
+  DollarSign, XCircle, Eye, ArrowLeft, History, Package, 
+  Calendar, TrendingUp, Hash, ChevronLeft, ChevronRight, Loader2 
+} from 'lucide-react';
+import VentaService from '../services/ventaService.js';
 
 const Reservas: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedReserva, setSelectedReserva] = useState<Venta | null>(null);
+  
+  // Estados para datos reales
+  const [reservas, setReservas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReserva, setSelectedReserva] = useState<any | null>(null);
+  
+  // UI States
   const [activeTab, setActiveTab] = useState<'DETAILS' | 'PAYMENTS'>('DETAILS');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
 
-  const calculateTotalPaid = (reserva: Venta) => reserva.pagos.reduce((acc, p) => acc + p.monto, 0);
+  // 1. CARGA DE DATOS REALES
+  const cargarReservas = async () => {
+    try {
+      setLoading(true);
+      // Filtro exacto según vimos en tu pgAdmin
+      const data = await VentaService.getVentas({ estado: 'VentaReservada' });
+      
+      // Manejo de paginación de Spring Boot (data.content)
+      const lista = data.content ? data.content : data;
+      setReservas(Array.isArray(lista) ? lista : []);
+    } catch (error) {
+      console.error("Error al cargar reservas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    cargarReservas();
+  }, []);
+
+  // 2. LOGICA DE PAGOS (Adaptada a los nombres de tu DB)
+  // Usamos monto_pagado o montoPagado según como llegue del JSON
+  const calculateTotalPaid = (reserva: any) => reserva.montoPagado || reserva.monto_pagado || 0;
+
+  const handleConfirmPayment = async () => {
+    if (!selectedReserva || !paymentAmount) return;
+    try {
+      await VentaService.agregarPagoReserva(selectedReserva.id, { 
+        monto: parseFloat(paymentAmount) 
+      });
+      setPaymentAmount('');
+      setShowPaymentModal(false);
+      cargarReservas(); // Recargar lista
+      setSelectedReserva(null); // Volver al listado
+    } catch (error) {
+      alert("Error al registrar el pago");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="h-96 flex flex-col items-center justify-center text-slate-400">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
+        <p className="font-bold text-[10px] uppercase tracking-[0.2em]">Sincronizando Base de Datos...</p>
+      </div>
+    );
+  }
+
+  // VISTA DE DETALLE (Tu estilo original)
   if (selectedReserva) {
     const paid = calculateTotalPaid(selectedReserva);
+    const total = selectedReserva.total || 0;
+
     return (
       <div className="space-y-6 animate-in">
         <button onClick={() => setSelectedReserva(null)} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm transition-colors">
@@ -31,22 +85,25 @@ const Reservas: React.FC = () => {
               <div className="flex items-center gap-3 mb-2">
                 <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Ficha de Reserva</p>
                 <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-[9px] font-black uppercase tracking-widest">
-                  {selectedReserva.estado}
+                  {selectedReserva.estadoNombre || "VentaReservada"}
                 </span>
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{selectedReserva.clienteNombre}</h2>
+              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+                {selectedReserva.cliente?.nombre || `Cliente #${selectedReserva.clienteId}`}
+              </h2>
               <div className="flex items-center gap-4 mt-2">
                 <p className="text-sm font-medium text-slate-400 flex items-center gap-1.5">
                   <Hash className="w-3.5 h-3.5" /> {selectedReserva.id}
                 </p>
                 <p className="text-sm font-medium text-rose-500 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" /> Vence: {selectedReserva.fechaVencimientoReserva}
+                  <Calendar className="w-3.5 h-3.5" /> 
+                  Vence: {selectedReserva.fechaVencimientoReserva || 'Sin fecha'}
                 </p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-widest">Saldo Pendiente</p>
-              <p className="text-4xl font-bold text-rose-600 tracking-tight leading-none">${selectedReserva.total - paid}</p>
+              <p className="text-4xl font-bold text-rose-600 tracking-tight leading-none">${total - paid}</p>
             </div>
           </div>
 
@@ -58,37 +115,37 @@ const Reservas: React.FC = () => {
           <div className="p-10">
             {activeTab === 'DETAILS' ? (
               <div className="space-y-4">
-                {selectedReserva.detalles.map((d, i) => (
+                {selectedReserva.detalles?.map((d: any, i: number) => (
                   <div key={i} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
                         <Package className="w-6 h-6" />
                       </div>
                       <div>
-                        <p className="text-lg font-bold text-slate-800 leading-tight">{d.nombre}</p>
+                        <p className="text-lg font-bold text-slate-800 leading-tight">{d.productoNombre || d.nombre}</p>
                         <p className="text-xs font-medium text-slate-500 mt-0.5">{d.sku} • {d.cantidad} unidades</p>
                       </div>
                     </div>
-                    <span className="font-bold text-2xl text-slate-900">${d.precioUnitario * d.cantidad}</span>
+                    <span className="font-bold text-2xl text-slate-900">${(d.precioUnitario || 0) * d.cantidad}</span>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="space-y-3">
-                {selectedReserva.pagos.length === 0 ? (
+                {(!selectedReserva.pagos || selectedReserva.pagos.length === 0) ? (
                   <div className="text-center py-16 opacity-30">
                     <History className="w-12 h-12 mx-auto mb-3" />
                     <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">No hay pagos registrados</p>
                   </div>
                 ) : 
-                  selectedReserva.pagos.map((p, i) => (
+                  selectedReserva.pagos.map((p: any, i: number) => (
                     <div key={i} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
                           <History className="w-6 h-6" />
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-slate-800 leading-tight">Pago #{p.numeroSecuencial}</p>
+                          <p className="text-lg font-bold text-slate-800 leading-tight">Pago #{p.numeroSecuencial || i+1}</p>
                           <p className="text-xs font-medium text-slate-400 mt-0.5">{p.fecha}</p>
                         </div>
                       </div>
@@ -104,7 +161,7 @@ const Reservas: React.FC = () => {
             <div className="flex gap-8">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Reserva</p>
-                <p className="text-xl font-bold text-slate-700">${selectedReserva.total}</p>
+                <p className="text-xl font-bold text-slate-700">${total}</p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Abonado</p>
@@ -144,7 +201,7 @@ const Reservas: React.FC = () => {
               </div>
               <div className="flex gap-4 pt-2">
                 <button onClick={() => setShowPaymentModal(false)} className="flex-1 py-4 font-bold text-sm text-slate-400 hover:text-slate-600 uppercase">Cerrar</button>
-                <button onClick={() => setShowPaymentModal(false)} className="flex-[2] py-4 bg-indigo-600 text-white rounded-[20px] font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">Confirmar Pago</button>
+                <button onClick={handleConfirmPayment} className="flex-[2] py-4 bg-indigo-600 text-white rounded-[20px] font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">Confirmar Pago</button>
               </div>
             </div>
           </div>
@@ -153,6 +210,7 @@ const Reservas: React.FC = () => {
     );
   }
 
+  // VISTA DE LISTADO (Tu estilo original con datos de pgAdmin)
   return (
     <div className="space-y-8 animate-in">
       <div>
@@ -161,28 +219,35 @@ const Reservas: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {MOCK_RESERVAS.map(reserva => {
+        {reservas.length === 0 ? (
+          <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-200">
+             <p className="text-slate-400 font-bold uppercase tracking-widest">No hay reservas con estado VentaReservada</p>
+          </div>
+        ) : reservas.map(reserva => {
           const totalPaid = calculateTotalPaid(reserva);
-          const progress = (totalPaid / reserva.total) * 100;
+          const total = reserva.total || 0;
+          const progress = total > 0 ? (totalPaid / total) * 100 : 0;
           
           return (
             <div key={reserva.id} className="bg-white rounded-[40px] border border-slate-200 shadow-sm p-8 flex flex-col group hover:border-indigo-300 hover:shadow-xl transition-all duration-300">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-16 h-16 bg-indigo-600 rounded-[24px] flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-100">
-                  {reserva.clienteNombre.charAt(0)}
+                  {(reserva.cliente?.nombre || 'C').charAt(0)}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className="px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                    {reserva.estado}
+                    {reserva.estadoNombre || "VentaReservada"}
                   </span>
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-                    <Calendar className="w-3.5 h-3.5" /> Vence: {reserva.fechaVencimientoReserva}
+                    <Calendar className="w-3.5 h-3.5" /> Vence: {reserva.fechaVencimientoReserva || 'N/A'}
                   </div>
                 </div>
               </div>
               
               <div className="mb-8">
-                <h4 className="text-xl font-bold text-slate-900 tracking-tight mb-2 group-hover:text-indigo-600 transition-colors">{reserva.clienteNombre}</h4>
+                <h4 className="text-xl font-bold text-slate-900 tracking-tight mb-2 group-hover:text-indigo-600 transition-colors">
+                   {reserva.cliente?.nombre || `Cliente #${reserva.clienteId}`}
+                </h4>
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                   Reserva ID: {reserva.id}
                 </p>
@@ -194,13 +259,11 @@ const Reservas: React.FC = () => {
                 </p>
                 
                 <div className="bg-slate-50 p-6 rounded-[24px] space-y-3 border border-slate-100">
-                  {/* Top part: Percentage text and label */}
                   <div className="flex justify-between items-end">
                     <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">Cobrado</p>
                     <p className="text-xs font-black text-slate-900">{Math.round(progress)}%</p>
                   </div>
                   
-                  {/* Middle part: Progress bar */}
                   <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                     <div 
                       className="bg-indigo-600 h-full transition-all duration-1000 ease-out" 
@@ -208,15 +271,14 @@ const Reservas: React.FC = () => {
                     ></div>
                   </div>
 
-                  {/* Bottom part: Total and Pending */}
                   <div className="flex justify-between items-end pt-2">
                     <div className="text-left">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total</p>
-                      <p className="text-lg font-medium text-slate-700 tracking-tighter leading-none">${reserva.total}</p>
+                      <p className="text-lg font-medium text-slate-700 tracking-tighter leading-none">${total}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Pendiente</p>
-                      <p className="text-2xl font-black text-rose-600 tracking-tighter leading-none">${reserva.total - totalPaid}</p>
+                      <p className="text-2xl font-black text-rose-600 tracking-tighter leading-none">${total - totalPaid}</p>
                     </div>
                   </div>
                 </div>
