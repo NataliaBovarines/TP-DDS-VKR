@@ -1,25 +1,21 @@
 services:
-  # CONFIGURACIÓN DEL BACKEND (Spring Boot)
+  # BACKEND
   - type: web
     name: backend-vkr
-    runtime: docker # Cambiamos a Docker ya que Java no aparecía en tu lista anterior
+    runtime: docker
     rootDir: backend
-    # Al usar Docker, el buildCommand y startCommand se definen en el Dockerfile,
-    # pero si prefieres usar el entorno nativo de Render (si te aparece Java):
-    # env: java
-    # buildCommand: ./mvnw clean install -DskipTests
-    # startCommand: java -jar target/*.jar
+    plan: free
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
 
-  # CONFIGURACIÓN DEL FRONTEND (React + Vite/Tailwind)
-  - type: web # En Render, los sitios estáticos también usan el tipo 'web'
+  # FRONTEND
+  - type: web
     name: frontend-vkr
-    runtime: static # Aquí es donde se define que es un sitio estático
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishPath: dist # dist para Vite, build para Create React App
+    staticPublishPath: dist # <--- ESTO CORRIGE EL ERROR DE LA IMAGEN
     routes:
       - type: rewrite
         source: /*
