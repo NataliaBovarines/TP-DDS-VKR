@@ -247,14 +247,20 @@ const Empleados: React.FC = () => {
           <button 
             disabled={paginaActual === 0 || loading} 
             onClick={() => setPaginaActual(prev => prev - 1)} 
-            className="p-2 border border-slate-200 bg-white rounded-xl shadow-sm transition-all disabled:opacity-30"
+            className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button 
             disabled={paginaActual >= totalPaginas - 1 || loading} 
             onClick={() => setPaginaActual(prev => prev + 1)} 
-            className="p-2 border border-slate-200 bg-white rounded-xl shadow-sm transition-all disabled:opacity-30"
+            className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -264,51 +270,137 @@ const Empleados: React.FC = () => {
       {/* MODAL CREAR/EDITAR */}
       {(activeModal === 'ADD' || activeModal === 'EDIT') && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl p-10 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-bold flex items-center gap-2 uppercase tracking-tight">
-                {activeModal === 'ADD' ? <UserPlus className="text-indigo-600" /> : <Edit className="text-indigo-600" />}
-                {activeModal === 'ADD' ? 'Registrar Colaborador' : 'Editar Colaborador'}
-              </h3>
-              <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-slate-600 transition-colors"><X className="w-6 h-6" /></button>
+          <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200 overflow-hidden select-none">
+            
+            {/* Encabezado del Modal (Igual a Clientes) */}
+            <div className="flex justify-between items-center border-b border-slate-50 pb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                  {activeModal === 'ADD' ? <UserPlus className="w-6 h-6" /> : <Edit className="w-6 h-6" />}
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">
+                  {activeModal === 'ADD' ? 'Registrar Colaborador' : 'Editar Colaborador'}
+                </h3>
+              </div>
+              <button onClick={() => setActiveModal(null)} className="p-2 text-slate-300 hover:text-slate-500 transition-all">
+                <X className="w-6 h-6" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 ml-1">Nombre Completo</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <input disabled={activeModal === 'EDIT'} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20 disabled:opacity-60" placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-                  <input disabled={activeModal === 'EDIT'} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20 disabled:opacity-60" placeholder="Apellido" value={apellido} onChange={(e) => setApellido(e.target.value)} />
+            {/* Cuerpo del Modal con Scroll (Igual a Clientes) */}
+            <div className="max-h-[60vh] pr-2 space-y-6 px-2 pb-6 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
+              
+              {/* Nombre y Apellido */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Nombre <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    disabled={activeModal === 'EDIT'} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none disabled:opacity-60" 
+                    placeholder="Ej: Juan" 
+                    value={nombre} 
+                    onChange={(e) => setNombre(e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Apellido <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    disabled={activeModal === 'EDIT'} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none disabled:opacity-60" 
+                    placeholder="Ej: Pérez" 
+                    value={apellido} 
+                    onChange={(e) => setApellido(e.target.value)} 
+                  />
                 </div>
               </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 ml-1">DNI</label>
-                <input disabled={activeModal === 'EDIT'} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20 disabled:opacity-60" placeholder="DNI" value={dni} onChange={(e) => setDni(e.target.value)} />
+
+              {/* DNI y Rol */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    DNI <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    disabled={activeModal === 'EDIT'} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none disabled:opacity-60" 
+                    placeholder="DNI" 
+                    value={dni} 
+                    onChange={(e) => setDni(e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Rol <span className="text-rose-500">*</span>
+                  </label>
+                  <select 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                    value={rolId} 
+                    onChange={(e) => setRolId(Number(e.target.value))}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {roles.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 ml-1">Rol</label>
-                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20" value={rolId} onChange={(e) => setRolId(Number(e.target.value))}>
-                  <option value="">Seleccionar...</option>
-                  {roles.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
-                </select>
+
+              {/* Email y Teléfono */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Email <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                    placeholder="Email" 
+                    value={mail} 
+                    onChange={(e) => setMail(e.target.value)} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Teléfono <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                    placeholder="Teléfono" 
+                    value={telefono} 
+                    onChange={(e) => setTelefono(e.target.value)} 
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 ml-1">Email</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20" placeholder="Email" value={mail} onChange={(e) => setMail(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 ml-1">Teléfono</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 ml-1">Dirección</label>
-                <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 ring-indigo-500/20" placeholder="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+
+              {/* Dirección (Opcional) */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Dirección</label>
+                <input 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                  placeholder="Dirección" 
+                  value={direccion} 
+                  onChange={(e) => setDireccion(e.target.value)} 
+                />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-10">
-              <button onClick={() => setActiveModal(null)} className="py-4 border border-slate-200 rounded-2xl text-slate-500 font-bold text-xs uppercase tracking-widest hover:bg-slate-50">Cancelar</button>
-              <button onClick={guardarCambios} className="bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-bold text-sm flex justify-center items-center gap-2 shadow-xl shadow-indigo-100"><Save className="w-4 h-4" /> Registrar</button>
+            {/* Botones de Acción (Igual a Clientes) */}
+            <div className="flex gap-4 pt-6 border-t border-slate-50">
+              <button 
+                onClick={() => setActiveModal(null)} 
+                className="flex-1 py-4 font-bold text-sm text-slate-400 hover:text-slate-600 uppercase tracking-widest"
+              >
+                Cerrar
+              </button>
+              <button 
+                onClick={guardarCambios} 
+                disabled={!nombre || !apellido || !dni || !rolId || !mail || !telefono}
+                className="flex-[2] py-4 bg-indigo-600 text-white rounded-[20px] font-bold text-sm tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+              >
+                <Save className="w-4 h-4" /> 
+                {activeModal === 'ADD' ? 'Registrar' : 'Guardar Cambios'}
+              </button>
             </div>
           </div>
         </div>

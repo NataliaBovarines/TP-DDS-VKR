@@ -54,7 +54,6 @@ public class VentaReservada extends VentaState {
         cliente.disminuirDeuda(venta.getTotal() - venta.getMontoPagado());
 
         venta.liberarStockProductos();
-        venta.setMontoPagado(0.0);
         System.out.println("Reserva cancelada. Motivo: " + motivo);
     }
 

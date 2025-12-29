@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, XCircle, Eye, ArrowLeft, History, Package, 
-  Calendar, Hash, Loader2, AlertCircle, Tag 
+  Calendar, Hash, Loader2, AlertCircle, Tag, 
+  X
 } from 'lucide-react';
 import VentaService from '../services/ventaService.js';
 import ProductoService from '../services/productoService.js';
@@ -12,7 +13,7 @@ const Reservas: React.FC = () => {
   const [selectedReserva, setSelectedReserva] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<'DETAILS' | 'PAYMENTS'>('DETAILS');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [montoAbono, setMontoAbono] = useState('');
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [reservaParaCancelar, setReservaParaCancelar] = useState<any | null>(null);
@@ -31,7 +32,11 @@ const Reservas: React.FC = () => {
   };
 
   useEffect(() => {
-    cargarReservas();
+    const delayDebounce = setTimeout(() => {
+      cargarReservas();
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
   }, []);
 
   const formatFecha = (fechaStr: string) => {
@@ -51,23 +56,23 @@ const Reservas: React.FC = () => {
   const saldoPendiente = selectedReserva ? (getTotal(selectedReserva) - getMontoPagado(selectedReserva)) : 0;
 
   const handleConfirmPayment = async () => {
-    if (!selectedReserva || !paymentAmount) return;
+    if (!selectedReserva || !montoAbono) return;
 
-    if (parseFloat(paymentAmount) > saldoPendiente) {
-      alert(`El monto no puede superar el saldo pendiente ($${saldoPendiente})`);
+    if (parseFloat(montoAbono) > saldoPendiente) {
+      console.error(`El monto no puede superar el saldo pendiente ($${saldoPendiente})`);
       return;
     }
 
     try {
-      await VentaService.agregarPagoReserva(selectedReserva.id, { monto: parseFloat(paymentAmount) });
-      setPaymentAmount('');
+      await VentaService.agregarPagoReserva(selectedReserva.id, { monto: parseFloat(montoAbono) });
+      setMontoAbono('');
       setShowPaymentModal(false);
 
       const actualizada = await VentaService.getVentaById(selectedReserva.id);
       setSelectedReserva(actualizada);
       cargarReservas();
     } catch (error) { 
-      console.log("Error al registrar el pago"); 
+      console.error("Error al registrar el pago"); 
     }
   };
 
@@ -89,62 +94,67 @@ const Reservas: React.FC = () => {
     }
   };
 
-  if (loading) return (
-    <div className="h-96 flex flex-col items-center justify-center text-slate-400">
-      <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-      <p className="font-bold text-[10px] uppercase tracking-[0.2em]">Cargando reservas...</p>
-    </div>
-  );
-
-return (
+  return (
     <div className="space-y-8 animate-in">
-      {/* --- LÓGICA DE VISTAS (LISTA O DETALLE) --- */}
+      {/* El título siempre visible */}
+      <div>
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Gestión de Reservas</h2>
+        <p className="text-slate-500 font-medium mt-1">Control de pagos parciales y estados de crédito</p>
+      </div>
+
       {!selectedReserva ? (
         <>
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Gestión de Reservas</h2>
-            <p className="text-slate-500 font-medium mt-1">Control de pagos parciales y estados de crédito</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {reservas.length === 0 ? (
-              <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-200">
-                <p className="text-slate-400 font-bold uppercase tracking-widest">No hay reservas activas</p>
-              </div>
-            ) : reservas.map(reserva => {
-              const paid = getMontoPagado(reserva);
-              const total = getTotal(reserva);
-              const progress = reserva.progresoPago || 0;
-              const vencida = estaVencida(reserva.fechaVencimientoReserva);
-              const barColor = vencida ? 'bg-rose-500' : (progress > 80 ? 'bg-emerald-500' : 'bg-indigo-600');
-              
-              return (
-                <div key={reserva.id} className="bg-white rounded-[40px] border border-slate-200 shadow-sm p-8 flex flex-col group hover:border-indigo-300 hover:shadow-xl transition-all">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center text-white font-bold text-2xl ${vencida ? 'bg-rose-600' : 'bg-indigo-600'}`}>{(reserva.cliente?.nombre || 'C').charAt(0)}</div>
-                    <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase px-3 py-1 rounded-lg border ${vencida ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
-                      {vencida ? <AlertCircle className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />} Vence: {formatFecha(reserva.fechaVencimientoReserva)}
-                    </div>
-                  </div>
-                  <h4 className="text-xl font-bold text-slate-900 mb-8">{reserva.cliente?.nombre || `Reserva #${reserva.id}`}</h4>
-                  <div className="bg-slate-50 p-6 rounded-[24px] space-y-3 border border-slate-100">
-                    <div className="flex justify-between text-[10px] font-black uppercase"><p>{vencida ? 'Expirada' : 'Progreso de Pago'}</p><p>{Math.round(progress)}%</p></div>
-                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div className={`${barColor} h-full transition-all`} style={{ width: `${progress}%` }}></div></div>
-                    <div className="flex justify-between pt-2">
-                      <div className="text-left"><p className="text-[10px] font-bold text-slate-400 uppercase">Total</p><p className="text-lg font-medium text-slate-700">${total.toLocaleString()}</p></div>
-                      <div className="text-right"><p className="text-[10px] font-bold text-slate-400 uppercase">Pendiente</p><p className="text-2xl font-black text-rose-600">${(total - paid).toLocaleString()}</p></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 mt-10">
-                    <button onClick={() => setSelectedReserva(reserva)} className="py-4 bg-white border border-slate-200 rounded-[20px] text-[11px] font-bold uppercase text-slate-600 hover:border-indigo-600 transition-all"><Eye className="w-4 h-4 inline mr-1"/> Detalle</button>
-                    <button onClick={() => abrirModalCancelacion(reserva)} className="py-4 bg-rose-50 text-rose-600 rounded-[20px] text-[11px] font-bold uppercase border border-rose-100 hover:bg-rose-100 transition-all active:scale-95"><XCircle className="w-4 h-4 inline mr-1"/> Cancelar</button>
-                  </div>
+          {loading ? (
+            /* ESTADO CARGANDO: Replicado de Productos */
+            <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm p-20 text-center flex flex-col items-center justify-center gap-4">
+              <div className="w-10 h-10 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Cargando reservas...</p>
+            </div>
+          ) : (
+            /* LISTADO DE TARJETAS */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {reservas.length === 0 ? (
+                <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-200">
+                  <p className="text-slate-400 font-bold uppercase tracking-widest">No hay reservas activas</p>
                 </div>
-              );
-            })}
-          </div>
+              ) : (
+                reservas.map(reserva => {
+                  const paid = getMontoPagado(reserva);
+                  const total = getTotal(reserva);
+                  const progress = reserva.progresoPago || 0;
+                  const vencida = estaVencida(reserva.fechaVencimientoReserva);
+                  const barColor = vencida ? 'bg-rose-500' : (progress > 80 ? 'bg-emerald-500' : 'bg-indigo-600');
+                  
+                  return (
+                    <div key={reserva.id} className="bg-white rounded-[40px] border border-slate-200 shadow-sm p-8 flex flex-col group hover:border-indigo-300 hover:shadow-xl transition-all">
+                      <div className="flex justify-between items-start mb-6">
+                        <div className={`w-16 h-16 rounded-[24px] flex items-center justify-center text-white font-bold text-2xl ${vencida ? 'bg-rose-600' : 'bg-indigo-600'}`}>{(reserva.cliente?.nombre || 'C').charAt(0)}</div>
+                        <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase px-3 py-1 rounded-lg border ${vencida ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+                          {vencida ? <AlertCircle className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />} Vence: {formatFecha(reserva.fechaVencimientoReserva)}
+                        </div>
+                      </div>
+                      <h4 className="text-xl font-bold text-slate-900 mb-8">{reserva.cliente?.nombre || `Reserva #${reserva.id}`}</h4>
+                      <div className="bg-slate-50 p-6 rounded-[24px] space-y-3 border border-slate-100">
+                        <div className="flex justify-between text-[10px] font-black uppercase"><p>{vencida ? 'Expirada' : 'Progreso de Pago'}</p><p>{Math.round(progress)}%</p></div>
+                        <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div className={`${barColor} h-full transition-all`} style={{ width: `${progress}%` }}></div></div>
+                        <div className="flex justify-between pt-2">
+                          <div className="text-left"><p className="text-[10px] font-bold text-slate-400 uppercase">Total</p><p className="text-lg font-medium text-slate-700">${total.toLocaleString()}</p></div>
+                          <div className="text-right"><p className="text-[10px] font-bold text-slate-400 uppercase">Pendiente</p><p className="text-2xl font-black text-rose-600">${(total - paid).toLocaleString()}</p></div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-10">
+                        <button onClick={() => setSelectedReserva(reserva)} className="py-4 bg-white border border-slate-200 rounded-[20px] text-[11px] font-bold uppercase text-slate-600 hover:border-indigo-600 transition-all"><Eye className="w-4 h-4 inline mr-1"/> Detalle</button>
+                        <button onClick={() => abrirModalCancelacion(reserva)} className="py-4 bg-rose-50 text-rose-600 rounded-[20px] text-[11px] font-bold uppercase border border-rose-100 hover:bg-rose-100 transition-all active:scale-95"><XCircle className="w-4 h-4 inline mr-1"/> Cancelar</button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </>
       ) : (
-        /* --- ESTÉTICA ORIGINAL DE TU FICHA DE DETALLE --- */
+        /* --- FICHA DE DETALLE --- */
         <div className="space-y-6 animate-in">
           <button onClick={() => setSelectedReserva(null)} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm">
             <ArrowLeft className="w-4 h-4" /> Volver al listado
@@ -186,9 +196,9 @@ return (
                         <div>
                           <p className="text-lg font-bold text-slate-800 leading-tight">{d.detalleProducto?.productoNombre || "Producto"}</p>
                           <div className="flex items-center gap-3 mt-1">
-                             <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-2 py-0.5 rounded border"><Tag className="w-3 h-3" /> Código: {d.detalleProducto?.codigo || "S/C"}</span>
-                             <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Cantidad: {d.cantidad || 0}</span>
-                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Precio unitario: ${d.precioUnitarioActual.toLocaleString()}</span>
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-2 py-0.5 rounded border"><Tag className="w-3 h-3" /> Código: {d.detalleProducto?.codigo || "S/C"}</span>
+                            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Cantidad: {d.cantidad || 0}</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Precio unitario: ${d.precioUnitarioActual.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
@@ -220,7 +230,7 @@ return (
                 <div><p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Abonado</p><p className="text-xl font-bold text-emerald-600">${getMontoPagado(selectedReserva).toLocaleString()}</p></div>
               </div>
               <div className="flex gap-4">
-                <button onClick={() => setShowPaymentModal(true)} className="px-8 py-4 bg-indigo-600 text-white rounded-[24px] font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-indigo-700 transition-all"><DollarSign className="w-5 h-5 inline mr-2"/>Registrar Abono</button>
+                <button onClick={() => setShowPaymentModal(true)} className="px-8 py-4 bg-indigo-600 text-white rounded-[24px] font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-indigo-700 transition-all"><DollarSign className="w-5 h-5 inline mr-2"/>Registrar abono</button>
                 <button onClick={() => abrirModalCancelacion(selectedReserva)} className="px-8 py-4 bg-white text-rose-500 rounded-[24px] font-bold text-sm uppercase border border-slate-200 hover:bg-rose-50 transition-all"><XCircle className="w-5 h-5 inline mr-2"/>Cancelar</button>
               </div>
             </div>
@@ -228,19 +238,38 @@ return (
         </div>
       )}
 
-      {/* --- MODALES: SIEMPRE ABAJO PARA QUE NO SE CORTEN --- */}
-
+      {/* --- MODALES --- */}
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10 space-y-6">
-            <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Registrar Abono</h3>
-            <div className="relative">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-3xl font-bold text-slate-300">$</span>
-              <input type="number" autoFocus value={paymentAmount} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="0.00" className="w-full text-4xl font-bold text-indigo-600 bg-slate-50 border border-slate-200 rounded-2xl p-8 pl-14 outline-none" />
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">Registrar Abono</h3>
+              <button onClick={() => { setShowPaymentModal(false); setMontoAbono(''); }} className="text-slate-300 hover:text-rose-500">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Saldo Pendiente</p>
+                  <p className="text-2xl font-black text-slate-900">${(selectedReserva?.saldoPendiente || 0).toLocaleString()}</p>
+                </div>
+                <div className="text-right text-indigo-600"><Tag className="w-6 h-6 ml-auto opacity-20" /></div>
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Monto a entregar</label>
+                <div className="relative">
+                  <DollarSign className={`absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 transition-colors ${montoAbono && parseFloat(montoAbono) > selectedReserva?.saldoPendiente ? 'text-rose-500' : 'text-emerald-500'}`} />
+                  <input type="number" autoFocus placeholder="0,00" className={`w-full pl-14 pr-6 py-5 bg-white border-2 rounded-[24px] text-2xl font-black outline-none transition-all shadow-inner ${montoAbono && parseFloat(montoAbono) > selectedReserva?.saldoPendiente ? 'border-rose-500 text-rose-600' : 'border-slate-100 text-slate-900 focus:border-emerald-500'}`} value={montoAbono} onChange={(e) => setMontoAbono(e.target.value)} />
+                </div>
+                {montoAbono && parseFloat(montoAbono) > selectedReserva?.saldoPendiente && (
+                  <div className="px-2 animate-in fade-in slide-in-from-top-1"><p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> El monto no puede superar el saldo pendiente</p></div>
+                )}
+              </div>
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setShowPaymentModal(false)} className="flex-1 py-4 font-bold text-slate-400">Cerrar</button>
-              <button onClick={handleConfirmPayment} className="flex-[2] py-4 bg-indigo-600 text-white rounded-[20px] font-bold shadow-xl">Confirmar</button>
+              <button onClick={() => { setShowPaymentModal(false); setMontoAbono(''); }} className="flex-1 py-4 font-bold text-xs text-slate-400 uppercase tracking-widest hover:bg-slate-50 rounded-2xl">Cancelar</button>
+              <button disabled={!montoAbono || parseFloat(montoAbono) <= 0 || parseFloat(montoAbono) > selectedReserva?.saldoPendiente} onClick={handleConfirmPayment} className="flex-[2] py-5 bg-indigo-600 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">Confirmar Abono</button>
             </div>
           </div>
         </div>
@@ -250,14 +279,10 @@ return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-[40px] shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-rose-50 text-rose-600 rounded-[30px] mx-auto flex items-center justify-center">
-                <XCircle className="w-10 h-10" />
-              </div>
+              <div className="w-20 h-20 bg-rose-50 text-rose-600 rounded-[30px] mx-auto flex items-center justify-center"><XCircle className="w-10 h-10" /></div>
               <div className="space-y-2">
                 <h4 className="text-xl font-bold text-slate-900 tracking-tight uppercase">¿Anular Reserva?</h4>
-                <p className="text-slate-500 text-sm">
-                  Estás por cancelar la reserva de <span className="font-bold text-slate-700">{reservaParaCancelar?.cliente?.nombre || `Reserva #${reservaParaCancelar?.id}`}</span>.
-                </p>
+                <p className="text-slate-500 text-sm">Estás por cancelar la reserva de <span className="font-bold text-slate-700">{reservaParaCancelar?.cliente?.nombre || `Reserva #${reservaParaCancelar?.id}`}</span>.</p>
               </div>
             </div>
             <div className="flex gap-4">

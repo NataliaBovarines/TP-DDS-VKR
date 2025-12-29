@@ -97,7 +97,7 @@ public class VentaController {
     @GetMapping("/reservas-vencidas")
     @ResponseStatus(HttpStatus.OK) 
     @PreAuthorize("hasAuthority('VENTA_PROCESAR')")
-    public void procesarReservasVencidas(@PathVariable Long id) {
+    public void procesarReservasVencidas() {
         ventaService.procesarReservasVencidas(); // Cancela las ventas reservadas vencidas
     }
 

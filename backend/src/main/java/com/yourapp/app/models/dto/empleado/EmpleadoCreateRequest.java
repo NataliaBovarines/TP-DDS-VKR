@@ -30,6 +30,7 @@ public class EmpleadoCreateRequest {
     @Email(message = "El formato de la dirección de correo electrónico es inválido")
     private String mail;
     
+    @NotBlank(message = "El teléfono es obligatorio")
     @Pattern(regexp = "^[0-9+()\\s-]{10,15}$", message = "El formato de teléfono es inválido. Debe contener entre 10 y 15 números")
     private String telefono;
     

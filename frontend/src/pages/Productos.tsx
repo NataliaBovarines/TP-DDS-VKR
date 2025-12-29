@@ -114,7 +114,7 @@ const Productos: React.FC = () => {
       const payload: any = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
-        precio: Number(formData.precio) || 0,
+        precio: formData.precio === '' ? null : Number(formData.precio),
         subcategoriaId: Number(formData.subcategoriaId),
         proveedorId: Number(formData.proveedorId) || null
       };
@@ -154,7 +154,7 @@ const Productos: React.FC = () => {
       const payload: any = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
-        precio: Number(formData.precio) || 0,
+        precio: formData.precio === '' ? null : Number(formData.precio),
         subcategoriaId: Number(formData.subcategoriaId),
         proveedorId: formData.proveedorId ? Number(formData.proveedorId) : null
       };
@@ -439,10 +439,24 @@ const Productos: React.FC = () => {
       <div className="bg-white px-8 py-4 border border-slate-200 rounded-3xl flex justify-between items-center text-[11px] font-bold text-slate-400 uppercase tracking-wider shadow-sm">
         <span>Página {currentPage + 1} de {totalPages}</span>
         <div className="flex gap-2">
-          <button disabled={currentPage === 0} onClick={() => setCurrentPage(prev => prev - 1)} className="p-2 border border-slate-200 bg-white rounded-xl opacity-30 shadow-sm transition-all">
+          <button 
+            disabled={currentPage === 0} 
+            onClick={() => setCurrentPage(prev => prev - 1)} 
+            className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
+          >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <button disabled={currentPage >= totalPages - 1} onClick={() => setCurrentPage(prev => prev + 1)} className="p-2 border border-slate-200 bg-white rounded-xl opacity-30 shadow-sm transition-all">
+          <button 
+            disabled={currentPage >= totalPages - 1} 
+            onClick={() => setCurrentPage(prev => prev + 1)} 
+            className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
+          >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -479,19 +493,24 @@ const Productos: React.FC = () => {
                 <div className="space-y-6"> 
                   {/* Nombre */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Nombre del producto</label>
+                    <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                      Nombre del producto <span className="text-rose-500">*</span>
+                    </label>
                     <input 
                       value={formData.nombre}
                       required
                       onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                       placeholder="Ej: Remera Básica Escote V Algodón Premium" 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
                     />
                   </div>
+
                   {/* Categoría y Subcategoría */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Categoría</label>
+                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                        Categoría <span className="text-rose-500">*</span>
+                      </label>
                       <select 
                         value={selectedCategoryInForm}
                         required
@@ -499,20 +518,23 @@ const Productos: React.FC = () => {
                           setSelectedCategoryInForm(e.target.value);
                           setFormData({...formData, subcategoriaId: ''});
                         }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
                       >
                         <option value="">Seleccionar categoría</option>
                         {categorias.map(cat => <option key={cat.id} value={cat.id}>{cat.descripcion}</option>)}
                       </select>
                     </div>
+
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Subcategoría</label>
+                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                        Subcategoría <span className="text-rose-500">*</span>
+                      </label>
                       <select 
                         disabled={!selectedCategoryInForm}
                         value={formData.subcategoriaId}
                         required
                         onChange={(e) => setFormData({...formData, subcategoriaId: e.target.value})}
-                        className={`w-full border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none ${!selectedCategoryInForm ? 'bg-slate-100 opacity-60' : 'bg-slate-50'}`}
+                        className={`w-full border border-slate-200 rounded-2xl p-4 font-semibold text-sm outline-none transition-all ${!selectedCategoryInForm ? 'bg-slate-100 opacity-60' : 'bg-slate-50 focus:ring-4 focus:ring-indigo-500/10'}`}
                       >
                         <option value="">Seleccionar subcategoría</option>
                         {categorias.find(c => c.id.toString() === selectedCategoryInForm)?.subcategorias.map((sub: any) => (
@@ -521,6 +543,7 @@ const Productos: React.FC = () => {
                       </select>
                     </div>
                   </div>
+
                   {/* Precio y Proveedor */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
@@ -530,22 +553,26 @@ const Productos: React.FC = () => {
                         onChange={(e) => setFormData({...formData, proveedorId: e.target.value})}
                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
                       >
-                        <option value="">Seleccionar proveedor</option>
+                        <option value="">Seleccionar proveedor (Opcional)</option>
                         {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                       </select>
                     </div>
+
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Precio ($)</label>
+                      <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                        Precio ($) <span className="text-rose-500">*</span>
+                      </label>
                       <input 
                         type="number" 
                         value={formData.precio}
                         required
                         onChange={(e) => setFormData({...formData, precio: e.target.value})}
                         placeholder="0.00"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all" 
                       />
                     </div>
                   </div>
+
                   {/* Descripción */}
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Descripción</label>
@@ -565,24 +592,30 @@ const Productos: React.FC = () => {
                   
                   {activeModal === 'ADD_VARIANT' && (
                     <>
+                      {/* COLOR */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Color</label>
+                        <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                          Color <span className="text-rose-500">*</span>
+                        </label>
                         <select 
                           value={variantFormData.colorId}
                           onChange={(e) => setVariantFormData({...variantFormData, colorId: e.target.value})}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10"
                         >
                           <option value="">Seleccionar color</option>
                           {colores.map(c => <option key={c.id} value={c.id}>{c.descripcion}</option>)}
                         </select>
                       </div>
 
+                      {/* TALLE */}
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Talle</label>
+                        <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                          Talle <span className="text-rose-500">*</span>
+                        </label>
                         <select 
                           value={variantFormData.talleId}
                           onChange={(e) => setVariantFormData({...variantFormData, talleId: e.target.value})}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-semibold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10"
                         >
                           <option value="">Seleccionar talle</option>
                           {talles.map(t => <option key={t.id} value={t.id}>{t.descripcion}</option>)}
@@ -591,19 +624,21 @@ const Productos: React.FC = () => {
                     </>
                   )}
 
+                  {/* STOCK ACTUAL / AUMENTO */}
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
-                      {activeModal === 'EDIT_VARIANT' ? 'Aumentar stock actual' : 'Stock inicial'}
+                      {activeModal === 'EDIT_VARIANT' ? 'Aumentar stock actual' : <>Stock inicial <span className="text-rose-500">*</span></>}
                     </label>
                     <input 
                       type="number" 
                       value={variantFormData.stockActual}
                       onChange={(e) => setVariantFormData({...variantFormData, stockActual: e.target.value})}
                       placeholder="0"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
                     />
                   </div>
 
+                  {/* STOCK MÍNIMO (OPCIONAL) */}
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Alerta stock mínimo</label>
                     <input 
@@ -611,7 +646,7 @@ const Productos: React.FC = () => {
                       value={variantFormData.stockMinimo}
                       onChange={(e) => setVariantFormData({...variantFormData, stockMinimo: e.target.value})}
                       placeholder="0"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none" 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10"
                     />
                   </div>
                 </div>
@@ -641,6 +676,15 @@ const Productos: React.FC = () => {
                 }} 
                 className="flex-1 py-4 font-bold text-sm text-slate-400 hover:text-slate-600 uppercase tracking-widest">Cerrar</button>
               <button 
+                disabled={
+                  (activeModal === 'ADD_PRODUCT' || activeModal === 'EDIT_PRODUCT') 
+                    ? (!formData.nombre || !selectedCategoryInForm || !formData.subcategoriaId || !formData.precio)
+                    : (activeModal === 'ADD_VARIANT')
+                      ? (!variantFormData.colorId || !variantFormData.talleId || !variantFormData.stockActual)
+                      : (activeModal === 'EDIT_VARIANT')
+                        ? false
+                        : false
+                }
                 onClick={() => { 
                   if (activeModal === 'DELETE') { 
                     confirmarEliminacion(); 
@@ -656,7 +700,11 @@ const Productos: React.FC = () => {
                     setActiveModal(null); 
                   }
                 }}
-                className={`flex-[2] py-4 rounded-[20px] font-bold text-sm tracking-widest flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${activeModal === 'DELETE' ? 'bg-rose-600 text-white shadow-rose-100 hover:bg-rose-700' : 'bg-indigo-600 text-white shadow-indigo-100 hover:bg-indigo-700'}`}
+                className={`flex-[2] py-4 rounded-[20px] font-bold text-sm tracking-widest flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 ${
+                  activeModal === 'DELETE' 
+                    ? 'bg-rose-600 text-white' 
+                    : 'bg-indigo-600 text-white disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed'
+                }`}
               >
                 {activeModal === 'DELETE' ? <Trash2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
                 {activeModal === 'DELETE' ? 'Confirmar eliminación' : 'Guardar cambios'}

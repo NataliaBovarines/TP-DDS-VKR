@@ -4,7 +4,8 @@ import {
   Search, ShoppingCart, Trash2, CreditCard, DollarSign, 
   ScanLine, List, Eye, ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, 
   Package, History, PlusCircle, X, Calendar, Hash, Loader2,
-  AlertCircle, Tag, Minus, Plus, CheckCircle2
+  AlertCircle, Tag, Minus, Plus, CheckCircle2,
+  CheckSquare
 } from 'lucide-react';
 import VentaService from '../services/ventaService.js';
 import ProductoService from '../services/productoService.js';
@@ -57,6 +58,10 @@ const Ventas: React.FC = () => {
     'VentaIniciada': { label: 'Venta Iniciada', color: 'bg-slate-100 text-slate-600' },
   };
 
+  // Modales de mensaje exitoso
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
   // ==========================================
   // BÚSQUEDA DE CLIENTES (Debounce 1 letra)
   // ==========================================
@@ -89,6 +94,7 @@ const Ventas: React.FC = () => {
       const data = await VentaService.getVentas({
         pagina: currentPage,
         direccion: filters.direccion,
+        orden: "fecha",
         estado: filters.estado || undefined,
         cliente: searchTerm || undefined 
       });
@@ -102,8 +108,14 @@ const Ventas: React.FC = () => {
   }, [currentPage, filters, searchTerm]);
 
   useEffect(() => {
-    if (view === 'LIST') fetchVentas();
-  }, [fetchVentas, view]);
+    if (view === 'LIST') {
+      const delayDebounce = setTimeout(() => {
+        fetchVentas();
+      }, 500);
+
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [fetchVentas, view, searchTerm]);
 
   // =========================
   // ACCIONES POS
@@ -154,7 +166,6 @@ const Ventas: React.FC = () => {
           motivo: "Cambio de producto",
           detalles: payload.detalles
         });
-        
         setLastCreatedVenta(ventaResultante);
         setIsComingFromDetail(false);
         setShowPostVentaModal(true); 
@@ -184,6 +195,10 @@ const Ventas: React.FC = () => {
     try {
       if (accion === 'CANCELAR') await VentaService.cancelarVenta(selectedVenta.id, { motivo });
       if (accion === 'RECHAZAR') await VentaService.rechazarVenta(selectedVenta.id, { motivo });
+
+      // Éxito
+      setSuccessMessage(`La venta #${selectedVenta.id} ha sido ${accion === 'CANCELAR' ? 'cancelada' : 'rechazada'} correctamente.`);
+      setShowSuccessModal(true);
       
       const actualizado = await VentaService.getVentaById(selectedVenta.id);
       setSelectedVenta(actualizado);
@@ -208,11 +223,22 @@ const Ventas: React.FC = () => {
     try {
       const payload = { metodoPago: metodo };
       await VentaService.pagarVenta(lastCreatedVenta.id, payload);
+      
       setShowPagoModal(false);
       setShowPostVentaModal(false);
-      setIsComingFromDetail(false);
-      setIsExchangeMode(false);
-      setView('LIST');
+
+      // Éxito
+      setSuccessMessage(`¡Pago registrado con éxito!\nVenta #${lastCreatedVenta.id} pagada.`);
+      setShowSuccessModal(true);
+      
+      if (isComingFromDetail) {
+        const actualizada = await VentaService.getVentaById(lastCreatedVenta.id);
+        setSelectedVenta(actualizada);
+        setIsComingFromDetail(false);
+      } else {
+        setView('LIST');
+      }
+      
       fetchVentas();
     } catch (e) {
       console.error("Error al procesar el pago:", e);
@@ -228,22 +254,28 @@ const Ventas: React.FC = () => {
     if (!lastCreatedVenta || !montoReserva) return;
     
     try {
-      const payload = { 
-        monto: parseFloat(montoReserva) 
-      };
-      
+      const payload = { monto: parseFloat(montoReserva) };
       await VentaService.reservarVenta(lastCreatedVenta.id, payload);
       
       setShowReservaModal(false);
       setShowPostVentaModal(false);
-      setIsComingFromDetail(false);
-      setIsExchangeMode(false);
       setMontoReserva('');
-      setView('LIST');
+
+      // Éxito
+      setSuccessMessage(`¡Reserva confirmada!\nSe registró la seña para la venta #${lastCreatedVenta.id}.`);
+      setShowSuccessModal(true);
+
+      if (isComingFromDetail) {
+        const actualizada = await VentaService.getVentaById(lastCreatedVenta.id);
+        setSelectedVenta(actualizada);
+        setIsComingFromDetail(false);
+      } else {
+        setView('LIST');
+      }
+      
       fetchVentas();
     } catch (e) {
       console.error("Error al reservar:", e);
-      alert("Error al procesar la reserva. Verifique el monto.");
     }
   };
 
@@ -288,8 +320,6 @@ const Ventas: React.FC = () => {
     : isExchangeMode && selectedVenta 
       ? Math.max(0, subtotalCarrito - selectedVenta.montoPagado) 
       : subtotalCarrito;
-
-  const canReserve = selectedClient !== null;
 
   return (
     <div className="space-y-8 animate-in h-full">
@@ -373,7 +403,16 @@ const Ventas: React.FC = () => {
         <AlertCircle className="w-3.5 h-3.5" /> Vencidas
       </button>
       <button 
-        onClick={async () => { await VentaService.procesarVencidas(); fetchVentas(); }}
+        onClick={async () => { 
+          try {
+            await VentaService.procesarVencidas();
+            setSuccessMessage("Se han procesado todas las reservas vencidas y el stock ha sido devuelto al inventario.");
+            setShowSuccessModal(true);
+            fetchVentas(); 
+          } catch (error) {
+            console.error("Error al procesar vencidas", error);
+          }
+        }}
         className="flex-1 h-[46px] px-4 bg-slate-900 text-white rounded-xl text-[10px] font-bold uppercase hover:bg-black transition-all flex items-center justify-center gap-2"
       >
         <RefreshCw className="w-3.5 h-3.5" /> Limpiar vencidas
@@ -387,36 +426,56 @@ const Ventas: React.FC = () => {
     </div>
   </div>
 </div>
-          <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            {loading ? <div className="p-24 flex justify-center"><div className="w-12 h-12 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div></div> : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">
-                    <tr><th className="px-8 py-6">ID Venta</th><th className="px-8 py-6">Fecha</th><th className="px-8 py-6">Cliente</th><th className="px-8 py-6 text-center">Estado</th><th className="px-8 py-6 text-right">Total</th><th className="px-8 py-6 w-20"></th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {ventas.map((v) => (
-                      <tr key={v.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-8 py-8 font-mono font-bold text-indigo-600 text-lg">#{v.id}</td>
-                        <td className="px-8 py-8 text-base font-semibold text-slate-500">{new Date(v.fecha).toLocaleDateString('es-AR')}</td>
-                        <td className="px-8 py-8 font-bold text-slate-900">{v.cliente?.nombre || 'Consumidor Final'}</td>
-                        <td className="px-8 py-8 text-center"><span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${ESTADOS_VENTA[v.estadoNombre]?.color || 'bg-slate-50'}`}>{ESTADOS_VENTA[v.estadoNombre]?.label || v.estadoNombre}</span></td>
-                        <td className="px-8 py-8 text-right font-black text-slate-900 text-xl">${v.total.toLocaleString()}</td>
-                        <td className="px-8 py-8 text-center"><button onClick={async () => { const det = await VentaService.getVentaById(v.id); setSelectedVenta(det); setView('DETAIL'); }} className="p-3 bg-white border border-slate-200 text-slate-300 hover:text-indigo-600 rounded-2xl transition-all shadow-sm active:scale-95"><Eye className="w-5 h-5" /></button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+
+<div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+  {loading ? (
+    <div className="p-20 text-center flex flex-col items-center justify-center gap-4">
+      <div className="w-10 h-10 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Cargando ventas...</p>
+    </div>
+  ) : (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left">
+        <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">
+          <tr><th className="px-8 py-6">ID Venta</th><th className="px-8 py-6">Fecha</th><th className="px-8 py-6">Cliente</th><th className="px-8 py-6 text-center">Estado</th><th className="px-8 py-6 text-right">Total</th><th className="px-8 py-6 w-20"></th></tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {ventas.map((v) => (
+            <tr key={v.id} className="hover:bg-slate-50/50 transition-colors">
+              <td className="px-8 py-8 font-mono font-bold text-indigo-600 text-lg">#{v.id}</td>
+              <td className="px-8 py-8 text-base font-semibold text-slate-500">{new Date(v.fecha).toLocaleDateString('es-AR')}</td>
+              <td className="px-8 py-8 font-bold text-slate-900">{v.cliente?.nombre || 'Consumidor Final'}</td>
+              <td className="px-8 py-8 text-center"><span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${ESTADOS_VENTA[v.estadoNombre]?.color || 'bg-slate-50'}`}>{ESTADOS_VENTA[v.estadoNombre]?.label || v.estadoNombre}</span></td>
+              <td className="px-8 py-8 text-right font-black text-slate-900 text-xl">${v.total.toLocaleString()}</td>
+              <td className="px-8 py-8 text-center"><button onClick={async () => { const det = await VentaService.getVentaById(v.id); setSelectedVenta(det); setView('DETAIL'); }} className="p-3 bg-white border border-slate-200 text-slate-300 hover:text-indigo-600 rounded-2xl transition-all shadow-sm active:scale-95"><Eye className="w-5 h-5" /></button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
           <div className="bg-white px-8 py-4 border border-slate-200 rounded-3xl flex justify-between items-center text-[11px] font-bold text-slate-400 uppercase tracking-wider shadow-sm">
             <span>Página {currentPage + 1} de {totalPages}</span>
             <div className="flex gap-2">
-              <button disabled={currentPage === 0} onClick={() => setCurrentPage(prev => prev - 1)} className="p-2 border border-slate-200 bg-white rounded-xl opacity-30 shadow-sm transition-all">
+              <button 
+                disabled={currentPage === 0} 
+                onClick={() => setCurrentPage(prev => prev - 1)} 
+                className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
+              >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <button disabled={currentPage >= totalPages - 1} onClick={() => setCurrentPage(prev => prev + 1)} className="p-2 border border-slate-200 bg-white rounded-xl opacity-30 shadow-sm transition-all">
+              <button 
+                disabled={currentPage >= totalPages - 1} 
+                onClick={() => setCurrentPage(prev => prev + 1)} 
+                className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
+              >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
@@ -465,7 +524,19 @@ const Ventas: React.FC = () => {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Cliente asociado</label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input type="text" placeholder="Buscar cliente..." className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 text-sm font-medium" value={clientSearch} onChange={(e) => { setClientSearch(e.target.value); if (selectedClient) setSelectedClient(null); }} />
+                <input 
+                  type="text" 
+                  placeholder={isExchangeMode ? "Cliente bloqueado en modo cambio" : "Buscar cliente..."} 
+                  disabled={isExchangeMode} 
+                  className={`w-full pl-12 pr-4 py-4 border-none rounded-2xl focus:outline-none text-sm font-medium ${
+                    isExchangeMode ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-slate-50 focus:ring-4 focus:ring-indigo-500/10'
+                  }`} 
+                  value={clientSearch} 
+                  onChange={(e) => { 
+                    setClientSearch(e.target.value); 
+                    if (selectedClient) setSelectedClient(null); 
+                  }} 
+                />
                 {clientesSugeridos.length > 0 && !selectedClient && (
                   <div className="absolute top-full left-0 w-full bg-white mt-2 rounded-2xl shadow-2xl border border-slate-100 z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     {clientesSugeridos.map(c => (
@@ -480,7 +551,14 @@ const Ventas: React.FC = () => {
               {selectedClient && (
                 <div className={`p-5 rounded-3xl border-l-4 animate-in slide-in-from-right-2 flex justify-between items-center ${selectedClient.categoriaCliente === 'CONFIABLE' ? 'bg-emerald-50 border-emerald-500' : 'bg-rose-50 border-rose-500'}`}>
                   <div><p className="text-lg font-bold text-slate-900 leading-none">{selectedClient.nombre} {selectedClient.apellido}</p><p className="text-[10px] font-black text-slate-500 mt-1.5 uppercase tracking-widest">{selectedClient.categoriaCliente}</p></div>
-                  <button onClick={() => { setSelectedClient(null); setClientSearch(''); }} className="text-slate-300 hover:text-rose-500"><X className="w-5 h-5"/></button>
+                  {!isExchangeMode && (
+                    <button 
+                      onClick={() => { setSelectedClient(null); setClientSearch(''); }} 
+                      className="text-slate-300 hover:text-rose-500 transition-colors"
+                    >
+                      <X className="w-5 h-5"/>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -530,20 +608,32 @@ const Ventas: React.FC = () => {
           <button onClick={() => setView('LIST')} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold text-sm transition-colors"><ArrowLeft className="w-4 h-4" /> Volver al Historial</button>
           
           <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-10 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Detalle de operación</p>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${ESTADOS_VENTA[selectedVenta.estadoNombre]?.color || 'bg-slate-100'}`}>{ESTADOS_VENTA[selectedVenta.estadoNombre]?.label || selectedVenta.estadoNombre}</span>
-                </div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{selectedVenta.cliente?.nombre || 'Consumidor Final'} {selectedVenta.cliente?.apellido || ''}</h2>
-                <div className="flex items-center gap-4 mt-2"><p className="text-sm font-medium text-slate-400 flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> {selectedVenta.id}</p><p className="text-sm font-medium text-slate-400 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(selectedVenta.fecha).toLocaleDateString('es-AR')}</p></div>
+          <div className="p-10 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Detalle de operación</p>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${ESTADOS_VENTA[selectedVenta.estadoNombre]?.color || 'bg-slate-100'}`}>
+                  {ESTADOS_VENTA[selectedVenta.estadoNombre]?.label || selectedVenta.estadoNombre}
+                </span>
               </div>
-              <div className="text-right">
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-widest">Monto total</p>
-                <p className="text-4xl font-bold text-slate-900 tracking-tight leading-none">${selectedVenta.total.toLocaleString()}</p>
+              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">{selectedVenta.cliente?.nombre || 'Consumidor Final'} {selectedVenta.cliente?.apellido || ''}</h2>
+              
+              <div className="flex items-center gap-4 mt-2">
+                <p className="text-sm font-medium text-slate-400 flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> {selectedVenta.id}</p>
+                <p className="text-sm font-medium text-slate-400 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(selectedVenta.fecha).toLocaleDateString('es-AR')}</p>
+                
+                {/* MÉTODO DE PAGO: Siempre visible */}
+                <p className="text-sm font-bold text-slate-500 flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-sm">
+                  <CreditCard className="w-3.5 h-3.5 text-indigo-500" /> 
+                  {selectedVenta.metodoPago ? selectedVenta.metodoPago.replace('_', ' ') : 'Pendiente de cobro'}
+                </p>
               </div>
             </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-widest">Monto total</p>
+              <p className="text-4xl font-bold text-slate-900 tracking-tight leading-none">${selectedVenta.total.toLocaleString()}</p>
+            </div>
+          </div>
 
             <div className="flex border-b border-slate-100 px-10">
               <button onClick={() => setActiveTab('DETAILS')} className={`py-4 text-sm font-bold mr-8 border-b-2 transition-all ${activeTab === 'DETAILS' ? 'text-indigo-600 border-indigo-600' : 'text-slate-400 border-transparent'}`}>Productos</button>
@@ -554,7 +644,7 @@ const Ventas: React.FC = () => {
               {activeTab === 'DETAILS' ? (
                 <div className="space-y-4">
                   {selectedVenta.detalles?.map((d: any, i: number) => (
-                    <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[30px] border border-slate-100 transition-all hover:bg-white hover:shadow-md">
+                    <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[30px] border border-slate-100 transition-all">
                       <div className="flex items-center gap-5">
                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-indigo-500 border border-slate-100 shadow-sm"><Package className="w-7 h-7" /></div>
                         <div>
@@ -741,7 +831,7 @@ const Ventas: React.FC = () => {
           <input 
             type="number" 
             autoFocus
-            placeholder="0.00"
+            placeholder="0,00"
             className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-100 rounded-[24px] text-2xl font-black text-slate-900 outline-none focus:border-emerald-500 transition-all shadow-inner"
             value={montoReserva}
             onChange={(e) => setMontoReserva(e.target.value)}
@@ -757,10 +847,17 @@ const Ventas: React.FC = () => {
             </span> se sumará a la deuda del cliente.
           </p>
           
-          {/* Alerta visual si el monto ingresado es menor al mínimo requerido */}
+          {/* Alerta 1: Monto ingresado es menor al mínimo requerido */}
           {montoReserva && parseFloat(montoReserva) < (lastCreatedVenta?.pagoMinimoParaCredito || 0) && (
             <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> El monto es menor al pago mínimo requerido.
+            </p>
+          )}
+
+          {/* Alerta 2: Monto mayor al total (Nueva) */}
+          {montoReserva && parseFloat(montoReserva) > totalFinal && (
+            <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> El monto no puede superar el total de ${totalFinal.toLocaleString()}
             </p>
           )}
         </div>
@@ -777,7 +874,11 @@ const Ventas: React.FC = () => {
           {isComingFromDetail ? 'Cerrar' : 'Atrás'}
         </button>
         <button 
-          disabled={!montoReserva || parseFloat(montoReserva) < (lastCreatedVenta?.pagoMinimoParaCredito || 0)}
+          disabled={
+            !montoReserva || 
+            parseFloat(montoReserva) < (lastCreatedVenta?.pagoMinimoParaCredito || 0) ||
+            parseFloat(montoReserva) > totalFinal
+          }
           onClick={handleConfirmarReserva}
           className="flex-[2] py-5 bg-indigo-600 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
         >
@@ -823,6 +924,23 @@ const Ventas: React.FC = () => {
             >
               {isComingFromDetail ? 'Cerrar' : 'Cancelar'}
             </button>
+          </div>
+        </div>
+      )}
+      
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl p-10 space-y-6 animate-in zoom-in duration-300">
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[30px] mx-auto flex items-center justify-center">
+                <CheckSquare className="w-10 h-10" />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-2xl font-bold text-slate-900 tracking-tight">¡Excelente!</h4>
+                <p className="text-slate-500 text-sm whitespace-pre-line leading-relaxed">{successMessage}</p>
+              </div>
+            </div>
+            <button onClick={() => setShowSuccessModal(false)} className="w-full py-4 bg-slate-900 text-white rounded-[20px] font-bold text-sm uppercase tracking-widest hover:bg-black active:scale-95 shadow-xl shadow-slate-200">Entendido</button>
           </div>
         </div>
       )}

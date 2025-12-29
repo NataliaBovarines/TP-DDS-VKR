@@ -32,7 +32,6 @@ import com.yourapp.app.models.entities.Subcategoria;
 import com.yourapp.app.repositories.DetalleProductoRepository;
 import com.yourapp.app.repositories.ProductoRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;

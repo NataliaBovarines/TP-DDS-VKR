@@ -316,14 +316,20 @@ const Clientes = () => {
           <button 
             disabled={currentPage === 0} 
             onClick={() => setCurrentPage(prev => prev - 1)} 
-            className="p-2 border border-slate-200 bg-white rounded-xl shadow-sm transition-all disabled:opacity-30"
+            className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button 
             disabled={currentPage >= totalPages - 1} 
             onClick={() => setCurrentPage(prev => prev + 1)} 
-            className="p-2 border border-slate-200 bg-white rounded-xl shadow-sm transition-all disabled:opacity-30"
+            className="p-2 border border-slate-200 bg-white text-slate-400 rounded-xl shadow-sm transition-all 
+                 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50
+                 active:scale-90 active:bg-indigo-100
+                 disabled:opacity-30 disabled:hover:border-slate-200 disabled:hover:text-slate-400 disabled:hover:bg-white disabled:active:scale-100"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -358,7 +364,9 @@ const Clientes = () => {
               {/* Nombre y Apellido en Grilla */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Nombre</label>
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Nombre <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     placeholder="Ej: Juan"
                     value={clienteForm.nombre}
@@ -367,7 +375,9 @@ const Clientes = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Apellido</label>
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Apellido <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     placeholder="Ej: Pérez"
                     value={clienteForm.apellido}
@@ -380,7 +390,9 @@ const Clientes = () => {
               {/* Teléfono y DNI en Grilla */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Teléfono</label>
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    Teléfono <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     placeholder="Ej: 1122334455"
                     value={clienteForm.telefono}
@@ -389,7 +401,9 @@ const Clientes = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">DNI</label>
+                  <label className="text-xs font-bold text-slate-400 ml-1 uppercase">
+                    DNI <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     placeholder="Ej: 40123456"
                     value={clienteForm.dni}
@@ -399,13 +413,13 @@ const Clientes = () => {
                 </div>
               </div>
 
-              {/* Límite de Crédito y Categoría */}
+              {/* Límite de Crédito y Categoría (Sin asterisco) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-400 ml-1 uppercase">Límite de Crédito ($)</label>
                   <input
                     type="number"
-                    placeholder="0.0"
+                    placeholder="0,00"
                     value={clienteForm.creditoLimite}
                     onChange={(e) => setClienteForm({ ...clienteForm, creditoLimite: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-bold text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none"
@@ -435,10 +449,11 @@ const Clientes = () => {
               </button>
               <button
                 onClick={handleGuardarCliente}
-                className="flex-[2] py-4 bg-indigo-600 text-white rounded-[20px] font-bold text-sm tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
+                disabled={!clienteForm.nombre || !clienteForm.apellido || !clienteForm.telefono || !clienteForm.dni}
+                className="flex-[2] py-4 bg-indigo-600 text-white rounded-[20px] font-bold text-sm tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
               >
                 <Save className="w-4 h-4" />
-                Guardar Cliente
+                Guardar cliente
               </button>
             </div>
           </div>

@@ -23,7 +23,6 @@ public class VentaPagada extends VentaState {
         if (motivo == null || motivo.trim().isEmpty()) throw new BadRequestException("Motivo de cancelación requerido");
 
         venta.getDetalles().forEach(DetalleVenta::aumentarStock);
-        venta.setMontoPagado(0.0);
 
         System.out.println("Venta pagada cancelada. Motivo: " + motivo);
     }

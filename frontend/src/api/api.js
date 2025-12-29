@@ -24,30 +24,24 @@ api.interceptors.request.use(
 
 // --- INTERCEPTOR DE RESPONSE ---
 // Se ejecuta CUANDO llega la respuesta, ANTES de que llegue a tu componente
+// --- INTERCEPTOR DE RESPONSE ---
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const serverResponse = error.response?.data;
-
     const status = serverResponse?.status || error.response?.status;
     const mensaje = serverResponse?.message || "Ocurrió un error inesperado";
-    const path = serverResponse?.path || "Ruta desconocida";
-    const errorTipo = serverResponse?.error || "Error";
 
-    // Logica especial para sesion expirada (401)
-    if (status === 401) {
-      const urlOriginal = error.config.url;
-      // Solo redirigimos si el error NO viene del intento de login
-      if (!urlOriginal.includes(ENDPOINTS.AUTH.LOGIN)) {
-        localStorage.removeItem("token");
-        window.location.href = "/#/login";
-        return Promise.reject(error);
-      }
+    if (status === 401 && !error.config.url.includes(ENDPOINTS.AUTH.LOGIN)) {
+      localStorage.removeItem("token");
+      window.location.href = "/#/login";
+      return Promise.reject(error);
     }
 
-    // Feedback generico para el usuario
-    console.error(`[${status}] Error en ${path} (${errorTipo}): ${mensaje}`);
-    alert(mensaje);
+    const apiErrorEvent = new CustomEvent("api-error-alert", { 
+      detail: { mensaje, status } 
+    });
+    window.dispatchEvent(apiErrorEvent);
 
     return Promise.reject(error);
   }
