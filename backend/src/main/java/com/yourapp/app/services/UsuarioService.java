@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.yourapp.app.models.entities.adapters.AdapterEmail;
 
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -27,6 +30,14 @@ public class UsuarioService {
     private final RolService rolService;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioMapper usuarioMapper;
+    private final AdapterEmail adapterEmail;
+
+    // URL del frontend donde el usuario completará el reseteo (puede ajustarse en application.properties)
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
+    @Value("${app.notification.email.from:notifications@yourapp.local}")
+    private String mailFrom;
 
     // ============================ CREAR UN USUARIO ============================
     @Transactional
@@ -144,8 +155,25 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
 
-        // ---------------------------------- TODO 
-        // ENVIAR EL MAIL CON EL LINK DE RECUPERACION (ESE LINK CONTIENE EL TOKEN)
+        // ---------------------------------- ENVIAR EL MAIL CON EL LINK DE RECUPERACION (ESE LINK CONTIENE EL TOKEN)
+        try {
+            String email = usuario.getEmpleado() != null ? usuario.getEmpleado().getEmail() : null;
+            if (email == null || email.isBlank()) return; // si no hay mail, no hacemos nada
+
+            String resetLink = frontendUrl + "/#/reset?token=" + tokenPlano;
+
+            String body = "Hola,\n\n" +
+                          "Recibimos una solicitud para restablecer la contraseña de tu cuenta. " +
+                          "Haz clic en el siguiente enlace para continuar (válido 15 minutos):\n\n" +
+                          resetLink + "\n\n" +
+                          "Si no solicitaste este cambio, puedes ignorar este correo.\n\n" +
+                          "Saludos,\nEl equipo";
+
+            adapterEmail.notificar(body, email);
+        } catch (Exception e) {
+            // No queremos que un error de envío bloque el flujo de recuperación, lo registramos y seguimos
+            System.err.println("Error enviando email de recuperación: " + e.getMessage());
+        }
     }
 
     // ============================ CAMBIAR CONTRASEÑA DE UN USUARIO (CON TOKEN) ============================

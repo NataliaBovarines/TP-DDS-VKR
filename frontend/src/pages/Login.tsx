@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
@@ -95,7 +94,13 @@ const Login: React.FC = () => {
             </button>
 
             <div className="text-center">
-              <a href="#" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors">¿Olvidaste tu contraseña?</a>
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-transparent"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
             </div>
           </form>
         </div>

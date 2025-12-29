@@ -50,6 +50,23 @@ dist
 dist-ssr
 *.local
 
+
+coverage/
+lerna-debug.log*
+npm-debug.log*
+# Logs and temp
+
+.env.production.local
+.env.test.local
+.env.development.local
+.env.local
+# Local env files commonly used by tools
+
+**/*.env
+**/.env
+*.env
+.env
+# Environment files (notar: incluya .env en raíz y subcarpetas si se crean)
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

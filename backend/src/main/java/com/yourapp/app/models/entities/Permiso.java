@@ -16,7 +16,7 @@ public enum Permiso {
     COLOR_ELIMINAR("Eliminar un color"),
 
     // --------- CONFIGURACION ----------
-    // CONFIGURACION_VER("Ver la configuracion de la tienda"),
+    //CONFIGURACION_VER("Ver la configuracion de la tienda"),
     CONFIGURACION_EDITAR("Editar la configuracion de la tienda"),
 
     // --------- EMPLEADO ----------

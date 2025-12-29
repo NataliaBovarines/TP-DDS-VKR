@@ -29,9 +29,23 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login", "/auth/recuperar-contrasenia", "/auth/resetear-contrasenia").permitAll()
-                .anyRequest().authenticated()
+            .authorizeHttpRequests(auth -> {
+                        auth
+                                .requestMatchers(
+                                        "/auth/login",
+                                        "/auth/recuperar-contrasenia",
+                                        "/auth/resetear-contrasenia",
+                                        "/v3/api-docs/**",
+                                        "/v3/api-docs.yaml",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/api/auth/**",
+                                        "/favicon.ico",
+                                        "/swagger-ui/index.html",
+                                        "/swagger-resources/**"
+                                ).permitAll()
+                                .anyRequest().authenticated();
+                    }
             )
             .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -48,7 +62,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "OPTIONS"));
 
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        
+
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

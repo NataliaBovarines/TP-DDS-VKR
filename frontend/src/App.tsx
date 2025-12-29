@@ -8,10 +8,12 @@ import Productos from './pages/Productos';
 import Empleados from './pages/Empleados';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
-import Usuario from './pages/Usuario';
+import { Usuario } from './pages/Usuario';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider, useAuth } from './context/AuthContext.js';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import GlobalErrorModal from './components/GlobalErrorModal';
 import ForcePasswordChangeModal from './components/ForcePasswordChangeModal';
 
@@ -29,6 +31,9 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Ruta pública */}
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset" element={<ResetPassword />} />
 
         {/* Rutas privadas envueltas */}
         <Route
@@ -45,7 +50,7 @@ const AppRoutes: React.FC = () => {
                   <Route path="/clientes" element={<Clientes />} />
                   <Route path="/configuracion" element={<Configuracion />} />
                   <Route path="/usuario" element={<Usuario />} />
-                  
+
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>

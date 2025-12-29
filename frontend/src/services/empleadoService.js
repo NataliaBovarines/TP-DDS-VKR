@@ -75,6 +75,30 @@ const EmpleadoService = {
   eliminarEmpleado: async (id) => {
     await api.patch(ENDPOINTS.EMPLEADOS.ELIMINAR(id));
   },
+
+  // =======================
+  // Obtener preferencias de notificación de un empleado
+  // GET /empleados/{id}/preferencias-notificacion
+  // =======================
+  getPreferencias: async (empleadoId) => {
+    const { data } = await api.get(`${ENDPOINTS.EMPLEADOS.POR_ID(empleadoId)}/preferencias-notificacion`);
+    return data;
+  },
+
+  // =======================
+  // POST /empleados/{id}/preferencias-notificacion?medioNombre=EMAIL&habilitado=true
+  // Crea o actualiza la preferencia para el empleado y medio
+  // =======================
+  setPreferencia: async (empleadoId, medioNombre, habilitado) => {
+    // Se usan query params según el controller del backend
+    const { data } = await api.post(`${ENDPOINTS.EMPLEADOS.POR_ID(empleadoId)}/preferencias-notificacion`, null, {
+      params: {
+        medioNombre,
+        habilitado
+      }
+    });
+    return data;
+  },
 };
 
 export default EmpleadoService;

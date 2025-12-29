@@ -1,5 +1,9 @@
 package com.yourapp.app.models.entities.adapters;
 
 public interface AdapterEmail {
-    public void notificar(String mensaje, String contacto);
+    /**
+     * @param mensaje El cuerpo del correo
+     * @param contacto La dirección de email del destinatario
+     */
+    void notificar(String mensaje, String contacto);
 }
