@@ -1,0 +1,26 @@
+services:
+  # CONFIGURACIÓN DEL BACKEND (Spring Boot)
+  - type: web
+    name: backend-vkr
+    env: java
+    rootDir: backend # <--- Asegurate que este sea el nombre de tu carpeta
+    buildCommand: ./mvnw clean install -DskipTests
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Acá podés agregar las keys de tu DB si usas una externa
+      - key: DATABASE_URL
+        value: postgres://... 
+
+  # CONFIGURACIÓN DEL FRONTEND (React + Vite/Tailwind)
+  - type: static
+    name: frontend-vkr
+    env: static
+    rootDir: frontend # <--- Asegurate que este sea el nombre de tu carpeta
+    buildCommand: npm install && npm run build
+    publishPath: dist # <--- dist si es Vite, build si es Create React App
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html # Esto es clave para que no de error 404 al recargar

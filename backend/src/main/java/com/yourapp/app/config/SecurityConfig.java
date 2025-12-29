@@ -43,7 +43,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); 
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://vkr-shop.netlify.app")); 
  
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "OPTIONS"));
 
