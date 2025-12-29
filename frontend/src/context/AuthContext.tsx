@@ -26,6 +26,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(window.atob(base64));
+
+      if (payload.primerLogin === true) {
+        setUser({ ...payload, primerLogin: true });
+        setLoading(false);
+        return;
+      }
+
       const userData = await AuthService.getMe();
       setUser(userData);
 

@@ -49,6 +49,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     const fetchConfig = async () => {
+      if (user?.primerLogin) return;
+
       try {
         const data = await ConfiguracionService.getConfiguracion();
         setConfig(data);
@@ -64,7 +66,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return () => {
       window.removeEventListener('configUpdated', fetchConfig);
     };
-  }, []);
+  }, [user?.primerLogin]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">

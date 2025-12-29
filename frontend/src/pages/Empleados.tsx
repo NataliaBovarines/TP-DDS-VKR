@@ -134,7 +134,7 @@ const Empleados: React.FC = () => {
       setActiveModal(null);
       fetchEmpleados();
     } catch (error) {
-      alert("Error al procesar la solicitud");
+      console.error("Error al procesar la solicitud");
     }
   };
 
@@ -150,14 +150,14 @@ const Empleados: React.FC = () => {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Gestión de Personal</h2>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Gestión de personal</h2>
           <p className="text-slate-500 font-medium mt-1">Administración de colaboradores y accesos</p>
         </div>
         <button
           onClick={abrirCrear}
           className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-sm shadow-xl shadow-indigo-100 flex items-center gap-2 hover:bg-indigo-700 transition-all active:scale-95"
         >
-          <UserPlus className="w-5 h-5" /> Nuevo Colaborador
+          <UserPlus className="w-5 h-5" /> Nuevo colaborador
         </button>
       </div>
 

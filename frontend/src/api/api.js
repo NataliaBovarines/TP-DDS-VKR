@@ -32,7 +32,9 @@ api.interceptors.response.use(
     const status = serverResponse?.status || error.response?.status;
     const mensaje = serverResponse?.message || "Ocurrió un error inesperado";
 
-    if (status === 401 && !error.config.url.includes(ENDPOINTS.AUTH.LOGIN)) {
+    const esCambioClaveObligatorio = mensaje.includes("cambiar su contraseña inicial");
+
+    if (status === 401 && !error.config.url.includes(ENDPOINTS.AUTH.LOGIN) && !esCambioClaveObligatorio) {
       localStorage.removeItem("token");
       window.location.href = "/#/login";
       return Promise.reject(error);
