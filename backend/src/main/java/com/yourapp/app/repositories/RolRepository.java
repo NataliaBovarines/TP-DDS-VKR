@@ -9,4 +9,6 @@ public interface RolRepository extends JpaRepository<Rol, Long> {
     boolean existsByNombreAndFueEliminadoFalse(String nombre);
 
     List<Rol> findByFueEliminadoFalse();
+
+    Optional<Rol> findByNombre(String nombre);
 }
