@@ -173,6 +173,23 @@ const VentaService = {
   eliminarVenta: async (id) => {
     await api.patch(ENDPOINTS.VENTAS.ELIMINAR(id));
   },
+
+  // =======================
+  // GET /ventas/ingresos-mes
+  // =======================
+  ventasMes: async () => {
+    const { data } = await api.get(ENDPOINTS.VENTAS.VENTAS_MES);
+    return data.total;
+  },
+
+  // =======================
+  // GET /ventas/ingresos-semana
+  // =======================
+  ventasSemana: async () => {
+    const { data } = await api.get(ENDPOINTS.VENTAS.VENTAS_SEMANALES);
+    return data;
+  },
+
 };
 
 export default VentaService;

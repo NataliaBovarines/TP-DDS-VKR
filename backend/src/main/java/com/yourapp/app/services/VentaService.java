@@ -7,6 +7,7 @@ import com.yourapp.app.mappers.VentaMapper;
 import com.yourapp.app.models.dto.venta.DetalleVentaCreateRequest;
 import com.yourapp.app.models.dto.venta.VentaUpdateRequest;
 import com.yourapp.app.models.dto.venta.VentaCreateRequest;
+import com.yourapp.app.models.dto.venta.VentaDiariaResponse;
 import com.yourapp.app.models.dto.venta.VentaQuery;
 import com.yourapp.app.models.dto.venta.VentaMotivoRequest;
 import com.yourapp.app.models.dto.venta.VentaPagoRequest;
@@ -321,4 +322,23 @@ public class VentaService {
         
         return ventas.map(ventaMapper::toResponse);
     }
-}
+
+    public Double obtenerMetricasDashboard() {
+        // Calculamos el primer día del mes actual a las 00:00
+        LocalDateTime inicioMes = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+
+        // 1. Suma de dinero del mes (solo pagadas)
+        Double ingresosMes = ventaRepository.sumarTotalVentasDesde("VentaPagada", inicioMes);
+        if (ingresosMes == null) ingresosMes = 0.0; 
+
+        return ingresosMes;
+    }
+
+    public List<VentaDiariaResponse> obtenerVentasMensuales() {
+        LocalDateTime inicioMes = LocalDateTime.now()
+                .withDayOfMonth(1)
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+        return ventaRepository.obtenerVentasMensuales(inicioMes);
+    }
+};

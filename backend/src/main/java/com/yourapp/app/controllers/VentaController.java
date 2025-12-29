@@ -1,7 +1,11 @@
 package com.yourapp.app.controllers;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yourapp.app.models.dto.venta.VentaUpdateRequest;
 import com.yourapp.app.models.dto.venta.VentaCreateRequest;
+import com.yourapp.app.models.dto.venta.VentaDiariaResponse;
 import com.yourapp.app.models.dto.venta.VentaQuery;
 import com.yourapp.app.models.dto.venta.VentaMotivoRequest;
 import com.yourapp.app.models.dto.venta.VentaPagoRequest;
@@ -106,5 +111,16 @@ public class VentaController {
     @PreAuthorize("hasAuthority('VENTA_VER')")
     public Page<VentaResponse> obtenerVentasFiltradas(@Valid @ModelAttribute VentaQuery filtros) {
         return ventaService.obtenerVentasFiltradas(filtros);
+    }
+
+    @GetMapping("/ingresos-mes")
+    public ResponseEntity<?> getIngresosMes() {
+        Double total = ventaService.obtenerMetricasDashboard();
+        return ResponseEntity.ok(Collections.singletonMap("total", total));
+    }
+
+    @GetMapping("/ingresos-semana")
+    public ResponseEntity<List<VentaDiariaResponse>> getVentasMensuales() {
+        return ResponseEntity.ok(ventaService.obtenerVentasMensuales());
     }
 }

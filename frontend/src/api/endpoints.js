@@ -95,5 +95,7 @@ export const ENDPOINTS = {
     ELIMINAR: (id) => `/ventas/${id}/eliminacion`,
     CAMBIO_PRODUCTO: (id) => `/ventas/${id}/cambio`,
     PROCESAR_VENCIDAS: "/ventas/reservas-vencidas",
+    VENTAS_MES: "/ventas/ingresos-mes",
+    VENTAS_SEMANALES: "/ventas/ingresos-semana",
   },
 };
