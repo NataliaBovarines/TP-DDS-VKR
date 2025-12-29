@@ -285,10 +285,16 @@ public class VentaService {
         }
 
         // Filtrar por cliente
-        if (filtros.getClienteId() != null) {
-            spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("cliente").get("id"), filtros.getClienteId())
-            );
+        if (filtros.getCliente() != null && !filtros.getCliente().trim().isEmpty()) {
+            String match = "%" + filtros.getCliente().toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> {
+                var cliente = root.join("cliente");
+                return cb.or(
+                    cb.like(cb.lower(cliente.get("nombre")), match),
+                    cb.like(cb.lower(cliente.get("apellido")), match),
+                    cb.like(cb.lower(cliente.get("dni")), match)
+                );
+            });
         }
 
         // Filtrar por método de pago

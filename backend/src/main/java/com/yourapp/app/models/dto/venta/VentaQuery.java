@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter @Setter
 public class VentaQuery {
     private Long empleadoId;
-    private Long clienteId;
+    private String cliente;
     private MetodoPago metodoPago;
     private String estado; // nombre de la clase
     private String orden;

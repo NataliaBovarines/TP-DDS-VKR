@@ -24,6 +24,7 @@ public interface DetalleProductoMapper {
     DetalleProductoResponse toResponse(DetalleProducto entity);
 
     @Mapping(target = "productoNombre", source = "producto.nombre")
+    @Mapping(target = "productoPrecio", source = "producto.precio")
     @Mapping(target = "talleNombre", source = "talle.descripcion")
     @Mapping(target = "colorNombre", source = "color.descripcion")
     DetalleProductoVentaResponse toDetalleResponse(DetalleProducto entity);

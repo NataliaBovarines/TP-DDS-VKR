@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yourapp.app.models.dto.producto.DetalleProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.DetalleProductoResponse;
 import com.yourapp.app.models.dto.producto.DetalleProductoUpdateRequest;
+import com.yourapp.app.models.dto.producto.DetalleProductoVentaResponse;
 import com.yourapp.app.models.dto.producto.ProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.ProductoQuery;
 import com.yourapp.app.models.dto.producto.ProductoResponse;
@@ -50,6 +51,13 @@ public class ProductoController {
     @PreAuthorize("hasAuthority('PRODUCTO_VER')")
     public ProductoResponse obtenerProducto(@PathVariable Long id) {
         return productoService.obtenerProducto(id);
+    }
+
+    @GetMapping("/detalles/{codigo}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('PRODUCTO_VER')")
+    public DetalleProductoVentaResponse obtenerProductoByCodigo(@PathVariable String codigo) {
+        return productoService.obtenerProductoByCodigo(codigo);
     }
 
     @PatchMapping("/{id}")

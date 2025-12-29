@@ -154,7 +154,9 @@ return (
               <div>
                 <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">Ficha de Reserva</p>
                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
-                  {selectedReserva.cliente?.nombre || `Cliente #${selectedReserva.id}`}
+                  {selectedReserva.cliente?.nombre 
+                    ? `${selectedReserva.cliente.nombre} ${selectedReserva.cliente.apellido || ''}`
+                    : `Cliente #${selectedReserva.id}`}
                 </h2>
                 <div className="flex items-center gap-4 mt-2">
                   <span className="text-sm font-medium text-slate-400 flex items-center gap-1.5"><Hash className="w-3.5 h-3.5" /> {selectedReserva.id}</span>
@@ -186,6 +188,7 @@ return (
                           <div className="flex items-center gap-3 mt-1">
                              <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-2 py-0.5 rounded border"><Tag className="w-3 h-3" /> Código: {d.detalleProducto?.codigo || "S/C"}</span>
                              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Cantidad: {d.cantidad || 0}</span>
+                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Precio unitario: ${d.precioUnitarioActual.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>

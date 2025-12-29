@@ -131,6 +131,9 @@ const Configuracion: React.FC = () => {
         porcentajeMinimoSena: generalConfig.porcentajeMinimoSena / 100
       };
       await ConfiguracionService.actualizarConfiguracion(payload);
+    
+      window.dispatchEvent(new Event('configUpdated'));
+
       setSuccessMessage("Los datos del negocio se actualizaron correctamente.");
       setShowSuccessModal(true);
     } catch (error) {

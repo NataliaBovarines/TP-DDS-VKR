@@ -44,6 +44,7 @@ export const ENDPOINTS = {
   PRODUCTOS: {
     BASE: "/productos",
     POR_ID: (id) => `/productos/${id}`,
+    POR_CODIGO: (codigo) => `/productos/detalles/${codigo}`,
     ELIMINAR: (id) => `/productos/${id}/eliminacion`,
     DETALLES: {
       CREAR: (id) => `/productos/${id}/detalles`,

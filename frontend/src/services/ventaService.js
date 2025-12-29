@@ -9,6 +9,10 @@ const VentaService = {
     //     private Long clienteId;
     //     private List<DetalleVentaCreateRequest> detalles;
     // }
+    // public class DetalleVentaCreateRequest {
+    //     private String codigo; 
+    //     private Integer cantidad;
+    // }
   crearVenta: async (payload) => {
     const { data } = await api.post(ENDPOINTS.VENTAS.BASE, payload);
     return data;
@@ -51,6 +55,41 @@ const VentaService = {
     //     private LocalDateTime fechaVencimientoReserva;
     //     private List<PagoDeCreditoResponse> pagosCredito;
     //     private List<DetalleVentaResponse> detalles;
+    // }
+    // public class EmpleadoResponse {
+    //     private Long id;
+    //     private String nombre;
+    //     private String apellido;
+    //     private String dni;
+    //     private String direccion;
+    //     private String mail;
+    //     private String telefono;
+    //     private UsuarioResponse usuario;
+    // }
+    // public class ClienteResponse {
+    //     private Long id;
+    //     private String nombre;
+    //     private String apellido;
+    //     private String telefono;
+    //     private String dni;
+    //     private Double creditoLimite;
+    //     private Double deuda;
+    //     private Double creditoDisponible;
+    //     private CategoriaCliente categoriaCliente;
+    // }
+    // public class DetalleVentaResponse {
+    //     private Long id;
+    //     private DetalleProductoVentaResponse detalleProducto;
+    //     private Double precioUnitarioActual;
+    //     private Integer cantidad;
+    //     private Double precioTotalUnitario;
+    // }
+    // public class PagoDeCreditoResponse {
+    //     private Long id;
+    //     private Double monto;
+    //     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    //     private LocalDateTime fecha;
+    //     private Integer numeroPago;
     // }
   getVentaById: async (id) => {
     const { data } = await api.get(ENDPOINTS.VENTAS.POR_ID(id));

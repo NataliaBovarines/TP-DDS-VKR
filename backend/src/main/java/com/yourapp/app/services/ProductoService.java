@@ -18,6 +18,7 @@ import com.yourapp.app.mappers.ProductoMapper;
 import com.yourapp.app.models.dto.producto.DetalleProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.DetalleProductoResponse;
 import com.yourapp.app.models.dto.producto.DetalleProductoUpdateRequest;
+import com.yourapp.app.models.dto.producto.DetalleProductoVentaResponse;
 import com.yourapp.app.models.dto.producto.ProductoCreateRequest;
 import com.yourapp.app.models.dto.producto.ProductoQuery;
 import com.yourapp.app.models.dto.producto.ProductoResponse;
@@ -31,6 +32,7 @@ import com.yourapp.app.models.entities.Subcategoria;
 import com.yourapp.app.repositories.DetalleProductoRepository;
 import com.yourapp.app.repositories.ProductoRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
@@ -94,6 +96,13 @@ public class ProductoService {
     // ============================ OBTENER UN PRODUCTO POR ID ============================
     public ProductoResponse obtenerProducto(Long productoId) {
         return productoMapper.toResponse(obtenerEntidad(productoId));
+    }
+
+    // ============================ OBTENER UN PRODUCTO POR CÓDIGO ============================
+    public DetalleProductoVentaResponse obtenerProductoByCodigo(String codigo) {
+        DetalleProducto detalle = obtenerDetalleByCodigo(codigo);
+
+        return detalleProductoMapper.toDetalleResponse(detalle);
     }
 
     // ============================ OBTENER PRODUCTO (ENTIDAD) ============================

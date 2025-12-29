@@ -36,6 +36,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Empleados', path: '/empleados', icon: Users, permiso: 'EMPLEADO_VER' },
   ];
 
+  const itemsVisibles = menuItems.filter(item => 
+    !item.permiso || tienePermiso(item.permiso)
+  );
+
   // Cerrar menú móvil al cambiar de ruta
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -52,7 +56,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         console.error("Error al obtener datos de la empresa", error);
       }
     };
+
     fetchConfig();
+    
+    window.addEventListener('configUpdated', fetchConfig);
+
+    return () => {
+      window.removeEventListener('configUpdated', fetchConfig);
+    };
   }, []);
 
   return (
@@ -75,8 +86,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-2">
-              {menuItems
-              .filter(item => tienePermiso(item.permiso))
+              {itemsVisibles
               .map((item) => (
                 <NavLink
                   key={item.path}
@@ -96,11 +106,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="flex items-center gap-4 sm:gap-8">
             {tienePermiso("VENTA_CREAR") && (
               <button 
-                onClick={() => navigate('/ventas', { state: { view: 'POS' } })}
+                onClick={() => navigate('/ventas', { state: { view: 'POS' }, replace: true })}
                 className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 sm:px-7 py-3 rounded-xl text-base font-bold flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95"
               >
                 <PlusCircle className="w-5 h-5" />
-                <span>Nueva Venta</span>
+                <span>Nueva venta</span>
               </button>
             )}
             <div className="flex items-center gap-3 sm:gap-5">
@@ -174,8 +184,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
 
             <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
-              {menuItems
-              .filter(item => tienePermiso(item.permiso))
+              {itemsVisibles
               .map((item) => (
                 <NavLink
                   key={item.path}

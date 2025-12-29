@@ -73,6 +73,23 @@ const ProductoService = {
     return data;
   },
 
+  
+  // =======================
+  // GET /productos/{codigo}
+  // =======================
+    // public class DetalleProductoVentaResponse {
+    //     private Long id;
+    //     private String codigo;
+    //     private String productoNombre;
+    //     private String productoPrecio;
+    //     private String talleNombre;
+    //     private String colorNombre;
+    // }
+  getProductoByCodigo: async (codigo) => {
+    const { data } = await api.get(ENDPOINTS.PRODUCTOS.POR_CODIGO(codigo));
+    return data;
+  },
+
   // =======================
   // PATCH /productos/{id}
   // =======================
