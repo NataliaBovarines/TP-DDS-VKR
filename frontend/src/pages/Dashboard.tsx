@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
           {/* STAT CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard 
-              title="Ingresos confirmados" 
+              title="Ingresos del mes" 
               value={`$${stats.ventasMes.toLocaleString()}`} 
               icon={TrendingUp} 
               color="bg-emerald-500" 
