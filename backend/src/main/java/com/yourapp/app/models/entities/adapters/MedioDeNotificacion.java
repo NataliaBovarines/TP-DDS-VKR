@@ -4,4 +4,5 @@ import com.yourapp.app.models.entities.Empleado;
 
 public interface MedioDeNotificacion {
     public void notificar(String mensaje, Empleado Empleado);
+    String getNombreCanal();
 }

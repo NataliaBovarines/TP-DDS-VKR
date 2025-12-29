@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.js';
+import { useAuth } from '../context/AuthContext';
 import { UserCircle, Key, LogOut, Mail, ChevronRight, Save, ShieldCheck, MessageCircle, Bell, Loader2, Edit3, CheckSquare, AlertCircle } from 'lucide-react';
-import AuthService from '../services/authService.js';
-import EmpleadoService from '../services/empleadoService.js';
+import AuthService from '../services/authService';
+import EmpleadoService from '../services/empleadoService';
 
-const Usuario: React.FC = () => {
+export const Usuario: React.FC = () => {
     const { user, recargarSesion, loading: authLoading, logout } = useAuth();
 
     // Manejo de modales unificado
@@ -28,6 +27,7 @@ const Usuario: React.FC = () => {
         notifEmail: true,
         notifWhatsApp: false
     });
+    const [prefLoading, setPrefLoading] = useState(false);
 
     // Sincronizar formData cuando se abre un modal
     useEffect(() => {
@@ -42,6 +42,21 @@ const Usuario: React.FC = () => {
         if (activeModal === 'CHANGE_PASSWORD') {
             setFormData(prev => ({ ...prev, passActual: '', passNueva: '', passConfirmar: '' }));
         }
+        // Al abrir el modal NOTIFICATIONS, cargamos las preferencias del empleado logueado
+        if (activeModal === 'NOTIFICATIONS' && user?.empleadoId) {
+            setPrefLoading(true);
+            EmpleadoService.getPreferencias(user.empleadoId)
+                .then((prefs) => {
+                    // prefs es un array de EmpleadoNotificacionPreferencia
+                    const hasEmail = prefs.some(p => p.medioNotificacion?.nombre?.toUpperCase() === 'EMAIL' && p.estaHabilitado);
+                    const hasWhatsapp = prefs.some(p => p.medioNotificacion?.nombre?.toUpperCase() === 'WHATSAPP' && p.estaHabilitado);
+                    setFormData(prev => ({ ...prev, notifEmail: hasEmail, notifWhatsApp: hasWhatsapp }));
+                })
+                .catch((err) => {
+                    console.error('Error cargando preferencias', err);
+                })
+                .finally(() => setPrefLoading(false));
+        }
     }, [activeModal, user]);
 
     // Validar coincidencia de contraseñas en tiempo real
@@ -55,13 +70,13 @@ const Usuario: React.FC = () => {
 
     const handleUpdateProfile = async () => {
         try {
-            await EmpleadoService.actualizarEmpleado(user.empleadoId, { 
-                mail: formData.mail, 
-                telefono: formData.telefono 
+            await EmpleadoService.actualizarEmpleado(user.empleadoId, {
+                mail: formData.mail,
+                telefono: formData.telefono
             });
 
-            await recargarSesion(); 
-            
+            await recargarSesion();
+
             setActiveModal(null);
             setSuccessMessage("Tus datos de contacto han sido actualizados correctamente.");
             setShowSuccessModal(true);
@@ -84,7 +99,7 @@ const Usuario: React.FC = () => {
             setActiveModal(null);
             setSuccessMessage("Tu contraseña ha sido actualizada con éxito.");
             setShowSuccessModal(true);
-            logout;
+            logout();
         } catch (error: any) {
             setFormError(error.response?.data?.message || "La contraseña actual es incorrecta");
         }
@@ -98,11 +113,11 @@ const Usuario: React.FC = () => {
             </div>
         );
     }
-    
+
 
     return (
-        
-        <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in"> 
+
+        <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in">
             {/* TARJETA DE PERFIL */}
             <div className="bg-white p-12 rounded-[40px] border border-slate-200 shadow-sm text-center space-y-6">
                 <div className="w-32 h-32 bg-indigo-600 text-white rounded-[40px] mx-auto flex items-center justify-center shadow-2xl shadow-indigo-200">
@@ -128,7 +143,7 @@ const Usuario: React.FC = () => {
             <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-6 bg-slate-50/50 border-b font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] px-8 text-center">Configuración de cuenta</div>
                 <div className="divide-y divide-slate-100">
-                    
+
                     <button onClick={() => setActiveModal('EDIT_PROFILE')} className="w-full p-8 flex items-center justify-between hover:bg-slate-50 transition-all group">
                         <div className="flex items-center gap-6">
                             <div className="p-4 bg-slate-50 text-slate-400 rounded-2xl group-hover:bg-white group-hover:text-indigo-600 shadow-sm transition-all"><Edit3 className="w-6 h-6" /></div>
@@ -161,7 +176,7 @@ const Usuario: React.FC = () => {
                         </div>
                         <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 transition-all" />
                     </button>
-                    
+
                     <button onClick={logout} className="w-full p-10 flex items-center justify-center gap-3 text-rose-600 font-black text-xs uppercase tracking-[0.2em] hover:bg-rose-50 transition-all">
                         <LogOut className="w-5 h-5" /> Cerrar sesión
                     </button>
@@ -181,20 +196,20 @@ const Usuario: React.FC = () => {
                         <div className="space-y-6">
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Correo electrónico</label>
-                                <input 
-                                    type="email" 
-                                    value={formData.mail} 
-                                    onChange={(e) => setFormData({...formData, mail: e.target.value})} 
-                                    className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10" 
+                                <input
+                                    type="email"
+                                    value={formData.mail}
+                                    onChange={(e) => setFormData({...formData, mail: e.target.value})}
+                                    className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10"
                                 />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Teléfono</label>
-                                <input 
-                                    type="text" 
-                                    value={formData.telefono} 
-                                    onChange={(e) => setFormData({...formData, telefono: e.target.value})} 
-                                    className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10" 
+                                <input
+                                    type="text"
+                                    value={formData.telefono}
+                                    onChange={(e) => setFormData({...formData, telefono: e.target.value})}
+                                    className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10"
                                 />
                             </div>
                         </div>
@@ -220,26 +235,26 @@ const Usuario: React.FC = () => {
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Asegúrate de usar una clave robusta</p>
                         </div>
                         <div className="space-y-6">
-                            <input 
-                                type="password" 
-                                placeholder="Clave actual" 
+                            <input
+                                type="password"
+                                placeholder="Clave actual"
                                 value={formData.passActual}
                                 onChange={e => setFormData({...formData, passActual: e.target.value})}
-                                className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10" 
+                                className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10"
                             />
-                            <input 
-                                type="password" 
-                                placeholder="Nueva clave" 
+                            <input
+                                type="password"
+                                placeholder="Nueva clave"
                                 value={formData.passNueva}
                                 onChange={e => setFormData({...formData, passNueva: e.target.value})}
-                                className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10" 
+                                className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10"
                             />
-                            <input 
-                                type="password" 
-                                placeholder="Confirmar nueva clave" 
+                            <input
+                                type="password"
+                                placeholder="Confirmar nueva clave"
                                 value={formData.passConfirmar}
                                 onChange={e => setFormData({...formData, passConfirmar: e.target.value})}
-                                className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10" 
+                                className="w-full bg-slate-50 border-none rounded-[24px] p-5 font-bold focus:ring-4 focus:ring-indigo-500/10"
                             />
                             {/* MENSAJE DE ERROR EN ROJO */}
                             {formError && (
@@ -251,8 +266,8 @@ const Usuario: React.FC = () => {
                         </div>
                         <div className="flex gap-4">
                             <button onClick={() => setActiveModal(null)} className="flex-1 py-5 font-black text-[10px] uppercase text-slate-400 tracking-widest">Cancelar</button>
-                            <button 
-                                onClick={handleCambiarPassword} 
+                            <button
+                                onClick={handleCambiarPassword}
                                 disabled={!!formError || !formData.passActual || !formData.passNueva}
                                 className="flex-[2] py-5 bg-indigo-600 text-white rounded-[24px] font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed"
                             >
@@ -275,9 +290,25 @@ const Usuario: React.FC = () => {
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">¿Por dónde quieres recibir alertas de stock bajo?</p>
                         </div>
 
-                        <div className="space-y-4">
-                            <div 
-                                onClick={() => setFormData({...formData, notifEmail: !formData.notifEmail})}
+                        <div className="space-y-4 relative">
+                            {prefLoading && (
+                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 rounded-[28px]">
+                                    <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+                                </div>
+                            )}
+                            <div
+                                onClick={async () => {
+                                    const nuevo = !formData.notifEmail;
+                                    setFormData({...formData, notifEmail: nuevo});
+                                    try {
+                                        await EmpleadoService.setPreferencia(user.empleadoId, 'EMAIL', nuevo);
+                                    } catch (err) {
+                                        console.error('Error guardando preferencia email', err);
+                                        // revertir estado en UI
+                                        setFormData(prev => ({...prev, notifEmail: !nuevo}));
+                                        alert('No se pudo guardar la preferencia de mail');
+                                    }
+                                }}
                                 className="flex items-center justify-between p-6 bg-slate-50 rounded-[28px] border border-transparent cursor-pointer hover:bg-white hover:border-indigo-100 transition-all group"
                             >
                                 <div className="flex items-center gap-4">
@@ -291,10 +322,20 @@ const Usuario: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div 
-                                onClick={() => setFormData({...formData, notifWhatsApp: !formData.notifWhatsApp})}
-                                className="flex items-center justify-between p-6 bg-slate-50 rounded-[28px] border border-transparent cursor-pointer hover:bg-white hover:border-indigo-100 transition-all group"
-                            >
+                             <div
+                                onClick={async () => {
+                                    const nuevo = !formData.notifWhatsApp;
+                                    setFormData({...formData, notifWhatsApp: nuevo});
+                                    try {
+                                        await EmpleadoService.setPreferencia(user.empleadoId, 'WHATSAPP', nuevo);
+                                    } catch (err) {
+                                        console.error('Error guardando preferencia whatsapp', err);
+                                        setFormData({...formData, notifWhatsApp: !nuevo});
+                                        alert('No se pudo guardar la preferencia de WhatsApp');
+                                    }
+                                }}
+                                 className="flex items-center justify-between p-6 bg-slate-50 rounded-[28px] border border-transparent cursor-pointer hover:bg-white hover:border-indigo-100 transition-all group"
+                             >
                                 <div className="flex items-center gap-4">
                                     <div className={`p-3 rounded-xl ${formData.notifWhatsApp ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-white text-slate-300'}`}>
                                         <MessageCircle className="w-5 h-5" />
@@ -338,5 +379,3 @@ const Usuario: React.FC = () => {
         </div>
     );
 };
-
-export default Usuario;

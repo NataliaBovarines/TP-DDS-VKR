@@ -11,6 +11,7 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
+
 public class Empleado extends Persistible {
     private String nombre;
 
@@ -39,5 +40,9 @@ public class Empleado extends Persistible {
     public void softDelete() {
         this.setFueEliminado(true);
         this.usuario.softDelete();;
+    }
+
+    public String getEmail() {
+        return this.mail;
     }
 }

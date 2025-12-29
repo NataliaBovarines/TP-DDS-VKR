@@ -1,5 +1,6 @@
 package com.yourapp.app.services;
 
+import com.yourapp.app.events.StockBajoEvent;
 import com.yourapp.app.exceptions.BadRequestException;
 import com.yourapp.app.exceptions.ConflictException;
 import com.yourapp.app.exceptions.NotFoundException;
@@ -40,6 +41,8 @@ public class VentaService {
     private final ClienteService clienteService;
     private final AuthService authService;
     private final VentaMapper ventaMapper;
+
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     // ============================ CREAR UNA VENTA ============================
     public VentaResponse crearVenta(VentaCreateRequest ventaDto) {
@@ -133,7 +136,43 @@ public class VentaService {
         venta.setMetodoPago(ventaDto.getMetodoPago());
         venta.setFecha(LocalDateTime.now());
 
-        return ventaMapper.toResponse(ventaRepository.save(venta));
+        Venta saved = ventaRepository.save(venta);
+
+        // --- Verificación de Stock Bajo (Tu lógica de DetalleProducto) ---
+        StringBuilder mensajeBuilder = new StringBuilder();
+        for (DetalleVenta detalle : saved.getDetalles()) {
+            DetalleProducto dp = detalle.getDetalleProducto();
+            if (dp == null || dp.getProducto() == null) continue;
+
+            Integer stockDisponible = dp.getStockDisponible();
+            Integer stockMinimo = dp.getStockMinimo();
+
+            if (stockMinimo != null && stockDisponible < stockMinimo) {
+                if (mensajeBuilder.isEmpty()) {
+                    mensajeBuilder.append("⚠️ Alerta de Stock Bajo:\n\n");
+                }
+                mensajeBuilder.append(String.format("- [%s] %s: Disponible %d (Mínimo %d)\n",
+                        dp.getCodigo(),
+                        dp.getProducto().getNombre(),
+                        stockDisponible,
+                        stockMinimo));
+            }
+        }
+
+        // --- Notificación mediante Evento (Observer) ---
+        if (!mensajeBuilder.isEmpty()) {
+            try {
+                // Usamos el EventPublisher para que el NotificadorService
+                // se encargue de filtrar empleados y usar los Adapters (Jetmail, etc.)
+                // Enviamos el mensaje ya construido
+                eventPublisher.publishEvent(new StockBajoEvent(mensajeBuilder.toString()));
+            } catch (Exception e) {
+                // Loguear error pero no interrumpir la venta
+                System.err.println("Error al disparar evento de notificación: " + e.getMessage());
+            }
+        }
+
+        return ventaMapper.toResponse(saved);
     }
 
     // ============================ RESERVAR UNA VENTA CON SEÑA ============================
