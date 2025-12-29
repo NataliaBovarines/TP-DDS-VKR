@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { 
   Save, Building2, AlertTriangle, Plus, Trash2, Shield, Layers, Tag, Palette, Ruler, Truck, ChevronRight,
   CheckSquare, Square, CalendarDays, Bell, MessageCircle, Mail,
-  Pencil,
+  Pencil, Eye,
   X
 } from 'lucide-react';
 import ConfiguracionService from '../services/configuracionService.js';
@@ -22,6 +21,7 @@ const Configuracion: React.FC = () => {
   const [selectedSubCatalog, setSelectedSubCatalog] = useState<'ROLES' | 'CATEGORIAS' | 'SUBCATEGORIAS' | 'COLORES' | 'TALLES' | 'PROVEEDORES'>('CATEGORIAS');
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false); // Nuevo estado para controlar modo lectura/edición
 
   const getSingularName = (catalog) => {
     const singulars = {
@@ -240,9 +240,11 @@ const Configuracion: React.FC = () => {
     setEditingRole(rol);
     setTempPermisos(rol.permisos.map(p => p.codigo)); 
     setShowPermissionsModal(true);
+    setIsEditing(false); // Siempre abre en modo lectura por defecto
   };
 
   const handleToggleTempPermiso = (permisoCodigo) => {
+    if (!isEditing) return; // Si no estamos editando, no hace nada
     setTempPermisos(prev => 
       prev.includes(permisoCodigo) 
         ? prev.filter(c => c !== permisoCodigo) 
@@ -262,10 +264,6 @@ const Configuracion: React.FC = () => {
       console.error("Error al guardar permisos definitivos:", error);
     }
   };
-
-  // ===================================================================================================================
-  // RETURN
-  // ===================================================================================================================
 
 return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in">
@@ -485,8 +483,12 @@ return (
                     </div>
                     <div className="flex gap-2">
                       {selectedSubCatalog === 'ROLES' && tienePermiso('ROL_ACTUALIZAR') && (
-                        <button onClick={() => handleOpenEditPermissions(item)} className="p-3 bg-white text-slate-300 hover:text-indigo-600 rounded-xl border border-slate-100 shadow-sm transition-all">
-                          <Pencil className="w-5 h-5" />
+                        <button 
+                          onClick={() => handleOpenEditPermissions(item)} 
+                          className="p-3 bg-white text-slate-300 hover:text-indigo-600 rounded-xl border border-slate-100 shadow-sm transition-all"
+                          title="Ver detalle"
+                        >
+                          <Eye className="w-5 h-5" />
                         </button>
                       )}
                       {tienePermiso(PERMISOS_MAP[selectedSubCatalog].eliminar) && (
@@ -544,7 +546,7 @@ return (
         </div>
       )}
 
-      {/* MODALES IGUALES... */}
+      {/* MODALES */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-[48px] shadow-2xl p-12 space-y-10 animate-in zoom-in duration-300">
@@ -592,12 +594,26 @@ return (
           <div className="bg-white w-full max-w-4xl rounded-[40px] shadow-2xl max-h-[90vh] flex flex-col animate-in zoom-in duration-300 overflow-hidden">
             <div className="p-8 lg:p-12 pb-6 border-b border-slate-50 flex justify-between items-center">
               <div>
-                <h3 className="text-2xl font-bold text-slate-900">Permisos de {editingRole.nombre}</h3>
-                <p className="text-slate-400 text-sm font-medium">Los cambios se aplicarán al presionar guardar</p>
+                <h3 className="text-2xl font-bold text-slate-900">
+                    {isEditing ? `Editando permisos: ${editingRole.nombre}` : `Permisos de ${editingRole.nombre}`}
+                </h3>
+                <p className="text-slate-400 text-sm font-medium">
+                    {isEditing ? "Los cambios se aplicarán al presionar guardar" : "Modo de solo lectura"}
+                </p>
               </div>
-              <button onClick={() => { setShowPermissionsModal(false); setEditingRole(null); }} className="p-3 bg-slate-100 text-slate-400 rounded-full hover:bg-slate-200">
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-3">
+                {!isEditing && (
+                    <button 
+                        onClick={() => setIsEditing(true)}
+                        className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                    >
+                        <Pencil className="w-4 h-4" /> Editar
+                    </button>
+                )}
+                <button onClick={() => { setShowPermissionsModal(false); setEditingRole(null); }} className="p-3 bg-slate-100 text-slate-400 rounded-full hover:bg-slate-200">
+                    <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto p-8 lg:p-12 pt-4 space-y-12 custom-scrollbar">
               {Array.from(new Set(allPermisos.map(p => p.codigo.split('_')[0]))).map(grupo => (
@@ -605,12 +621,18 @@ return (
                   <h5 className="text-xs font-black text-indigo-500 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Módulo {grupo}</h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {allPermisos.filter(p => p.codigo.startsWith(grupo)).map((perm) => {
-                      const tienePermiso = tempPermisos.includes(perm.codigo);
+                      const tienePermisoCheck = tempPermisos.includes(perm.codigo);
                       return (
-                        <div key={perm.codigo} onClick={() => handleToggleTempPermiso(perm.codigo)} className={`flex items-center justify-between p-5 rounded-[24px] border transition-all cursor-pointer ${tienePermiso ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}>
-                          <span className={`text-sm font-bold ${tienePermiso ? 'text-indigo-700' : 'text-slate-600'}`}>{perm.descripcion}</span>
-                          <div className={`transition-all transform ${tienePermiso ? 'text-indigo-600 scale-110' : 'text-slate-300'}`}>
-                            {tienePermiso ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                        <div 
+                            key={perm.codigo} 
+                            onClick={() => handleToggleTempPermiso(perm.codigo)} 
+                            className={`flex items-center justify-between p-5 rounded-[24px] border transition-all 
+                                ${isEditing ? 'cursor-pointer hover:border-indigo-200' : 'cursor-default opacity-80'} 
+                                ${tienePermisoCheck ? 'bg-indigo-50/50 border-indigo-100' : 'bg-slate-50 border-transparent'}`}
+                        >
+                          <span className={`text-sm font-bold ${tienePermisoCheck ? 'text-indigo-700' : 'text-slate-600'}`}>{perm.descripcion}</span>
+                          <div className={`transition-all transform ${tienePermisoCheck ? 'text-indigo-600 scale-110' : 'text-slate-300'}`}>
+                            {tienePermisoCheck ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
                           </div>
                         </div>
                       );
@@ -620,8 +642,14 @@ return (
               ))}
             </div>
             <div className="p-8 lg:p-10 border-t border-slate-100 bg-slate-50/50 flex gap-4 justify-end">
-              <button onClick={() => { setShowPermissionsModal(false); setEditingRole(null); }} className="px-8 py-4 rounded-2xl font-bold text-sm text-slate-400 hover:text-slate-600">Cerrar</button>
-              <button onClick={handleSavePermissions} className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">Guardar cambios</button>
+              <button onClick={() => { setShowPermissionsModal(false); setEditingRole(null); }} className="px-8 py-4 rounded-2xl font-bold text-sm text-slate-400 hover:text-slate-600">
+                  {isEditing ? 'Cancelar' : 'Cerrar'}
+              </button>
+              {isEditing && (
+                <button onClick={handleSavePermissions} className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">
+                    Guardar cambios
+                </button>
+              )}
             </div>
           </div>
         </div>
