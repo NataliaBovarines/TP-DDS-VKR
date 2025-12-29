@@ -1,22 +1,10 @@
 services:
-  # BACKEND
+  # CONFIGURACIÓN DEL BACKEND (Spring Boot)
   - type: web
     name: backend-vkr
-    runtime: docker
+    runtime: docker # Usamos Docker para asegurar que use Java 17
     rootDir: backend
-    plan: free
+    plan: free # Aseguramos que use el plan gratuito
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-
-  # FRONTEND
-  - type: web
-    name: frontend-vkr
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist # <--- ESTO CORRIGE EL ERROR DE LA IMAGEN
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
