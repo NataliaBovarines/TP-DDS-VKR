@@ -2,25 +2,25 @@ services:
   # CONFIGURACIÓN DEL BACKEND (Spring Boot)
   - type: web
     name: backend-vkr
-    env: java
-    rootDir: backend # <--- Asegurate que este sea el nombre de tu carpeta
-    buildCommand: ./mvnw clean install -DskipTests
-    startCommand: java -jar target/*.jar
+    runtime: docker # Cambiamos a Docker ya que Java no aparecía en tu lista anterior
+    rootDir: backend
+    # Al usar Docker, el buildCommand y startCommand se definen en el Dockerfile,
+    # pero si prefieres usar el entorno nativo de Render (si te aparece Java):
+    # env: java
+    # buildCommand: ./mvnw clean install -DskipTests
+    # startCommand: java -jar target/*.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      # Acá podés agregar las keys de tu DB si usas una externa
-      - key: DATABASE_URL
-        value: postgres://... 
 
   # CONFIGURACIÓN DEL FRONTEND (React + Vite/Tailwind)
-  - type: static
+  - type: web # En Render, los sitios estáticos también usan el tipo 'web'
     name: frontend-vkr
-    env: static
-    rootDir: frontend # <--- Asegurate que este sea el nombre de tu carpeta
+    runtime: static # Aquí es donde se define que es un sitio estático
+    rootDir: frontend
     buildCommand: npm install && npm run build
-    publishPath: dist # <--- dist si es Vite, build si es Create React App
+    publishPath: dist # dist para Vite, build para Create React App
     routes:
       - type: rewrite
         source: /*
-        destination: /index.html # Esto es clave para que no de error 404 al recargar
+        destination: /index.html
